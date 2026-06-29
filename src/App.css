@@ -25,3 +25,77 @@ h2 {
   font-weight: 400;
   margin-bottom: 50px;
 }
+
+/*----------------------------------------------------------------------------------------------------*/
+
+/* Contenedor del buscador */
+.contenedor-buscador {
+  text-align: center;
+  margin-bottom: 40px;
+}
+
+/* La barra para escribir */
+.buscador {
+  padding: 12px 20px;
+  width: 300px;
+  border-radius: 8px;
+  border: 2px solid #333;
+  background-color: #1e1e1e;
+  color: #ffffff;
+  font-size: 1rem;
+  outline: none;
+  transition: border-color 0.3s ease;
+}
+
+/* Cuando hacés clic adentro del buscador para escribir */
+.buscador:focus {
+  border-color: #00e5ff;
+}
+
+/* --- INFRAESTRUCTURA DEL LAYOUT --- */
+
+/* La caja gigante que contiene ambas columnas */
+.layout-principal {
+  display: flex; /* Esto las pone una al lado de la otra */
+  gap: 30px; /* Separación entre el panel y los productos */
+  max-width: 1200px; /* Ancho máximo para que no se estire infinito en monitores gigantes */
+  margin: 0 auto; /* Centra todo en la pantalla */
+  padding: 20px;
+}
+
+/* El Panel Lateral de Filtros */
+.panel-lateral {
+  width: 250px; 
+  background-color: #1e1e1e; 
+  padding: 20px;
+  border-radius: 12px;
+  border: 1px solid #333;
+  /* LA MAGIA PARA ESTIRARLO: */
+  min-height: 80vh; /* vh significa "Viewport Height". Ocupará el 80% de la pantalla */
+}
+
+.panel-lateral h3 {
+  color: #00e5ff; /* Cian para destacar */
+  margin-top: 0;
+  text-transform: uppercase;
+}
+
+.separador {
+  border: 1px solid #333;
+  margin-bottom: 20px;
+}
+
+.panel-lateral p {
+  color: #a0a0a0;
+  cursor: pointer;
+  transition: color 0.3s ease;
+}
+
+.panel-lateral p:hover {
+  color: #ffffff;
+}
+
+/* La columna derecha donde van los productos */
+.contenido-derecha {
+  flex: 1; /* Esto le dice: "Ocupá todo el espacio que sobre a la derecha" */
+}
