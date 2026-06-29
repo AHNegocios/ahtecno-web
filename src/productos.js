@@ -10,16 +10,16 @@ export const inventarioOfertas = [
     },
     {
       id: 2,
-      titulo: "Teclado Táctil Samsung",
-      precio: "$85.000",
-      link: "https://www.mercadolibre.com.ar",
-      imagen: "https://via.placeholder.com/150"
+      titulo: "Teclado Wireless Redragon Eisa Pro K686wb ",
+      precio: "$99.990,00",
+      link: "https://meli.la/2Br8bqy",
+      imagen: "https://http2.mlstatic.com/D_NQ_NP_2X_753484-MLA99939107025_112025-F.webp"
     },
     {
       id: 3,
-      titulo: "Mochila Viajera 60L",
-      precio: "$120.000",
-      link: "https://www.mercadolibre.com.ar",
-      imagen: "https://via.placeholder.com/150"
+      titulo: "Lapiz OpticoL",
+      precio: "$22.499,00",
+      link: "https://meli.la/1N333TY",
+      imagen: "https://http2.mlstatic.com/D_NQ_NP_2X_993707-MLA99531638676_122025-F.webp"
     }
   ];

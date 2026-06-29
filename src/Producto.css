@@ -5,7 +5,7 @@
   border: 1px solid #333; /* Borde muy sutil */
   padding: 20px;
   border-radius: 12px; /* Bordes más redondeados y modernos */
-  width: 260px;
+  width: 180px;
   text-align: center;
   /* El toque mágico: una sombra suave de color cian */
   box-shadow: 0 8px 16px rgba(0, 229, 255, 0.05); 
