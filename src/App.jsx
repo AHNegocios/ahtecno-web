@@ -1,5 +1,7 @@
 import './App.css'
 import Producto from './Producto'
+// 1. Importamos nuestra base de datos simulada
+import { inventarioOfertas } from './productos' 
 
 function App() {
   return (
@@ -7,29 +9,21 @@ function App() {
       <h1>¡Hola A&H Tecno!</h1>
       <h2>Preparando las mejores ofertas del mercado...</h2>
       
-      {/* Aca esta la magia de la escalabilidad. 3 tarjetas, 1 solo componente */}
-      <div style={{ display: 'flex', gap: '20px', justifyContent: 'center' }}>
+      <div style={{ display: 'flex', gap: '20px', justifyContent: 'center', flexWrap: 'wrap' }}>
         
-        <Producto 
-          titulo="Auriculares Xiaomi Buds 5" 
-          precio="$45.000" 
-          linkOferta="https://www.mercadolibre.com.ar" 
-        />
-        
-        <Producto 
-          titulo="Teclado Táctil Samsung" 
-          precio="$85.000" 
-          linkOferta="https://www.mercadolibre.com.ar" 
-        />
-        
-        <Producto 
-          titulo="Mochila Viajera 60L" 
-          precio="$120.000" 
-          linkOferta="https://www.mercadolibre.com.ar" 
-        />
+        {/* 2. El comando .map() recorre la lista automáticamente */}
+        {inventarioOfertas.map( (productoEnTurno) => (
+          
+          <Producto 
+            key={productoEnTurno.id} // Obligatorio cuando creamos listas automáticas
+            titulo={productoEnTurno.titulo} 
+            precio={productoEnTurno.precio} 
+            linkOferta={productoEnTurno.link} 
+          />
+
+        ))}
 
       </div>
-      
     </div>
   )
 }

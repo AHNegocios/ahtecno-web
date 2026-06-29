@@ -1,24 +1,62 @@
+/* Producto.css: Diseño Individual de la Tarjeta */
+
 .tarjeta {
-  border: 1px solid #ddd;
-  padding: 15px;
-  border-radius: 8px;
-  width: 250px;
+  background-color: #1e1e1e; /* Gris un poco más claro que el fondo para que resalte */
+  border: 1px solid #333; /* Borde muy sutil */
+  padding: 20px;
+  border-radius: 12px; /* Bordes más redondeados y modernos */
+  width: 260px;
   text-align: center;
-  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-  margin: 10px;
+  /* El toque mágico: una sombra suave de color cian */
+  box-shadow: 0 8px 16px rgba(0, 229, 255, 0.05); 
+  transition: transform 0.3s ease, box-shadow 0.3s ease; /* Prepara la tarjeta para animación */
 }
 
+/* Efecto Hover (Cuando pasás el mouse por arriba) */
+.tarjeta:hover {
+  transform: translateY(-5px); /* Se levanta un poquito */
+  box-shadow: 0 12px 20px rgba(0, 229, 255, 0.15); /* La luz cian brilla más */
+}
+
+/* La imagen simulada */
+.tarjeta img {
+  width: 100%; /* La imagen ocupa todo el ancho de la tarjeta */
+  border-radius: 8px; /* También le redondeamos los bordes */
+  margin-bottom: 15px;
+}
+
+/* El título del producto */
+.tarjeta h3 {
+  color: #ffffff;
+  font-size: 1.2rem;
+  margin: 10px 0;
+  height: 50px; /* Forzamos una altura para que las tarjetas queden parejas aunque el título sea largo */
+}
+
+/* El Precio */
 .precio {
-  color: #28a745; /* Verde para destacar el dinero */
+  color: #00e5ff; /* Precio en cian neón */
   font-weight: bold;
-  font-size: 20px;
+  font-size: 1.5rem;
+  margin-bottom: 20px;
 }
 
+/* El Botón */
 button {
-  background-color: #007bff; /* Azul comercial */
-  color: white;
-  border: none;
-  padding: 10px 15px;
-  border-radius: 5px;
+  background-color: transparent;
+  color: #00e5ff;
+  border: 2px solid #00e5ff;
+  padding: 10px 20px;
+  border-radius: 6px;
   cursor: pointer;
+  font-weight: bold;
+  width: 100%; /* Botón ancho y profesional */
+  text-transform: uppercase;
+  transition: all 0.3s ease; /* Suavidad al pasar el mouse */
+}
+
+/* Cuando pasás el mouse por el botón */
+button:hover {
+  background-color: #00e5ff;
+  color: #121212; /* El texto se vuelve negro y el fondo cian */
 }
