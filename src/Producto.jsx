@@ -1,16 +1,16 @@
 import './Producto.css'
 
-// 1. Agregamos "variables" (props o propiedades) entre llaves en la función
-function Producto({ titulo, precio, linkOferta }) { 
+// 1. Agregamos "imagen" a la lista de variables que entran
+function Producto({ titulo, precio, linkOferta, imagen }) { 
   return (
     <div className="tarjeta">
-      <img src="https://via.placeholder.com/150" alt="Producto" />
       
-      {/* 2. Reemplazamos el texto fijo por las variables */}
+      {/* 2. Reemplazamos el texto fijo por la variable de la imagen */}
+      <img src={imagen} alt={titulo} />
+      
       <h3>{titulo}</h3>
       <p className="precio">{precio}</p>
       
-      {/* 3. El botón ahora usa el link que le pasemos */}
       <a href={linkOferta} target="_blank">
         <button>Ver Oferta</button>
       </a>

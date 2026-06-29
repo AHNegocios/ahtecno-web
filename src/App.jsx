@@ -19,6 +19,7 @@ function App() {
             titulo={productoEnTurno.titulo} 
             precio={productoEnTurno.precio} 
             linkOferta={productoEnTurno.link} 
+            imagen={productoEnTurno.imagen} /* ACA: Le enviamos la foto a la tarjeta */
           />
 
         ))}

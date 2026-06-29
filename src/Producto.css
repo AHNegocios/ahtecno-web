@@ -29,8 +29,8 @@
 .tarjeta h3 {
   color: #ffffff;
   font-size: 1.2rem;
-  margin: 10px 0;
-  height: 50px; /* Forzamos una altura para que las tarjetas queden parejas aunque el título sea largo */
+  margin: 10px 0 15px 0; /* Agregamos un poco más de margen abajo */
+  min-height: 50px; /* ACÁ ESTÁ LA MAGIA: Altura mínima, se estira si hace falta */
 }
 
 /* El Precio */
