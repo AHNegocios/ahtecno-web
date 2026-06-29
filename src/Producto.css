@@ -1,0 +1,24 @@
+.tarjeta {
+  border: 1px solid #ddd;
+  padding: 15px;
+  border-radius: 8px;
+  width: 250px;
+  text-align: center;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+  margin: 10px;
+}
+
+.precio {
+  color: #28a745; /* Verde para destacar el dinero */
+  font-weight: bold;
+  font-size: 20px;
+}
+
+button {
+  background-color: #007bff; /* Azul comercial */
+  color: white;
+  border: none;
+  padding: 10px 15px;
+  border-radius: 5px;
+  cursor: pointer;
+}
