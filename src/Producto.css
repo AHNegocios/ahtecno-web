@@ -1,3 +1,6 @@
+/* src/Producto.css */
+
+/* MODO GRILLA (El que ya teníamos) */
 .tarjeta {
   background-color: #1e1e24;
   border: 1px solid #333;
@@ -7,7 +10,8 @@
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  transition: transform 0.3s ease;
+  transition: transform 0.3s ease, box-shadow 0.3s ease, width 0.3s ease;
+  box-shadow: 0 8px 16px rgba(0, 229, 255, 0.05); 
 }
 
 .tarjeta:hover {
@@ -15,49 +19,6 @@
   box-shadow: 0 12px 20px rgba(0, 229, 255, 0.15);
 }
 
-.tarjeta img {
-  width: 100%;
-  aspect-ratio: 1 / 1; 
-  object-fit: contain; /* <--- EL CAMBIO CLAVE */
-  background-color: #ffffff; /* Mantiene el fondo blanco limpio para que no queden huecos feos */
-  border-radius: 8px;
-  margin-bottom: 15px;
-}
-
-/* El título empuja lo de abajo hacia el fondo */
-.tarjeta h3 {
-  color: #ffffff;
-  font-size: 1.1rem;
-  margin: 10px 0;
-  flex-grow: 1; 
-}
-
-.precio {
-  color: #00e5ff;
-  font-weight: bold;
-  font-size: 1.4rem;
-  margin-bottom: 15px;
-}
-
-button {
-  background-color: transparent;
-  color: #00e5ff;
-  border: 2px solid #00e5ff;
-  padding: 10px 20px;
-  border-radius: 6px;
-  cursor: pointer;
-  font-weight: bold;
-  width: 100%;
-  text-transform: uppercase;
-  transition: all 0.3s ease;
-}
-
-button:hover {
-  background-color: #00e5ff;
-  color: #121212;
-}
-
-/* Contenedor que obliga a la imagen a ser siempre cuadrada */
 .contenedor-imagen {
   width: 100%;
   height: 170px;
@@ -67,5 +28,64 @@ button:hover {
   background-color: #ffffff;
   border-radius: 8px;
   margin-bottom: 15px;
-  overflow: hidden; /* Esto corta lo que se salga de la caja */
+  overflow: hidden;
+}
+
+.tarjeta img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
+
+.info-producto {
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+}
+
+.tarjeta h3 { color: #ffffff; font-size: 1.1rem; margin: 0 0 10px 0; flex-grow: 1; text-align: center; }
+.precio { color: #00e5ff; font-weight: bold; font-size: 1.4rem; margin-bottom: 15px; text-align: center; }
+button { background-color: transparent; color: #00e5ff; border: 2px solid #00e5ff; padding: 10px; border-radius: 6px; cursor: pointer; width: 100%; text-transform: uppercase; font-weight: bold; transition: all 0.3s ease;}
+button:hover { background-color: #00e5ff; color: #121212; }
+
+
+/* ==========================================================================
+   MODO LISTA (La nueva vista horizontal)
+   ========================================================================== */
+.tarjeta.modo-lista {
+  width: 100%; /* Ocupa todo el ancho disponible */
+  flex-direction: row; /* Pone la imagen al lado del texto */
+  align-items: center;
+  height: 140px;
+}
+
+.tarjeta.modo-lista .contenedor-imagen {
+  width: 120px;
+  height: 110px;
+  margin-bottom: 0;
+  margin-right: 20px;
+  flex-shrink: 0;
+}
+
+.tarjeta.modo-lista .info-producto {
+  flex-direction: row; /* Título, precio y botón en una sola línea */
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+}
+
+.tarjeta.modo-lista h3 {
+  text-align: left;
+  margin: 0;
+  flex: 2;
+}
+
+.tarjeta.modo-lista .precio {
+  margin: 0;
+  flex: 1;
+}
+
+.tarjeta.modo-lista a {
+  flex: 1;
+  max-width: 200px;
 }

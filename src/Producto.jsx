@@ -1,19 +1,23 @@
+// src/Producto.jsx
 import './Producto.css'
 
-// 1. Agregamos "imagen" a la lista de variables que entran
-function Producto({ titulo, precio, linkOferta, imagen }) { 
+function Producto({ titulo, precio, linkOferta, imagen, vista }) {
+  // Si la vista es "lista", le agregamos una clase CSS extra llamada "modo-lista"
+  const claseTarjeta = vista === 'lista' ? 'tarjeta modo-lista' : 'tarjeta'
+
   return (
-    <div className="tarjeta">
+    <div className={claseTarjeta}>
+      <div className="contenedor-imagen">
+        <img src={imagen} alt={titulo} />
+      </div>
       
-      {/* 2. Reemplazamos el texto fijo por la variable de la imagen */}
-      <img src={imagen} alt={titulo} />
-      
-      <h3>{titulo}</h3>
-      <p className="precio">{precio}</p>
-      
-      <a href={linkOferta} target="_blank">
-        <button>Ver Oferta</button>
-      </a>
+      <div className="info-producto">
+        <h3>{titulo}</h3>
+        <p className="precio">${precio}</p>
+        <a href={linkOferta} target="_blank" rel="noopener noreferrer">
+          <button>Ver Oferta</button>
+        </a>
+      </div>
     </div>
   )
 }
