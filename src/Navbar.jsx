@@ -1,22 +1,19 @@
-import { Link } from 'react-router-dom' // 1. Importamos el cable del GPS
+import { Link } from 'react-router-dom'
 import './Navbar.css'
 
 function Navbar() {
   return (
     <nav className="cinta-navegacion">
-      <div className="logo-cinta">A&H TECNO</div>
+      {/* 1. Agrupamos el logo y el texto en un Link al Inicio */}
+      <Link to="/" style={{ display: 'flex', alignItems: 'center', gap: '15px', textDecoration: 'none' }}>
+       <img src="/LogoAHTecno.png" alt="Logo A&H" style={{ width: '45px', height: '45px', borderRadius: '8px', objectFit: 'contain' }} />
+        <div className="logo-cinta">A&H TECNO</div>
+      </Link>
       
       <ul className="links-cinta">
-        {/* 2. Reemplazamos los <li> sueltos por <Link> */}
-        <li>
-          <Link to="/" style={{ color: 'inherit', textDecoration: 'none' }}>Inicio</Link>
-        </li>
-        <li>
-          <Link to="/hardware" style={{ color: 'inherit', textDecoration: 'none' }}>Hardware</Link>
-        </li>
-        <li>
-          <Link to="/contacto" style={{ color: 'inherit', textDecoration: 'none' }}>Contacto</Link>
-        </li>
+        <li><Link to="/" style={{ color: 'inherit', textDecoration: 'none' }}>Inicio</Link></li>
+        <li><Link to="/hardware" style={{ color: 'inherit', textDecoration: 'none' }}>Hardware</Link></li>
+        <li><Link to="/contacto" style={{ color: 'inherit', textDecoration: 'none' }}>Contacto</Link></li>
       </ul>
     </nav>
   )

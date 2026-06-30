@@ -2,22 +2,18 @@
 import { Routes, Route } from 'react-router-dom'
 import './App.css'
 import Navbar from './Navbar'
-import Inicio from './Inicio' // Importamos nuestro nuevo "Canal"
+import Inicio from './Inicio'
+import Hardware from './Hardware' // 1. Importamos la página nueva
 
 function App() {
   return (
     <div>
-      {/* 1. La cinta fija que se ve en TODAS las páginas */}
       <Navbar /> 
 
-      {/* 2. El sector dinámico donde cambian los "canales" */}
       <Routes>
-        {/* Cuando la URL esté vacía ("/"), mostrá el componente Inicio */}
         <Route path="/" element={<Inicio />} />
-        
-        {/* Próximamente agregaremos: 
-        <Route path="/upgrades" element={<Upgrades />} /> 
-        */}
+        {/* 2. Registramos la ruta en el GPS */}
+        <Route path="/hardware" element={<Hardware />} /> 
       </Routes>
     </div>
   )

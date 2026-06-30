@@ -1,40 +1,86 @@
-/* App.css: Diseño Global */
+/* ==========================================================================
+   App.css: CONFIGURACIÓN GLOBAL Y LAYOUT PRINCIPAL (A&H TECNO)
+   ========================================================================== */
 
-/* Esta etiqueta afecta a toda la página web */
+/* Estilos de Base para toda la Web */
 body {
   margin: 0;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; /* Tipografía limpia y moderna */
-  background-color: #121212; /* Un gris casi negro muy elegante, no negro puro */
-  color: #ffffff; /* Texto blanco por defecto */
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background-color: #16161a; /* Gris azulado oscuro premium para contraste */
+  color: #ffffff;
 }
 
-/* El título principal */
-h1 {
-  text-align: center;
-  color: #00e5ff; /* Tu color Cian Neón característico */
-  font-size: 2.5rem;
-  margin-top: 40px;
-  text-transform: uppercase;
-  letter-spacing: 2px;
-}
-
-/* El subtítulo */
+/* El subtítulo general debajo del Navbar */
 h2 {
   text-align: center;
-  color: #a0a0a0; /* Gris claro para no robar atención */
+  color: #a0a0a0;
   font-weight: 400;
   margin-bottom: 50px;
 }
 
-/*----------------------------------------------------------------------------------------------------*/
 
-/* Contenedor del buscador */
-.contenedor-buscador {
-  text-align: center;
-  margin-bottom: 40px;
+/* ==========================================================================
+   ESTRUCTURA DEL LAYOUT DOBLE (Filtros a la Izquierda, Contenido a la Derecha)
+   ========================================================================== */
+
+.layout-principal {
+  display: flex; /* Pone las dos columnas a la par */
+  gap: 30px; 
+  max-width: 1400px; /* Estirado para que entren los 4 productos por fila */
+  margin: 0 auto; 
+  padding: 20px;
 }
 
-/* La barra para escribir */
+
+/* --- COLUMNA IZQUIERDA: PANEL DE FILTROS --- */
+.panel-lateral {
+  width: 250px; 
+  background-color: #1e1e24; /* Fondo sutilmente más claro para las tarjetas y paneles */
+  padding: 20px;
+  border-radius: 12px;
+  border: 1px solid #333;
+  min-height: 80vh; /* Se estira verticalmente ocupando casi toda la pantalla */
+}
+
+.panel-lateral h3 {
+  color: #00e5ff; /* Tu Cian distintivo */
+  margin-top: 0;
+  text-transform: uppercase;
+}
+
+.separador {
+  border: 1px solid #333;
+  margin-bottom: 20px;
+}
+
+/* Items de los Filtros (Alineados a la izquierda) */
+.lista-filtros p {
+  text-align: left;
+  padding-left: 10px;
+  color: #a0a0a0;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-weight: 500;
+}
+
+.lista-filtros p:hover {
+  color: #00e5ff;
+  border-left: 2px solid #00e5ff; /* Marca una línea cian interactiva al pasar el mouse */
+}
+
+
+/* --- COLUMNA DERECHA: BUSCADOR Y VIDRIERA --- */
+.contenido-derecha {
+  flex: 1; /* Absorbe todo el espacio restante a la derecha */
+}
+
+/* Contenedor del Buscador (Alineado a la derecha) */
+.contenedor-buscador {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 30px;
+}
+
 .buscador {
   padding: 12px 20px;
   width: 300px;
@@ -47,55 +93,36 @@ h2 {
   transition: border-color 0.3s ease;
 }
 
-/* Cuando hacés clic adentro del buscador para escribir */
 .buscador:focus {
   border-color: #00e5ff;
 }
 
-/* --- INFRAESTRUCTURA DEL LAYOUT --- */
-
-/* La caja gigante que contiene ambas columnas */
-.layout-principal {
-  display: flex; /* Esto las pone una al lado de la otra */
-  gap: 30px; /* Separación entre el panel y los productos */
-  max-width: 1200px; /* Ancho máximo para que no se estire infinito en monitores gigantes */
-  margin: 0 auto; /* Centra todo en la pantalla */
-  padding: 20px;
+/* Grilla que envuelve las tarjetas de ofertas */
+.grilla-productos {
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap; /* Permite que las tarjetas bajen al siguiente renglón */
 }
 
-/* El Panel Lateral de Filtros */
-.panel-lateral {
-  width: 250px; 
-  background-color: #1e1e1e; 
-  padding: 20px;
-  border-radius: 12px;
-  border: 1px solid #333;
-  /* LA MAGIA PARA ESTIRARLO: */
-  min-height: 80vh; /* vh significa "Viewport Height". Ocupará el 80% de la pantalla */
-}
 
-.panel-lateral h3 {
-  color: #00e5ff; /* Cian para destacar */
-  margin-top: 0;
-  text-transform: uppercase;
-}
-
-.separador {
-  border: 1px solid #333;
-  margin-bottom: 20px;
-}
-
-.panel-lateral p {
-  color: #a0a0a0;
-  cursor: pointer;
-  transition: color 0.3s ease;
-}
-
-.panel-lateral p:hover {
-  color: #ffffff;
-}
-
-/* La columna derecha donde van los productos */
-.contenido-derecha {
-  flex: 1; /* Esto le dice: "Ocupá todo el espacio que sobre a la derecha" */
+/* ==========================================================================
+   RESPONSIVE DESIGN: ADAPTACIÓN PARA MÓVILES (SOLUCIÓN AL TEXTO CORTADO)
+   ========================================================================== */
+@media (max-width: 768px) {
+  .layout-principal {
+    flex-direction: column; /* Apila el panel arriba y el contenido abajo en celulares */
+  }
+  
+  .panel-lateral {
+    width: auto; /* Se expande horizontalmente en pantallas chicas */
+    min-height: auto;
+  }
+  
+  .contenedor-buscador {
+    justify-content: center !important; /* Centra el buscador en teléfonos */
+  }
+  
+  .grilla-productos {
+    justify-content: center; /* Mantiene simétricas y centradas las tarjetas en el celular */
+  }
 }

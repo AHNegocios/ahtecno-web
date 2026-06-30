@@ -1,47 +1,44 @@
-/* Producto.css: Diseño Individual de la Tarjeta */
-
 .tarjeta {
-  background-color: #1e1e1e; /* Gris un poco más claro que el fondo para que resalte */
-  border: 1px solid #333; /* Borde muy sutil */
-  padding: 20px;
-  border-radius: 12px; /* Bordes más redondeados y modernos */
-  width: 180px;
-  text-align: center;
-  /* El toque mágico: una sombra suave de color cian */
-  box-shadow: 0 8px 16px rgba(0, 229, 255, 0.05); 
-  transition: transform 0.3s ease, box-shadow 0.3s ease; /* Prepara la tarjeta para animación */
+  background-color: #1e1e24;
+  border: 1px solid #333;
+  padding: 15px;
+  border-radius: 12px;
+  width: 200px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  transition: transform 0.3s ease;
 }
 
-/* Efecto Hover (Cuando pasás el mouse por arriba) */
 .tarjeta:hover {
-  transform: translateY(-5px); /* Se levanta un poquito */
-  box-shadow: 0 12px 20px rgba(0, 229, 255, 0.15); /* La luz cian brilla más */
+  transform: translateY(-5px);
+  box-shadow: 0 12px 20px rgba(0, 229, 255, 0.15);
 }
 
-/* La imagen simulada */
 .tarjeta img {
-  width: 100%; /* La imagen ocupa todo el ancho de la tarjeta */
-  border-radius: 8px; /* También le redondeamos los bordes */
+  width: 100%;
+  aspect-ratio: 1 / 1; 
+  object-fit: contain; /* <--- EL CAMBIO CLAVE */
+  background-color: #ffffff; /* Mantiene el fondo blanco limpio para que no queden huecos feos */
+  border-radius: 8px;
   margin-bottom: 15px;
 }
 
-/* El título del producto */
+/* El título empuja lo de abajo hacia el fondo */
 .tarjeta h3 {
   color: #ffffff;
-  font-size: 1.2rem;
-  margin: 10px 0 15px 0; /* Agregamos un poco más de margen abajo */
-  min-height: 50px; /* ACÁ ESTÁ LA MAGIA: Altura mínima, se estira si hace falta */
+  font-size: 1.1rem;
+  margin: 10px 0;
+  flex-grow: 1; 
 }
 
-/* El Precio */
 .precio {
-  color: #00e5ff; /* Precio en cian neón */
+  color: #00e5ff;
   font-weight: bold;
-  font-size: 1.5rem;
-  margin-bottom: 20px;
+  font-size: 1.4rem;
+  margin-bottom: 15px;
 }
 
-/* El Botón */
 button {
   background-color: transparent;
   color: #00e5ff;
@@ -50,13 +47,25 @@ button {
   border-radius: 6px;
   cursor: pointer;
   font-weight: bold;
-  width: 100%; /* Botón ancho y profesional */
+  width: 100%;
   text-transform: uppercase;
-  transition: all 0.3s ease; /* Suavidad al pasar el mouse */
+  transition: all 0.3s ease;
 }
 
-/* Cuando pasás el mouse por el botón */
 button:hover {
   background-color: #00e5ff;
-  color: #121212; /* El texto se vuelve negro y el fondo cian */
+  color: #121212;
+}
+
+/* Contenedor que obliga a la imagen a ser siempre cuadrada */
+.contenedor-imagen {
+  width: 100%;
+  height: 170px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: #ffffff;
+  border-radius: 8px;
+  margin-bottom: 15px;
+  overflow: hidden; /* Esto corta lo que se salga de la caja */
 }
