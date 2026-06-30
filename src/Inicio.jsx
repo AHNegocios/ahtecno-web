@@ -91,6 +91,7 @@ function Inicio() {
                 linkOferta={productoEnTurno.link} 
                 imagen={productoEnTurno.imagen}
                 vista={vista} /* <--- LE PASAMOS LA ORDEN AL PRODUCTO */
+                ml_id={productoEnTurno.ml_id}
               />
             ))}
           </div>
