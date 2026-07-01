@@ -6,10 +6,15 @@ function Producto({ titulo, precio, linkOferta, imagen, vista, ml_id }) {
   const claseTarjeta = vista === 'lista' ? 'tarjeta modo-lista' : 'tarjeta';
   const [precioVivo, setPrecioVivo] = useState(null);
 
-  // Radar para Mercado Libre
+// Radar para Mercado Libre (Con Proxy para saltar la seguridad)
   useEffect(() => {
     if (ml_id) {
-      fetch(`https://api.mercadolibre.com/items/${ml_id}`)
+      // 1. Preparamos el link de Meli
+      const urlMeli = `https://api.mercadolibre.com/items/${ml_id}`;
+      // 2. Lo pasamos por el puente de AllOrigins
+      const urlProxy = `https://api.allorigins.win/raw?url=${encodeURIComponent(urlMeli)}`;
+
+      fetch(urlProxy)
         .then(respuesta => respuesta.json())
         .then(datosMeli => {
           if (datosMeli.price) {
