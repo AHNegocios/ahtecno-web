@@ -16,7 +16,9 @@ function Producto({ titulo, precio, linkOferta, imagen, vista, ml_id }) {
 
       fetch(urlProxy)
         .then(respuesta => respuesta.json())
-        .then(datosMeli => {
+        .then(datosProxy => {
+          // Acá "abrimos el paquete" que nos manda el proxy
+          const datosMeli = JSON.parse(datosProxy.contents);
           if (datosMeli.price) {
             setPrecioVivo(datosMeli.price);
           }
