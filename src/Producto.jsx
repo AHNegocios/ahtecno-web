@@ -6,33 +6,27 @@ function Producto({ titulo, precio, linkOferta, imagen, vista, ml_id }) {
   const claseTarjeta = vista === 'lista' ? 'tarjeta modo-lista' : 'tarjeta';
   const [precioVivo, setPrecioVivo] = useState(null);
 
-// Radar para Mercado Libre (Con Proxy para saltar la seguridad)
+  // Radar para Mercado Libre Directo
   useEffect(() => {
     if (ml_id) {
-      // 1. Preparamos el link de Meli
-      const urlMeli = `https://api.mercadolibre.com/items/${ml_id}`;
-      // 2. Lo pasamos por el puente de AllOrigins
-      const urlProxy = `https://api.allorigins.win/raw?url=${encodeURIComponent(urlMeli)}`;
-
-      fetch(urlProxy)
-        .then(respuesta => respuesta.json())
-        .then(datosProxy => {
-          // Acá "abrimos el paquete" que nos manda el proxy
-          const datosMeli = JSON.parse(datosProxy.contents);
+      fetch(`https://api.mercadolibre.com/items/${ml_id}`)
+        .then(respuesta => {
+          if (!respuesta.ok) throw new Error("ID no encontrado en ML");
+          return respuesta.json();
+        })
+        .then(datosMeli => {
           if (datosMeli.price) {
             setPrecioVivo(datosMeli.price);
           }
         })
-        .catch(error => console.error("Error conectando con ML:", error));
+        .catch(error => console.warn("Aviso ML (Usando precio local):", error.message));
     }
   }, [ml_id]);
 
   // Formateador automático a Pesos Argentinos
   const formatearMoneda = (monto) => {
-    // Forzamos a que el dato sea un número puro antes de formatear
     const numeroPuro = Number(monto);
-    
-    if (isNaN(numeroPuro)) return '$ 0'; // Resguardo por si el dato viene roto
+    if (isNaN(numeroPuro) || numeroPuro === 0) return 'Consultar precio'; 
 
     return new Intl.NumberFormat('es-AR', {
       style: 'currency',
@@ -52,7 +46,6 @@ function Producto({ titulo, precio, linkOferta, imagen, vista, ml_id }) {
       
       <div className="info-producto">
         <h3>{titulo}</h3>
-        {/* Dejamos que el formateador automático ponga el $ y los puntos solo */}
         <p className="precio">{formatearMoneda(precioFinal)}</p>
         <a href={linkOferta} target="_blank" rel="noopener noreferrer">
           <button>Ver Oferta</button>

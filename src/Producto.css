@@ -89,3 +89,53 @@ button:hover { background-color: #00e5ff; color: #121212; }
   flex: 1;
   max-width: 200px;
 }
+
+/* =========================================
+   DISEÑO DE LOS FILTROS Y CENTRADO
+   ========================================= */
+
+/* 1. Centramos las tarjetas pase lo que pase */
+.grilla-productos {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-start; /* MAGIA: Esto las alinea siempre a la izquierda */
+  align-items: flex-start;
+  gap: 25px;
+  width: 100%;
+  padding: 20px 0;
+}
+
+/* 2. Diseño de los nuevos botones de filtro */
+.boton-filtro {
+  background-color: #1e1e24;
+  color: #ffffff;
+  border: 1px solid #333333;
+  padding: 12px 15px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  width: 100%;
+  text-align: left;
+  margin-bottom: 12px;
+  font-weight: 600;
+  font-size: 0.95rem;
+  display: flex;
+  justify-content: space-between; /* Manda la flecha a la derecha */
+}
+
+/* El efecto neón cuando pasás el mouse */
+.boton-filtro:hover, .boton-filtro.activo {
+  background-color: rgba(0, 229, 255, 0.1);
+  color: #00e5ff;
+  border-color: #00e5ff;
+  box-shadow: 0 0 10px rgba(0, 229, 255, 0.2);
+}
+
+.titulo-filtro {
+  color: #00e5ff;
+  font-size: 0.85rem;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  margin-bottom: 15px;
+  margin-top: 20px;
+}
