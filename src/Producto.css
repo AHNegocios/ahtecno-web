@@ -1,17 +1,21 @@
 /* src/Producto.css */
 
-/* MODO GRILLA (El que ya teníamos) */
+/* ==========================================================================
+   MODO GRILLA (Tarjetas Cuadradas Uniformes)
+   ========================================================================== */
 .tarjeta {
-  background-color: #1e1e24;
-  border: 1px solid #333;
-  padding: 15px;
+  background-color: #2b2b36; /* Gris más claro y moderno */
+  border: 1px solid #4d4d5e; /* Borde más suave */
+  padding: 20px;
   border-radius: 12px;
-  width: 200px;
+  width: 240px;               /* Ancho fijo para mantener la simetría */
+  min-height: 420px;          /* Altura mínima para que ninguna quede más corta */
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
-  transition: transform 0.3s ease, box-shadow 0.3s ease, width 0.3s ease;
+  justify-content: space-between; /* Empuja el botón siempre abajo de todo */
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
   box-shadow: 0 8px 16px rgba(0, 229, 255, 0.05); 
+  box-sizing: border-box;
 }
 
 .tarjeta:hover {
@@ -19,9 +23,10 @@
   box-shadow: 0 12px 20px rgba(0, 229, 255, 0.15);
 }
 
+/* Contenedor de imagen fijo para evitar que fotos deformes rompan la tarjeta */
 .contenedor-imagen {
   width: 100%;
-  height: 170px;
+  height: 160px;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -29,6 +34,7 @@
   border-radius: 8px;
   margin-bottom: 15px;
   overflow: hidden;
+  flex-shrink: 0;
 }
 
 .tarjeta img {
@@ -41,71 +47,107 @@
   display: flex;
   flex-direction: column;
   flex-grow: 1;
+  justify-content: space-between;
 }
 
-.tarjeta h3 { color: #ffffff; font-size: 1.1rem; margin: 0 0 10px 0; flex-grow: 1; text-align: center; }
-.precio { color: #00e5ff; font-weight: bold; font-size: 1.4rem; margin-bottom: 15px; text-align: center; }
-button { background-color: transparent; color: #00e5ff; border: 2px solid #00e5ff; padding: 10px; border-radius: 6px; cursor: pointer; width: 100%; text-transform: uppercase; font-weight: bold; transition: all 0.3s ease;}
-button:hover { background-color: #00e5ff; color: #121212; }
+.tarjeta h3 { 
+  color: #ffffff; 
+  font-size: 1rem; 
+  margin: 0 0 10px 0; 
+  text-align: center;
+  display: -webkit-box;
+  -webkit-line-clamp: 2; /* Si el título es muy largo, lo corta en 2 líneas con puntos suspensivos */
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
 
+.precio { 
+  color: #00e5ff; 
+  font-weight: bold; 
+  font-size: 1.3rem; 
+  margin-bottom: 15px; 
+  text-align: center; 
+}
+
+button { 
+  background-color: transparent; 
+  color: #00e5ff; 
+  border: 2px solid #00e5ff; 
+  padding: 10px; 
+  border-radius: 6px; 
+  cursor: pointer; 
+  width: 100%; 
+  text-transform: uppercase; 
+  font-weight: bold; 
+  transition: all 0.3s ease;
+}
+
+button:hover { 
+  background-color: #00e5ff; 
+  color: #121212; 
+}
 
 /* ==========================================================================
-   MODO LISTA (La nueva vista horizontal)
+   MODO LISTA (Tarjetas Horizontales Flfluidas)
    ========================================================================== */
 .tarjeta.modo-lista {
-  width: 100%; /* Ocupa todo el ancho disponible */
-  flex-direction: row; /* Pone la imagen al lado del texto */
+  width: 100%;
+  max-width: 900px;           /* Para que no se estire infinito en pantallas gigantes */
+  flex-direction: row;        /* Imagen a la izquierda, info a la derecha */
   align-items: center;
-  height: 140px;
+  min-height: 140px;
+  height: auto;               /* Permite que se adapte si el texto es muy largo */
+  gap: 20px;
 }
 
 .tarjeta.modo-lista .contenedor-imagen {
   width: 120px;
   height: 110px;
   margin-bottom: 0;
-  margin-right: 20px;
   flex-shrink: 0;
 }
 
 .tarjeta.modo-lista .info-producto {
-  flex-direction: row; /* Título, precio y botón en una sola línea */
+  flex-direction: row;        /* Título, precio y botón en una sola línea */
   align-items: center;
   justify-content: space-between;
   width: 100%;
+  gap: 15px;
 }
 
 .tarjeta.modo-lista h3 {
   text-align: left;
   margin: 0;
   flex: 2;
+  max-width: 350px; /* Limita la expansión horizontal */
+  padding-right: 20px;
 }
 
 .tarjeta.modo-lista .precio {
   margin: 0;
   flex: 1;
+  text-align: right;
 }
 
 .tarjeta.modo-lista a {
   flex: 1;
-  max-width: 200px;
+  max-width: 160px;
 }
 
-/* =========================================
-   DISEÑO DE LOS FILTROS Y CENTRADO
-   ========================================= */
-
-/* 1. Centramos las tarjetas pase lo que pase */
+/* ==========================================================================
+   ESTRUCTURA DE LA GRILLA Y FILTROS LATERALES
+   ========================================================================== */
 .grilla-productos {
   display: flex;
   flex-wrap: wrap;
-  justify-content: flex-start; /* MAGIA: Esto las alinea siempre a la izquierda */
+  justify-content: flex-start; /* Alinea los productos a la izquierda de su contenedor */
   align-items: flex-start;
   gap: 25px;
   width: 100%;
-  padding: 20px 0;
+  padding: 20px;
+  box-sizing: border-box;
 }
 
-/* 2. Diseño de los nuevos botones de filtro */
 .boton-filtro {
   background-color: #1e1e24;
   color: #ffffff;
@@ -120,10 +162,9 @@ button:hover { background-color: #00e5ff; color: #121212; }
   font-weight: 600;
   font-size: 0.95rem;
   display: flex;
-  justify-content: space-between; /* Manda la flecha a la derecha */
+  justify-content: space-between;
 }
 
-/* El efecto neón cuando pasás el mouse */
 .boton-filtro:hover, .boton-filtro.activo {
   background-color: rgba(0, 229, 255, 0.1);
   color: #00e5ff;
@@ -138,4 +179,44 @@ button:hover { background-color: #00e5ff; color: #121212; }
   text-transform: uppercase;
   margin-bottom: 15px;
   margin-top: 20px;
+}
+
+/* =========================================
+   ADAPTACIÓN PARA CELULARES Y TABLETS
+   ========================================= */
+@media (max-width: 768px) {
+  /* Separa el botón del texto FILTROS en la tablet */
+  .panel-lateral div[style*="display: flex"] {
+    gap: 15px;
+  }
+
+  /* Desamontona la grilla en el celu */
+  .grilla-productos {
+    gap: 15px;
+    padding: 10px;
+    justify-content: center;
+  }
+
+  /* Hace que las tarjetas no se aplasten y ocupen bien el ancho del celu */
+  .tarjeta {
+    width: 100%;
+    max-width: 320px;
+    min-height: auto; /* Deja que crezcan si es necesario */
+  }
+
+  /* Si está en modo lista en celu, lo pasa a columna para que no se pise todo */
+  .tarjeta.modo-lista {
+    flex-direction: column;
+    height: auto;
+    text-align: center;
+  }
+  
+  .tarjeta.modo-lista .contenedor-imagen {
+    margin-right: 0;
+    margin-bottom: 15px;
+  }
+
+  .tarjeta.modo-lista .info-producto {
+    flex-direction: column;
+  }
 }
