@@ -5,9 +5,9 @@
 /* Estilos de Base para toda la Web */
 body {
   margin: 0;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  background-color: #16161a; /* Gris azulado oscuro premium para contraste */
-  color: #ffffff;
+  padding: 0;
+  background-color: #0d0d12;
+  overflow-x: hidden;
 }
 
 /* El subtítulo general debajo del Navbar */
@@ -125,4 +125,11 @@ h2 {
   .grilla-productos {
     justify-content: center; /* Mantiene simétricas y centradas las tarjetas en el celular */
   }
+}
+/* Limpieza del límite de Vite */
+#root {
+  max-width: 100%;
+  margin: 0;
+  padding: 0;
+  width: 100%;
 }

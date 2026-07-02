@@ -443,3 +443,68 @@ button:hover {
   gap: 25px;
   width: 100%;
 }
+
+/* =========================================
+   MODAL FLOTANTE (Pop-up de Detalles)
+   ========================================= */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.85); /* Sombra oscura */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999; /* Se pone por encima de todo */
+  backdrop-filter: blur(5px);
+}
+
+.modal-contenido {
+  background-color: #1e1e24;
+  border: 1px solid #00e5ff;
+  border-radius: 12px;
+  width: 90%;
+  max-width: 500px;
+  padding: 30px;
+  position: relative;
+  box-shadow: 0 10px 30px rgba(0, 229, 255, 0.2);
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.boton-cerrar-modal {
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  background: transparent;
+  border: none;
+  color: #aaaaaa;
+  font-size: 1.5rem;
+  cursor: pointer;
+  width: auto;
+  padding: 0;
+}
+
+.boton-cerrar-modal:hover {
+  color: #ff4444;
+  background: transparent;
+}
+
+.modal-etiquetas {
+  display: flex;
+  gap: 10px;
+  margin-top: 10px;
+  flex-wrap: wrap;
+}
+
+.etiqueta-modal {
+  background-color: #2b2b36;
+  color: #aaaaaa;
+  padding: 5px 12px;
+  border-radius: 4px;
+  font-size: 0.85rem;
+  border: 1px solid #333;
+}

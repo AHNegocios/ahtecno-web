@@ -1,3 +1,72 @@
+/* ==========================================================================
+   RESET ABSOLUTO Y LIMPIEZA DE VITE
+   ========================================================================== */
+* {
+  box-sizing: border-box;
+}
+
+html, body, #root {
+  max-width: 100% !important;
+  width: 100% !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  overflow-x: hidden;
+  background-color: #0d0d12;
+}
+
+/* =========================================
+   MENÚ DESPLEGABLE (Categorías)
+   ========================================= */
+.dropdown {
+  position: relative;
+  display: inline-block;
+}
+
+.dropdown-titulo {
+  color: #ffffff;
+  font-weight: 600;
+  font-size: 0.95rem;
+  cursor: pointer;
+  padding-bottom: 10px;
+}
+
+.dropdown:hover .dropdown-titulo {
+  color: #00e5ff;
+}
+
+.dropdown-content {
+  display: none;
+  position: absolute;
+  background-color: #1a1a20;
+  min-width: 180px;
+  border: 1px solid #333333;
+  border-radius: 4px;
+  z-index: 1000;
+  top: 100%;
+  left: 0;
+  padding: 8px 0;
+  box-shadow: 0px 8px 16px rgba(0,0,0,0.5);
+}
+
+.dropdown-content a {
+  color: #cccccc;
+  padding: 10px 20px;
+  text-decoration: none;
+  display: block;
+  font-size: 0.85rem;
+  transition: all 0.2s;
+}
+
+.dropdown-content a:hover {
+  background-color: rgba(0, 229, 255, 0.1);
+  color: #00e5ff;
+  padding-left: 25px;
+}
+
+.dropdown:hover .dropdown-content {
+  display: block;
+}
+
 :root {
   --text: #6b6375;
   --text-h: #08060d;
@@ -192,9 +261,11 @@ code {
 .layout-principal {
   display: flex;
   gap: 30px;
-  padding: 40px;
-  max-width: 1450px;
+  width: 100%;
+  max-width: 95vw; /* Usa el 95% del ancho total de la pantalla, sin importar el monitor */
   margin: 0 auto;
+  padding: 40px 0;
+  align-items: flex-start;
 }
 
 .panel-lateral {

@@ -1,8 +1,27 @@
-import React, { useRef } from 'react';
+// src/Vidriera.jsx
+import React, { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
+import { supabase } from './supabaseClient'; // Conectamos a la base de datos
 
 function Vidriera() {
+  const [ofertas, setOfertas] = useState([]);
   const carruselRef = useRef(null);
+
+  // El radar va a buscar tus productos a Supabase
+  useEffect(() => {
+    async function fetchUltimosIngresos() {
+      const { data, error } = await supabase
+        .from('Productos')
+        .select('*')
+        .order('created_at', { ascending: false }) // Los ordena del más nuevo al más viejo
+        .limit(5); // Traemos los 5 más recientes para el carrusel
+
+      if (!error && data) {
+        setOfertas(data);
+      }
+    }
+    fetchUltimosIngresos();
+  }, []);
 
   const moverCarrusel = (direccion) => {
     if (carruselRef.current) {
@@ -11,10 +30,17 @@ function Vidriera() {
     }
   };
 
+  // Formateador automático de moneda
+  const formatearMoneda = (monto) => {
+    const numero = Number(monto);
+    if (isNaN(numero) || numero === 0) return 'Consultar precio';
+    return new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS', maximumFractionDigits: 0 }).format(numero);
+  };
+
   return (
     <div style={{ backgroundColor: '#0d0d12', minHeight: '100vh', color: 'white', overflowX: 'hidden' }}>
       
-      {/* SECCIÓN 1: BIENVENIDA (Con mejor espaciado) */}
+      {/* HERO SECTION */}
       <section style={{ textAlign: 'center', padding: '100px 20px 80px 20px', background: 'linear-gradient(180deg, #121214 0%, #0d0d12 100%)' }}>
         <h1 style={{ fontSize: '3.8rem', margin: '0 0 20px 0', fontWeight: '900', lineHeight: '1.2' }}>
           Tecnología <span style={{ color: '#00e5ff' }}>Premium</span>
@@ -29,10 +55,11 @@ function Vidriera() {
         </Link>
       </section>
 
-      {/* SECCIÓN 2: CARRUSEL CON PRODUCTOS REALES Y LINKS A MELI */}
+      {/* CARRUSEL DINÁMICO (Conectado a Supabase) */}
       <section style={{ maxWidth: '1200px', margin: '0 auto', padding: '0 20px' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
           <h2 style={{ fontSize: '1.8rem', margin: 0, borderLeft: '4px solid #00e5ff', paddingLeft: '15px' }}>Últimos Ingresos</h2>
+          
           <div style={{ display: 'flex', gap: '15px', alignItems: 'center' }}>
             <button onClick={() => moverCarrusel('izq')} style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', background: '#1e1e24', border: '1px solid #333', color: '#00e5ff', width: '45px', height: '45px', borderRadius: '50%', cursor: 'pointer', fontSize: '1.2rem' }}>❮</button>
             <button onClick={() => moverCarrusel('der')} style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', background: '#1e1e24', border: '1px solid #333', color: '#00e5ff', width: '45px', height: '45px', borderRadius: '50%', cursor: 'pointer', fontSize: '1.2rem' }}>❯</button>
@@ -41,49 +68,32 @@ function Vidriera() {
 
         <div ref={carruselRef} style={{ display: 'flex', overflowX: 'auto', scrollBehavior: 'smooth', gap: '25px', padding: '10px 0', scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
           
-          {/* Producto Real 1 */}
-          <div className="tarjeta" style={{ minWidth: '260px', flexShrink: 0 }}>
-             <div className="contenedor-imagen" style={{ background: '#ffffff' }}>
-                <img src="https://http2.mlstatic.com/D_NQ_NP_2X_702008-MLA74681607567_022024-F.webp" alt="Teclado" style={{ borderRadius: '4px' }} />
-             </div>
-             <h3 style={{ color: 'white', fontSize: '1.05rem', textAlign: 'center' }}>Teclado Wireless Redragon Eisa Pro K686wb</h3>
-             <p className="precio" style={{ color: '#00e5ff', textAlign: 'center', fontSize: '1.3rem', fontWeight: 'bold' }}>$ 99.999</p>
-             <a href="https://www.mercadolibre.com.ar/teclado-wireless-redragon-eisa-pro-k686wb-blanco-azul-rgb-n-blancoazul-espanol-latinoamerica/p/MLA53360613" target="_blank" rel="noopener noreferrer">
-               <button style={{ width: '100%', padding: '12px', background: 'transparent', border: '2px solid #00e5ff', color: '#00e5ff', borderRadius: '6px', cursor: 'pointer', fontWeight: 'bold' }}>Ver Oferta</button>
-             </a>
-          </div>
+          {/* Mapeamos los productos que trajimos de la base de datos */}
+          {ofertas.map((producto) => (
+            <div key={producto.id} className="tarjeta" style={{ minWidth: '260px', flexShrink: 0, border: '1px solid #4d4d5e' }}>
+               <div className="contenedor-imagen" style={{ background: '#ffffff', width: '100%', height: '160px', display: 'flex', justifyContent: 'center', alignItems: 'center', borderRadius: '8px', overflow: 'hidden' }}>
+                  <img src={producto.imagen} alt={producto.titulo} style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }} />
+               </div>
+               <div style={{ display: 'flex', flexDirection: 'column', flexGrow: 1, justifyContent: 'space-between', marginTop: '15px' }}>
+                 <h3 style={{ color: 'white', fontSize: '1.05rem', textAlign: 'center', margin: '0 0 10px 0' }}>{producto.titulo}</h3>
+                 <p className="precio" style={{ color: '#00e5ff', textAlign: 'center', fontSize: '1.4rem', fontWeight: 'bold', margin: '0 0 15px 0' }}>{formatearMoneda(producto.precio)}</p>
+                 <a href={producto.link} target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none' }}>
+                   <button style={{ width: '100%', padding: '12px', background: 'transparent', border: '2px solid #00e5ff', color: '#00e5ff', borderRadius: '6px', cursor: 'pointer', fontWeight: 'bold', textTransform: 'uppercase' }}>
+                     Ver Oferta
+                   </button>
+                 </a>
+               </div>
+            </div>
+          ))}
 
-          {/* Producto Real 2 */}
-          <div className="tarjeta" style={{ minWidth: '260px', flexShrink: 0 }}>
-             <div className="contenedor-imagen" style={{ background: '#ffffff' }}>
-                <img src="https://http2.mlstatic.com/D_NQ_NP_2X_656209-MLU74384666016_022024-F.webp" alt="Power Bank" style={{ borderRadius: '4px' }} />
-             </div>
-             <h3 style={{ color: 'white', fontSize: '1.05rem', textAlign: 'center' }}>Xiaomi Power Bank 10000 (67w)</h3>
-             <p className="precio" style={{ color: '#00e5ff', textAlign: 'center', fontSize: '1.3rem', fontWeight: 'bold' }}>$ 64.999</p>
-             <a href="https://www.mercadolibre.com.ar/xiaomi-power-bank-10000-67w-con-cable-integrado-blanco-blanco/p/MLA66101767" target="_blank" rel="noopener noreferrer">
-               <button style={{ width: '100%', padding: '12px', background: 'transparent', border: '2px solid #00e5ff', color: '#00e5ff', borderRadius: '6px', cursor: 'pointer', fontWeight: 'bold' }}>Ver Oferta</button>
-             </a>
-          </div>
-
-          {/* Producto Real 3 */}
-          <div className="tarjeta" style={{ minWidth: '260px', flexShrink: 0 }}>
-             <div className="contenedor-imagen" style={{ background: '#ffffff' }}>
-                <img src="https://http2.mlstatic.com/D_NQ_NP_2X_892224-MLA74681607567_022024-F.webp" alt="Proyector" style={{ borderRadius: '4px' }} />
-             </div>
-             <h3 style={{ color: 'white', fontSize: '1.05rem', textAlign: 'center' }}>Proyector Portátil 4K Hy300 Full Hd</h3>
-             <p className="precio" style={{ color: '#00e5ff', textAlign: 'center', fontSize: '1.3rem', fontWeight: 'bold' }}>$ 69.900</p>
-             <a href="https://www.mercadolibre.com.ar/proyector-portatil-4k-hy300-full-hd-wifi-hdmi-android-11-bt-50/p/MLA42238146" target="_blank" rel="noopener noreferrer">
-               <button style={{ width: '100%', padding: '12px', background: 'transparent', border: '2px solid #00e5ff', color: '#00e5ff', borderRadius: '6px', cursor: 'pointer', fontWeight: 'bold' }}>Ver Oferta</button>
-             </a>
-          </div>
-
+          {/* Tarjeta Extra Fija: Ver todo */}
           <div className="tarjeta" style={{ minWidth: '260px', flexShrink: 0, display: 'flex', justifyContent: 'center', alignItems: 'center', background: 'transparent', border: '2px dashed #333' }}>
-             <Link to="/productos" style={{ color: '#00e5ff', textDecoration: 'none', fontSize: '1.2rem', fontWeight: 'bold', padding: '20px' }}>Ver todo el catálogo +</Link>
+             <Link to="/productos" style={{ color: '#00e5ff', textDecoration: 'none', fontSize: '1.2rem', fontWeight: 'bold', padding: '20px', textAlign: 'center' }}>Ver todo el catálogo +</Link>
           </div>
         </div>
       </section>
 
-      {/* SECCIÓN 3: TEXTOS DE MARKETING PULIDOS */}
+      {/* BLOQUES DE MARKETING */}
       <section style={{ maxWidth: '1200px', margin: '80px auto 40px auto', padding: '0 20px', display: 'flex', flexWrap: 'wrap', gap: '30px', justifyContent: 'center' }}>
         <div style={{ background: '#1e1e24', padding: '30px', borderRadius: '12px', flex: '1 1 300px', textAlign: 'center', border: '1px solid #333' }}>
           <h3 style={{ color: '#00e5ff', fontSize: '1.4rem', marginBottom: '15px' }}>⚡ El Radar Definitivo</h3>
@@ -101,10 +111,20 @@ function Vidriera() {
 
       {/* FOOTER */}
       <footer style={{ backgroundColor: '#121214', borderTop: '1px solid #333', padding: '50px 20px', textAlign: 'center', margin: '60px 0 0 0' }}>
-        <h2 style={{ color: '#00e5ff', fontSize: '1.8rem', margin: '0 0 10px 0', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '10px' }}>
-          <img src="/LogoAHTecno.png" alt="Icono" style={{ height: '25px' }} />
-          A&H TECNO
-        </h2>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+          
+          <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
+            <h2 style={{ fontSize: '1.8rem', margin: 0, borderLeft: '4px solid #00e5ff', paddingLeft: '15px' }}>Últimos Ingresos</h2>
+            <Link to="/ofertas-semana" style={{ color: '#00e5ff', textDecoration: 'none', fontSize: '0.9rem', border: '1px solid #00e5ff', padding: '6px 15px', borderRadius: '20px', transition: 'all 0.3s', fontWeight: 'bold' }}>
+              Ver últimos publicados +
+            </Link>
+          </div>
+          
+          <div style={{ display: 'flex', gap: '15px', alignItems: 'center' }}>
+            <button onClick={() => moverCarrusel('izq')} style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', background: '#1e1e24', border: '1px solid #333', color: '#00e5ff', width: '45px', height: '45px', borderRadius: '50%', cursor: 'pointer', fontSize: '1.2rem' }}>❮</button>
+            <button onClick={() => moverCarrusel('der')} style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', background: '#1e1e24', border: '1px solid #333', color: '#00e5ff', width: '45px', height: '45px', borderRadius: '50%', cursor: 'pointer', fontSize: '1.2rem' }}>❯</button>
+          </div>
+        </div>
         <p style={{ color: '#888', margin: '0 0 20px 0' }}>Innovación y rendimiento en un solo lugar.</p>
         <p style={{ color: '#00e5ff', fontWeight: 'bold', fontSize: '1.1rem' }}>@TecnoOne_A&H</p>
         <hr style={{ borderColor: '#333', margin: '30px auto', maxWidth: '800px' }} />

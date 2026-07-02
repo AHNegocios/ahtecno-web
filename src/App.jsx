@@ -5,6 +5,7 @@ import Inicio from './Inicio';       // Este es tu Catálogo
 import Comunidad from './Comunidad'; // Esta es tu página de redes
 import './index.css'; 
 import OfertasSemana from './OfertasSemana';
+import Categorias from './Categorias';
 
 function App() {
   const estiloPestaña = ({ isActive }) => ({
@@ -53,6 +54,7 @@ function App() {
         <Route path="/productos" element={<Inicio />} /> 
         <Route path="/comunidad" element={<Comunidad />} />
         <Route path="/ofertas-semana" element={<OfertasSemana />} />
+        <Route path="/categorias" element={<Categorias />} />
       </Routes>
     </BrowserRouter>
   );
