@@ -85,8 +85,8 @@ function Inicio() {
           </aside>
         )}
 
-        <main className="contenido-derecha">
-
+<main className="contenido-derecha" style={{ padding: '0 20px', width: '100%', boxSizing: 'border-box' }}>
+  
           <div className="contenedor-buscador" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '30px' }}>
 
             {!panelAbierto ? (

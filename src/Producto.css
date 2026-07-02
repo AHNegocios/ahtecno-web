@@ -219,4 +219,227 @@ button:hover {
   .tarjeta.modo-lista .info-producto {
     flex-direction: column;
   }
+  
+  /* 1. MAGIA ANTI-DESBORDE: Corta cualquier cosa que se salga de la pantalla */
+  body, html {
+    overflow-x: hidden;
+    width: 100%;
+  }
+
+  /* 2. Acomoda el buscador y los botones de vista para que no empujen la pantalla */
+  .contenedor-buscador {
+    flex-direction: column;
+    width: 100%;
+    align-items: stretch !important;
+    gap: 15px;
+  }
+
+  .buscador {
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  /* ... (dejá acá el resto de las reglas de celular que ya habías pegado) ... */
+}
+
+/* =========================================
+   ESTRUCTURA PRINCIPAL (Catálogo)
+   ========================================= */
+.layout-principal {
+  display: flex; /* Esto pone el panel y los productos uno al lado del otro */
+  gap: 30px;
+  padding: 20px 40px;
+  align-items: flex-start; /* Evita que el panel lateral se estire hacia abajo */
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.panel-lateral {
+  width: 260px;
+  flex-shrink: 0; /* Impide que el panel se achaste si hay muchos productos */
+  background-color: transparent;
+}
+
+.contenido-derecha {
+  flex-grow: 1;
+  width: 100%;
+}
+
+/* =========================================
+   DISEÑO DEL BUSCADOR (Moderno)
+   ========================================= */
+.buscador {
+  background-color: #1e1e24;
+  color: #ffffff;
+  border: 1px solid #333333;
+  padding: 12px 20px;
+  border-radius: 8px;
+  font-size: 1rem;
+  width: 300px;
+  outline: none;
+  transition: all 0.3s ease;
+  box-shadow: inset 0 2px 4px rgba(0,0,0,0.2);
+}
+
+.buscador::placeholder {
+  color: #666666;
+}
+
+.buscador:focus {
+  border-color: #00e5ff;
+  box-shadow: 0 0 8px rgba(0, 229, 255, 0.3);
+}
+
+/* =========================================
+   ADAPTACIÓN PARA CELULARES
+   ========================================= */
+@media (max-width: 768px) {
+  .layout-principal {
+    flex-direction: column; /* En celular sí queremos que se apile uno arriba del otro */
+    padding: 15px;
+  }
+  
+  .panel-lateral {
+    width: 100%;
+  }
+
+  .buscador {
+    width: 100%; /* El buscador ocupa toda la pantalla en el celu */
+    box-sizing: border-box;
+  }
+}
+
+/* MODO GRILLA */
+.tarjeta {
+  background-color: #2b2b36;
+  border: 1px solid #4d4d5e;
+  padding: 20px;
+  border-radius: 12px;
+  width: 240px;
+  min-height: 400px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  box-shadow: 0 8px 16px rgba(0, 229, 255, 0.05);
+  box-sizing: border-box;
+}
+
+.tarjeta:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 12px 20px rgba(0, 229, 255, 0.15);
+}
+
+.contenedor-imagen {
+  width: 100%;
+  height: 160px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: #ffffff;
+  border-radius: 8px;
+  margin-bottom: 15px;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.tarjeta img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
+
+.info-producto {
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+  justify-content: space-between;
+}
+
+/* Título completo y agrupado sin puntos suspensivos */
+.tarjeta h3 { 
+  color: #ffffff; 
+  font-size: 1.05rem; 
+  margin: 0 0 12px 0; 
+  text-align: center;
+  line-height: 1.4;
+}
+
+.precio { 
+  color: #00e5ff; 
+  font-weight: bold; 
+  font-size: 1.35rem; 
+  margin-bottom: 15px; 
+  text-align: center; 
+}
+
+/* Botón Premium */
+.tarjeta button {
+  background-color: transparent;
+  color: #00e5ff;
+  border: 2px solid #00e5ff;
+  padding: 10px;
+  border-radius: 6px;
+  cursor: pointer;
+  width: 100%;
+  text-transform: uppercase;
+  font-weight: bold;
+  transition: all 0.3s ease;
+}
+
+.tarjeta button:hover {
+  background-color: #00e5ff;
+  color: #121212;
+}
+
+/* MODO LISTA */
+.tarjeta.modo-lista {
+  width: 100%;
+  max-width: 900px;
+  flex-direction: row;
+  align-items: center;
+  min-height: 130px;
+  gap: 20px;
+}
+
+.tarjeta.modo-lista .contenedor-imagen {
+  width: 120px;
+  height: 100px;
+  margin-bottom: 0;
+  flex-shrink: 0;
+}
+
+.tarjeta.modo-lista .info-producto {
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  gap: 25px;
+}
+
+.tarjeta.modo-lista h3 {
+  text-align: left;
+  margin: 0;
+  flex: 2;
+}
+
+.tarjeta.modo-lista .precio {
+  margin: 0;
+  flex: 1;
+  text-align: right;
+}
+
+.tarjeta.modo-lista a {
+  flex: 1;
+  max-width: 160px;
+}
+
+/* GRILLA CONTENEDORA */
+.grilla-productos {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-start;
+  align-items: flex-start;
+  gap: 25px;
+  width: 100%;
 }

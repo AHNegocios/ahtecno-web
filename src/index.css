@@ -109,3 +109,227 @@ code {
   padding: 4px 8px;
   background: var(--code-bg);
 }
+
+/* Estilos para la Cinta Superior Global */
+.navbar-superior {
+  background-color: #1e1e24;
+  padding: 15px 40px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid #333333;
+}
+
+.logo-texto-cyan {
+  color: #00e5ff;
+  font-size: 1.6rem;
+  font-weight: 900;
+  letter-spacing: 1px;
+}
+
+.logo-texto-blanco {
+  color: #ffffff;
+}
+
+.nav-links {
+  display: flex;
+  gap: 30px;
+  align-items: center;
+}
+
+/* MENÚ DESPLEGABLE (Dropdown CSS Puro) */
+.dropdown {
+  position: relative;
+  display: inline-block;
+}
+
+.dropdown-titulo {
+  color: #ffffff;
+  font-weight: 600;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: color 0.3s;
+}
+
+.dropdown:hover .dropdown-titulo {
+  color: #00e5ff;
+}
+
+.dropdown-content {
+  display: none;
+  position: absolute;
+  background-color: #2b2b36;
+  min-width: 160px;
+  box-shadow: 0px 8px 16px rgba(0,0,0,0.3);
+  border: 1px solid #4d4d5e;
+  border-radius: 6px;
+  z-index: 10;
+  top: 100%;
+  left: 0;
+  margin-top: 5px;
+}
+
+.dropdown-content a {
+  color: #ffffff;
+  padding: 12px 16px;
+  text-decoration: none;
+  display: block;
+  font-size: 0.9rem;
+  font-weight: 500;
+  transition: background 0.2s, color 0.2s;
+}
+
+.dropdown-content a:hover {
+  background-color: rgba(0, 229, 255, 0.1);
+  color: #00e5ff;
+}
+
+.dropdown:hover .dropdown-content {
+  display: block;
+}
+
+/* Estructura de Paneles del Catálogo */
+.layout-principal {
+  display: flex;
+  gap: 30px;
+  padding: 40px;
+  max-width: 1450px;
+  margin: 0 auto;
+}
+
+.panel-lateral {
+  width: 260px;
+  flex-shrink: 0;
+}
+
+.contenido-derecha {
+  flex-grow: 1;
+}
+
+/* Buscador Moderno */
+.buscador {
+  background-color: #1e1e24;
+  color: #ffffff;
+  border: 1px solid #4d4d5e;
+  padding: 12px 20px;
+  border-radius: 8px;
+  font-size: 1rem;
+  width: 280px;
+  outline: none;
+  transition: all 0.3s ease;
+}
+
+.buscador:focus {
+  border-color: #00e5ff;
+  box-shadow: 0 0 8px rgba(0, 229, 255, 0.3);
+}
+
+/* =========================================
+   LISTA DESPLEGABLE (Corrección y Minimalismo)
+   ========================================= */
+.dropdown-content {
+  display: none;
+  position: absolute;
+  background-color: #1a1a20; /* Color súper oscuro y premium */
+  min-width: 170px;
+  border: 1px solid #333333;
+  border-radius: 4px; /* Bordes menos redondeados, más serios */
+  z-index: 10;
+  top: 100%; /* MAGIA: Esto lo pega al texto, evita que desaparezca */
+  left: 0;
+  padding: 8px 0;
+}
+
+.dropdown-content a {
+  color: #cccccc;
+  padding: 8px 20px;
+  text-decoration: none;
+  display: block;
+  font-size: 0.85rem; /* Letra más chica y sutil */
+  transition: all 0.2s;
+}
+
+.dropdown-content a:hover {
+  background-color: transparent;
+  color: #00e5ff;
+  padding-left: 25px; /* Pequeño efecto de movimiento al pasar el mouse */
+}
+
+/* =========================================
+   DISEÑO DE LA VIDRIERA (CARRUSEL Y FOOTER)
+   ========================================= */
+.carrusel-contenedor {
+  display: flex;
+  overflow-x: auto; /* Permite el scroll horizontal */
+  scroll-behavior: smooth; /* Movimiento suave */
+  gap: 20px;
+  padding: 20px 0;
+  /* Oculta la barra de scroll nativa para que quede limpio */
+  -ms-overflow-style: none;  
+  scrollbar-width: none;  
+}
+.carrusel-contenedor::-webkit-scrollbar {
+  display: none;
+}
+
+.footer-global {
+  background-color: #121214;
+  border-top: 1px solid #333;
+  padding: 40px 20px;
+  text-align: center;
+  margin-top: 60px;
+}
+
+/* =========================================
+   MENÚ DESPLEGABLE (Dropdown)
+   ========================================= */
+.dropdown {
+  position: relative;
+  display: inline-block;
+}
+
+.dropdown-titulo {
+  color: #ffffff;
+  font-weight: 600;
+  font-size: 0.95rem;
+  cursor: pointer;
+  padding-bottom: 10px; /* IMPORTANTE: Crea un puente invisible para el mouse */
+}
+
+.dropdown:hover .dropdown-titulo {
+  color: #00e5ff;
+}
+
+.dropdown-content {
+  display: none;
+  position: absolute;
+  background-color: #1a1a20;
+  min-width: 180px;
+  border: 1px solid #333333;
+  border-radius: 4px;
+  z-index: 1000;
+  top: 100%; /* Lo pega exactamente abajo del título */
+  left: 0;
+  padding: 8px 0;
+  box-shadow: 0px 8px 16px rgba(0,0,0,0.5);
+}
+
+.dropdown-content a {
+  color: #cccccc;
+  padding: 10px 20px;
+  text-decoration: none;
+  display: block;
+  font-size: 0.85rem;
+  transition: all 0.2s;
+}
+
+.dropdown-content a:hover {
+  background-color: rgba(0, 229, 255, 0.1);
+  color: #00e5ff;
+  padding-left: 25px; /* Efecto Premium al pasar el mouse */
+}
+
+/* Activa el menú al pasar el mouse */
+.dropdown:hover .dropdown-content {
+  display: block;
+}
