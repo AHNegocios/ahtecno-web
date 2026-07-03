@@ -123,7 +123,18 @@ function Inicio() {
             </div>
           </div>
 
-          <div className="grilla-productos">
+<div 
+            className="grilla-productos"
+            style={{
+              display: 'grid',
+              gridTemplateColumns: vista === 'lista' ? '1fr' : 'repeat(auto-fit, minmax(240px, 250px))',
+              gap: '25px',
+              width: '100%',
+              justifyContent: 'center',
+              alignItems: 'start',
+              margin: '0 auto'
+            }}
+          >
             {productosFiltrados.map((productoEnTurno) => (
               <Producto
                 key={productoEnTurno.id}
