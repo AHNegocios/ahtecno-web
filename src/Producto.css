@@ -92,46 +92,47 @@ button:hover {
    ========================================================================== */
 .tarjeta.modo-lista {
   width: 100%;
-  max-width: 900px;           /* Para que no se estire infinito en pantallas gigantes */
-  flex-direction: row;        /* Imagen a la izquierda, info a la derecha */
+  max-width: 1000px;
+  flex-direction: row;
   align-items: center;
-  min-height: 140px;
-  height: auto;               /* Permite que se adapte si el texto es muy largo */
+  min-height: 120px;
   gap: 20px;
+  padding: 15px;
 }
 
 .tarjeta.modo-lista .contenedor-imagen {
-  width: 120px;
-  height: 110px;
+  width: 100px;
+  height: 100px;
   margin-bottom: 0;
   flex-shrink: 0;
 }
 
 .tarjeta.modo-lista .info-producto {
-  flex-direction: row;        /* Título, precio y botón en una sola línea */
+  flex-direction: row; /* Alinea todo en horizontal */
   align-items: center;
   justify-content: space-between;
   width: 100%;
-  gap: 15px;
+  gap: 20px;
 }
 
 .tarjeta.modo-lista h3 {
   text-align: left;
   margin: 0;
-  flex: 2;
-  max-width: 350px; /* Limita la expansión horizontal */
-  padding-right: 20px;
+  flex: 2; /* El título ocupa el mayor espacio */
 }
 
 .tarjeta.modo-lista .precio {
   margin: 0;
   flex: 1;
-  text-align: right;
+  text-align: center;
 }
 
-.tarjeta.modo-lista a {
+/* Contenedor de los dos botones en modo lista */
+.tarjeta.modo-lista .botones-dobles {
   flex: 1;
-  max-width: 160px;
+  display: flex;
+  gap: 10px;
+  max-width: 200px; /* Evita que el botón OFERTA se vuelva gigante */
 }
 
 /* ==========================================================================
@@ -507,4 +508,37 @@ button:hover {
   border-radius: 4px;
   font-size: 0.85rem;
   border: 1px solid #333;
+}
+
+/* PARCHE: MODO LISTA HORIZONTAL (Pegar al final del archivo) */
+.tarjeta.modo-lista {
+  width: 100%;
+  max-width: 900px;
+  flex-direction: row !important;
+  min-height: 120px !important;
+  padding: 15px !important;
+  display: flex;
+  align-items: center;
+}
+
+.tarjeta.modo-lista .info-producto {
+  flex-direction: row !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  width: 100%;
+  gap: 20px;
+}
+
+.tarjeta.modo-lista h3 {
+  flex: 2 !important;
+  text-align: left !important;
+  margin: 0 !important;
+  font-size: 1rem !important;
+}
+
+.tarjeta.modo-lista .botones-dobles {
+  flex: 1 !important;
+  max-width: 250px !important;
+  margin-top: 0 !important;
+  flex-direction: row !important;
 }

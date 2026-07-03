@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { supabase } from './supabaseClient';
-import Producto from './Producto'; // Usamos el componente Producto que ya tiene el modal integrado
+import Producto from './Producto';
 
 function OfertasSemana() {
   const [ofertas, setOfertas] = useState([]);
@@ -12,7 +12,7 @@ function OfertasSemana() {
       const { data, error } = await supabase
         .from('Productos')
         .select('*')
-        .order('created_at', { ascending: false }); // Trae todos los cargados de forma ilimitada
+        .order('created_at', { ascending: false });
 
       if (!error && data) {
         setOfertas(data);
@@ -24,7 +24,7 @@ function OfertasSemana() {
   return (
     <div style={{ backgroundColor: '#0d0d12', minHeight: '100vh', color: 'white', display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '60px 20px' }}>
 
-      {/* FOTO Y BIO */}
+      {/* 1. FOTO Y BIO */}
       <div style={{ width: '110px', height: '110px', borderRadius: '50%', border: '3px solid #00e5ff', display: 'flex', justifyContent: 'center', alignItems: 'center', backgroundColor: '#ffffff', marginBottom: '15px', overflow: 'hidden' }}>
         <img src="/LogoAHTecno.png" alt="A&H Tecno" style={{ width: '85%', height: '85%', objectFit: 'contain' }} />
       </div>
@@ -36,7 +36,7 @@ function OfertasSemana() {
         ⚡ Nuestras mejores selecciones para tu setup.
       </p>
 
-      {/* BOTONES DE ACCIÓN DE DOS COLUMNAS MINIMALISTAS */}
+      {/* 2. BOTONES DE ACCIÓN (ACÁ ARRIBA DE LA GRILLA) */}
       <div style={{ display: 'flex', gap: '15px', width: '100%', maxWidth: '600px', marginBottom: '50px' }}>
         <Link to="/productos" style={{ textDecoration: 'none', flex: 1 }}>
           <div style={{ border: '1px solid #00e5ff', color: '#00e5ff', padding: '14px', borderRadius: '8px', textAlign: 'center', fontWeight: 'bold', fontSize: '0.95rem', transition: 'all 0.3s', backgroundColor: 'rgba(0, 229, 255, 0.03)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
@@ -50,9 +50,9 @@ function OfertasSemana() {
         </Link>
       </div>
 
-      {/* GRILLA DE PRODUCTOS EXPANDIDA ALINEADA A LA IZQUIERDA */}
+      {/* 3. GRILLA DE PRODUCTOS */}
       <div style={{ width: '100%', maxWidth: '1200px', margin: '0 auto' }}>
-        <div className="grilla-productos">
+        <div className="grilla-productos" style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'flex-start', gap: '25px' }}>
           {ofertas.map((producto, index) => (
             <Producto
               key={producto.id}
@@ -61,7 +61,6 @@ function OfertasSemana() {
               linkOferta={producto.link}
               imagen={producto.imagen}
               ml_id={producto.ml_id}
-              // Pasamos una propiedad para saber cuál es el primero de la lista
               esPrimero={index === 0} 
             />
           ))}
