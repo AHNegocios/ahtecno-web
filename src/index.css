@@ -1,4 +1,31 @@
 /* ==========================================================================
+   1. VARIABLES GLOBALES (ESTO VA ARRIBA DE TODO, SUELTO)
+   ========================================================================== */
+:root, body.tema-oscuro {
+  --fondo-pagina: #0d0d12;
+  --fondo-tarjeta: #1e1e24;
+  --borde-tarjeta: #333333;
+  --texto-principal: #ffffff;
+  --texto-secundario: #aaaaaa;
+}
+
+body.tema-claro {
+  --fondo-pagina: #eef2f9;
+  --fondo-tarjeta: #ffffff;
+  --borde-tarjeta: #cce0ff;
+  --texto-principal: #111111;
+  --texto-secundario: #555555;
+}
+
+/* ==========================================================================
+   2. ESTILOS DE TUS COMPONENTES (DE ACÁ PARA ABAJO VA EL RESTO DE TU CSS)
+   ========================================================================== */
+.bloque-categoria {
+  transition: transform 0.2s ease, borderColor 0.2s ease;
+}
+
+/* Si tenés más clases de CSS abajo (.navbar, .tarjetas, etc.), las dejás ahí */
+/* ==========================================================================
    RESET ABSOLUTO Y LIMPIEZA DE VITE
    ========================================================================== */
 * {
@@ -437,3 +464,4 @@ code {
   padding: 15px 0;
   border-bottom: 1px solid #1e1e24;
 }
+

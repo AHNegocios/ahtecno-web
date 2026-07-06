@@ -1,5 +1,5 @@
 // src/App.jsx
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { BrowserRouter, Routes, Route, NavLink, Link } from 'react-router-dom';
 import Vidriera from './Vidriera';
 import Inicio from './Inicio'; 
@@ -8,9 +8,10 @@ import OfertasSemana from './OfertasSemana';
 import Categorias from './Categorias';
 import './index.css'; 
 
+
 function App() {
-  // Estado para controlar el menú lateral de ajustes
   const [menuAjustesAbierto, setMenuAjustesAbierto] = useState(false);
+  const [tema, setTema] = useState('oscuro'); // <--- AGREGAMOS ESTE ESTADO
 
   const estiloPestaña = ({ isActive }) => ({
     color: isActive ? '#00e5ff' : '#ffffff',
@@ -22,87 +23,98 @@ function App() {
 
   return (
     <BrowserRouter>
-      <header className="navbar-superior">
+      <header className="navbar-superior" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '15px 30px', backgroundColor: 'var(--fondo-tarjeta)', borderBottom: '1px solid var(--borde-tarjeta)' }}>
         {/* LOGO OFICIAL */}
-        <Link to="/" className="logo-contenedor" style={{ display: 'flex', alignItems: 'center', gap: '12px', textDecoration: 'none' }}>
+        <Link to="/" style={{ display: 'flex', alignItems: 'center', gap: '12px', textDecoration: 'none' }}>
           <img src="/LogoAHTecno.png" alt="A&H Logo" style={{ height: '40px', objectFit: 'contain' }} />
-          <span className="logo-texto-cyan">A&H <span className="logo-texto-blanco">TECNO</span></span>
+          <span style={{ color: '#00e5ff', fontSize: '1.6rem', fontWeight: '900' }}>A&H <span style={{ color: 'var(--texto-principal)' }}>TECNO</span></span>
         </Link>
 
         {/* NAVEGACIÓN Y BOTÓN 3 RAYITAS */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '30px' }}>
-          <nav className="nav-links">
-            <NavLink to="/" style={estiloPestaña} end>Inicio</NavLink>
+          <nav style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
+            <NavLink to="/" style={({ isActive }) => ({ color: isActive ? '#00e5ff' : 'var(--texto-principal)', textDecoration: 'none', fontWeight: '600', fontSize: '0.95rem' })} end>Inicio</NavLink>
             
-            <div className="dropdown">
-              <Link to="/categorias" style={{ textDecoration: 'none' }}>
-                <span className="dropdown-titulo">Categorías ▾</span>
-              </Link>
-              <div className="dropdown-content">
-                <Link to="/productos">Periféricos</Link>
-                <Link to="/productos">Componentes</Link>
-                <Link to="/productos">Energía</Link>
-                <Link to="/productos">Imagen y Video</Link>
-                <Link to="/productos">Audio</Link>
+            {/* MENÚ DESPLEGABLE */}
+            <div className="dropdown" style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
+              <NavLink to="/categorias" style={({ isActive }) => ({ color: isActive ? '#00e5ff' : 'var(--texto-principal)', textDecoration: 'none', fontWeight: '600', fontSize: '0.95rem', padding: '5px 10px', display: 'flex', alignItems: 'center', gap: '6px', transition: 'color 0.3s' })}>
+                Categorías <span style={{ fontSize: '0.7rem', color: 'inherit', marginTop: '2px' }}>▼</span>
+              </NavLink>
+              
+              <div className="dropdown-content" style={{ position: 'absolute', top: '20px', left: 0, paddingTop: '15px', zIndex: 1000 }}>
+                <div style={{ backgroundColor: 'var(--fondo-tarjeta)', border: '1px solid var(--borde-tarjeta)', borderRadius: '8px', overflow: 'hidden', minWidth: '220px', boxShadow: '0 8px 24px rgba(0,0,0,0.8)' }}>
+                  <Link to="/categorias" style={{ fontWeight: 'bold', color: '#00e5ff', padding: '12px 20px', display: 'block', textDecoration: 'none', fontSize: '0.9rem' }}>Ver todas las secciones</Link>
+                  <div style={{ height: '1px', backgroundColor: 'var(--borde-tarjeta)' }}></div>
+                  <Link to="/productos" style={{ color: 'var(--texto-principal)', padding: '10px 20px', display: 'block', textDecoration: 'none', fontSize: '0.9rem' }}>Periféricos</Link>
+                  <Link to="/productos" style={{ color: 'var(--texto-principal)', padding: '10px 20px', display: 'block', textDecoration: 'none', fontSize: '0.9rem' }}>Componentes</Link>
+                  <Link to="/productos" style={{ color: 'var(--texto-principal)', padding: '10px 20px', display: 'block', textDecoration: 'none', fontSize: '0.9rem' }}>Equipos armados</Link>
+                  <Link to="/productos" style={{ color: 'var(--texto-principal)', padding: '10px 20px', display: 'block', textDecoration: 'none', fontSize: '0.9rem' }}>Energía</Link>
+                  <Link to="/productos" style={{ color: 'var(--texto-principal)', padding: '10px 20px', display: 'block', textDecoration: 'none', fontSize: '0.9rem' }}>Imagen y Video</Link>
+                  <Link to="/productos" style={{ color: 'var(--texto-principal)', padding: '10px 20px', display: 'block', textDecoration: 'none', fontSize: '0.9rem' }}>Audio</Link>
+                  <Link to="/productos" style={{ color: 'var(--texto-principal)', padding: '10px 20px', display: 'block', textDecoration: 'none', fontSize: '0.9rem' }}>Almacenamiento</Link>
+                  <Link to="/productos" style={{ color: 'var(--texto-principal)', padding: '10px 20px', display: 'block', textDecoration: 'none', fontSize: '0.9rem' }}>Redes</Link>
+                  <Link to="/productos" style={{ color: 'var(--texto-principal)', padding: '10px 20px', display: 'block', textDecoration: 'none', fontSize: '0.9rem' }}>Varios</Link>
+                </div>
               </div>
             </div>
 
-            <NavLink to="/productos" style={estiloPestaña}>Productos</NavLink>
-            <NavLink to="/comunidad" style={estiloPestaña}>Comunidad</NavLink>
+            <NavLink to="/productos" style={({ isActive }) => ({ color: isActive ? '#00e5ff' : 'var(--texto-principal)', textDecoration: 'none', fontWeight: '600', fontSize: '0.95rem' })}>Productos</NavLink>
+            <NavLink to="/comunidad" style={({ isActive }) => ({ color: isActive ? '#00e5ff' : 'var(--texto-principal)', textDecoration: 'none', fontWeight: '600', fontSize: '0.95rem' })}>Comunidad</NavLink>
           </nav>
 
-          {/* BOTÓN DE AJUSTES (3 RAYITAS) */}
-          <button 
-            onClick={() => setMenuAjustesAbierto(true)}
-            style={{ background: 'transparent', border: 'none', color: '#00e5ff', fontSize: '1.8rem', cursor: 'pointer', display: 'flex', alignItems: 'center' }}
-          >
+          <button onClick={() => setMenuAjustesAbierto(true)} style={{ background: 'transparent', border: 'none', color: '#00e5ff', fontSize: '2rem', cursor: 'pointer', padding: '0', display: 'flex', alignItems: 'center' }}>
             ☰
           </button>
         </div>
       </header>
 
-      {/* PANEL LATERAL DE AJUSTES (Off-Canvas) */}
+      {/* MENÚ LATERAL DE AJUSTES */}
+{/* MENÚ LATERAL DE AJUSTES */}
       {menuAjustesAbierto && (
         <>
-          {/* Fondo oscuro que tapa todo */}
           <div 
-            style={{ position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', backgroundColor: 'rgba(0,0,0,0.7)', zIndex: 9998 }} 
-            onClick={() => setMenuAjustesAbierto(false)}
+            onClick={() => setMenuAjustesAbierto(false)} 
+            style={{ position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', backgroundColor: 'rgba(0,0,0,0.85)', zIndex: 9998, backdropFilter: 'blur(3px)' }}
           ></div>
           
-          {/* Menú deslizable */}
-          <div className="menu-ajustes-lateral">
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '30px' }}>
-              <h2 style={{ color: '#00e5ff', margin: 0, fontSize: '1.5rem' }}>Ajustes</h2>
-              <button onClick={() => setMenuAjustesAbierto(false)} style={{ background: 'transparent', border: 'none', color: '#fff', fontSize: '1.5rem', cursor: 'pointer' }}>✕</button>
+          <div style={{ position: 'fixed', top: 0, right: 0, width: '350px', height: '100vh', backgroundColor: 'var(--fondo-pagina)', borderLeft: '1px solid var(--borde-tarjeta)', zIndex: 9999, padding: '30px', display: 'flex', flexDirection: 'column', gap: '25px', boxShadow: '-10px 0 30px rgba(0,0,0,0.8)', transition: 'background-color 0.3s ease' }}>
+            
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
+              <h2 style={{ color: 'var(--texto-principal)', margin: 0, fontSize: '1.6rem', fontWeight: '900', transition: 'color 0.3s ease' }}>Configuración</h2>
+              <button onClick={() => setMenuAjustesAbierto(false)} style={{ background: 'var(--fondo-tarjeta)', border: '1px solid var(--borde-tarjeta)', color: 'var(--texto-principal)', fontSize: '1.2rem', cursor: 'pointer', width: '35px', height: '35px', borderRadius: '50%', display: 'flex', justifyContent: 'center', alignItems: 'center', transition: 'all 0.2s' }}>✕</button>
             </div>
 
-            {/* OPCIÓN 1: TEMA */}
-            <div className="ajuste-item">
-              <span style={{ color: '#fff', fontWeight: 'bold' }}>🎨 Tema Visual</span>
-              <select style={{ background: '#1e1e24', color: '#00e5ff', border: '1px solid #333', padding: '8px', borderRadius: '6px' }}>
-                <option value="oscuro">Oscuro (Neón)</option>
-                <option value="claro">Claro (Celeste)</option>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', backgroundColor: 'var(--fondo-tarjeta)', padding: '15px 20px', borderRadius: '10px', border: '1px solid var(--borde-tarjeta)', transition: 'all 0.3s ease' }}>
+              <span style={{ color: 'var(--texto-principal)', fontWeight: 'bold', fontSize: '0.95rem', display: 'flex', alignItems: 'center', gap: '8px', transition: 'color 0.3s ease' }}>🎨 Tema visual</span>
+              <select 
+                value={tema} 
+                onChange={(e) => setTema(e.target.value)} 
+                style={{ backgroundColor: 'var(--fondo-pagina)', color: '#00e5ff', border: '1px solid var(--borde-tarjeta)', padding: '8px 12px', borderRadius: '6px', fontWeight: 'bold', outline: 'none', cursor: 'pointer', transition: 'all 0.3s ease' }}
+              >
+                <option value="oscuro">Modo Oscuro</option>
+                <option value="claro">Modo Claro</option>
               </select>
             </div>
 
-            {/* OPCIÓN 2: MONEDA */}
-            <div className="ajuste-item">
-              <span style={{ color: '#fff', fontWeight: 'bold' }}>💵 Moneda</span>
-              <select style={{ background: '#1e1e24', color: '#00e5ff', border: '1px solid #333', padding: '8px', borderRadius: '6px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', backgroundColor: 'var(--fondo-tarjeta)', padding: '15px 20px', borderRadius: '10px', border: '1px solid var(--borde-tarjeta)', transition: 'all 0.3s ease' }}>
+              <span style={{ color: 'var(--texto-principal)', fontWeight: 'bold', fontSize: '0.95rem', display: 'flex', alignItems: 'center', gap: '8px', transition: 'color 0.3s ease' }}>💵 Moneda base</span>
+              <select style={{ backgroundColor: 'var(--fondo-pagina)', color: '#00e5ff', border: '1px solid var(--borde-tarjeta)', padding: '8px 12px', borderRadius: '6px', fontWeight: 'bold', outline: 'none', cursor: 'pointer', transition: 'all 0.3s ease' }}>
                 <option value="ars">Pesos (ARS)</option>
                 <option value="usd">Dólares (USD)</option>
               </select>
             </div>
-
-            {/* OPCIÓN 3: LEGALES */}
-            <div className="ajuste-item" style={{ marginTop: 'auto', borderTop: '1px solid #333', paddingTop: '20px' }}>
-              <Link to="/comunidad" onClick={() => setMenuAjustesAbierto(false)} style={{ color: '#aaa', textDecoration: 'none', fontSize: '0.9rem' }}>Avisos Legales y Privacidad ➜</Link>
+            
+            <div style={{ marginTop: 'auto', borderTop: '1px solid var(--borde-tarjeta)', paddingTop: '20px', transition: 'border-color 0.3s ease' }}>
+              <Link to="/comunidad" onClick={() => setMenuAjustesAbierto(false)} style={{ color: 'var(--texto-secundario)', textDecoration: 'none', fontSize: '0.9rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 0', transition: 'color 0.3s ease' }}>
+                <span>Avisos Legales y Privacidad</span>
+                <span style={{ color: '#00e5ff' }}>➜</span>
+              </Link>
             </div>
           </div>
         </>
       )}
 
+      {/* RUTAS */}
       <Routes>
         <Route path="/" element={<Vidriera />} />
         <Route path="/productos" element={<Inicio />} /> 
