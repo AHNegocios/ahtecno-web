@@ -18,7 +18,7 @@ function Categorias() {
   return (
     <div style={{ padding: '60px 20px', minHeight: '100vh', backgroundColor: 'var(--fondo-pagina)', transition: 'background-color 0.3s ease' }}>
       <h1 style={{ color: 'var(--texto-principal)', textAlign: 'center', fontSize: '2.8rem', margin: '0 0 10px 0', fontWeight: '900', transition: 'color 0.3s ease' }}>
-        Nuestras <span style={{ color: '#00e5ff' }}>Categorías</span>
+        Nuestras <span style={{ color: 'var(--color-primario)' }}>Categorías</span>
       </h1>
       <p style={{ color: 'var(--texto-secundario)', textAlign: 'center', marginBottom: '60px', fontSize: '1.15rem', transition: 'color 0.3s ease' }}>
         Navegá por nuestras secciones y encontrá exactamente lo que tu setup necesita.
@@ -37,7 +37,7 @@ function Categorias() {
               {cat.icon}
             </div>
             <div style={{ textAlign: 'left' }}>
-              <h2 style={{ color: '#00e5ff', margin: '0 0 8px 0', fontSize: '1.5rem', fontWeight: 'bold' }}>{cat.title}</h2>
+              <h2 style={{ color: 'var(--color-primario)', margin: '0 0 8px 0', fontSize: '1.5rem', fontWeight: 'bold' }}>{cat.title}</h2>
               <p style={{ color: 'var(--texto-secundario)', margin: 0, fontSize: '0.95rem', lineHeight: '1.5', transition: 'color 0.3s ease' }}>{cat.desc}</p>
             </div>
           </Link>

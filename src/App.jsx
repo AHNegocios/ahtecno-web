@@ -13,13 +13,16 @@ function App() {
   const [menuAjustesAbierto, setMenuAjustesAbierto] = useState(false);
   const [tema, setTema] = useState('oscuro'); // <--- AGREGAMOS ESTE ESTADO
 
-  const estiloPestaña = ({ isActive }) => ({
-    color: isActive ? '#00e5ff' : '#ffffff',
-    textDecoration: 'none',
-    fontWeight: '600',
-    fontSize: '0.95rem',
-    transition: 'all 0.3s'
-  });
+  // Lógica blindada para forzar el cambio de clase en el body HTML
+  useEffect(() => {
+    if (tema === 'claro') {
+      document.body.classList.remove('tema-oscuro');
+      document.body.classList.add('tema-claro');
+    } else {
+      document.body.classList.remove('tema-claro');
+      document.body.classList.add('tema-oscuro');
+    }
+  }, [tema]);
 
   return (
     <BrowserRouter>
@@ -27,23 +30,23 @@ function App() {
         {/* LOGO OFICIAL */}
         <Link to="/" style={{ display: 'flex', alignItems: 'center', gap: '12px', textDecoration: 'none' }}>
           <img src="/LogoAHTecno.png" alt="A&H Logo" style={{ height: '40px', objectFit: 'contain' }} />
-          <span style={{ color: '#00e5ff', fontSize: '1.6rem', fontWeight: '900' }}>A&H <span style={{ color: 'var(--texto-principal)' }}>TECNO</span></span>
+          <span style={{ color: 'var(--color-primario)', fontSize: '1.6rem', fontWeight: '900' }}>A&H <span style={{ color: 'var(--texto-principal)' }}>TECNO</span></span>
         </Link>
 
         {/* NAVEGACIÓN Y BOTÓN 3 RAYITAS */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '30px' }}>
           <nav style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
-            <NavLink to="/" style={({ isActive }) => ({ color: isActive ? '#00e5ff' : 'var(--texto-principal)', textDecoration: 'none', fontWeight: '600', fontSize: '0.95rem' })} end>Inicio</NavLink>
+            <NavLink to="/" style={({ isActive }) => ({ color: isActive ? 'var(--color-primario)' : 'var(--texto-principal)', textDecoration: 'none', fontWeight: '600', fontSize: '0.95rem' })} end>Inicio</NavLink>
             
             {/* MENÚ DESPLEGABLE */}
             <div className="dropdown" style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
-              <NavLink to="/categorias" style={({ isActive }) => ({ color: isActive ? '#00e5ff' : 'var(--texto-principal)', textDecoration: 'none', fontWeight: '600', fontSize: '0.95rem', padding: '5px 10px', display: 'flex', alignItems: 'center', gap: '6px', transition: 'color 0.3s' })}>
+              <NavLink to="/categorias" style={({ isActive }) => ({ color: isActive ? 'var(--color-primario)' : 'var(--texto-principal)', textDecoration: 'none', fontWeight: '600', fontSize: '0.95rem', padding: '5px 10px', display: 'flex', alignItems: 'center', gap: '6px', transition: 'color 0.3s' })}>
                 Categorías <span style={{ fontSize: '0.7rem', color: 'inherit', marginTop: '2px' }}>▼</span>
               </NavLink>
               
-              <div className="dropdown-content" style={{ position: 'absolute', top: '20px', left: 0, paddingTop: '15px', zIndex: 1000 }}>
-                <div style={{ backgroundColor: 'var(--fondo-tarjeta)', border: '1px solid var(--borde-tarjeta)', borderRadius: '8px', overflow: 'hidden', minWidth: '220px', boxShadow: '0 8px 24px rgba(0,0,0,0.8)' }}>
-                  <Link to="/categorias" style={{ fontWeight: 'bold', color: '#00e5ff', padding: '12px 20px', display: 'block', textDecoration: 'none', fontSize: '0.9rem' }}>Ver todas las secciones</Link>
+              {/* Forzamos que este contenedor puente sea transparente para borrar cualquier reborde viejo */}
+              <div className="dropdown-content" style={{ position: 'absolute', top: '20px', left: 0, paddingTop: '15px', zIndex: 1000, background: 'transparent', border: 'none', boxShadow: 'none' }}>                <div style={{ backgroundColor: 'var(--fondo-tarjeta)', border: '1px solid var(--borde-tarjeta)', borderRadius: '8px', overflow: 'hidden', minWidth: '220px', boxShadow: '0 8px 24px rgba(0,0,0,0.8)' }}>
+                  <Link to="/categorias" style={{ fontWeight: 'bold', color: 'var(--color-primario)', padding: '12px 20px', display: 'block', textDecoration: 'none', fontSize: '0.9rem' }}>Ver todas las secciones</Link>
                   <div style={{ height: '1px', backgroundColor: 'var(--borde-tarjeta)' }}></div>
                   <Link to="/productos" style={{ color: 'var(--texto-principal)', padding: '10px 20px', display: 'block', textDecoration: 'none', fontSize: '0.9rem' }}>Periféricos</Link>
                   <Link to="/productos" style={{ color: 'var(--texto-principal)', padding: '10px 20px', display: 'block', textDecoration: 'none', fontSize: '0.9rem' }}>Componentes</Link>
@@ -58,11 +61,11 @@ function App() {
               </div>
             </div>
 
-            <NavLink to="/productos" style={({ isActive }) => ({ color: isActive ? '#00e5ff' : 'var(--texto-principal)', textDecoration: 'none', fontWeight: '600', fontSize: '0.95rem' })}>Productos</NavLink>
-            <NavLink to="/comunidad" style={({ isActive }) => ({ color: isActive ? '#00e5ff' : 'var(--texto-principal)', textDecoration: 'none', fontWeight: '600', fontSize: '0.95rem' })}>Comunidad</NavLink>
+            <NavLink to="/productos" style={({ isActive }) => ({ color: isActive ? 'var(--color-primario)' : 'var(--texto-principal)', textDecoration: 'none', fontWeight: '600', fontSize: '0.95rem' })}>Productos</NavLink>
+            <NavLink to="/comunidad" style={({ isActive }) => ({ color: isActive ? 'var(--color-primario)' : 'var(--texto-principal)', textDecoration: 'none', fontWeight: '600', fontSize: '0.95rem' })}>Comunidad</NavLink>
           </nav>
 
-          <button onClick={() => setMenuAjustesAbierto(true)} style={{ background: 'transparent', border: 'none', color: '#00e5ff', fontSize: '2rem', cursor: 'pointer', padding: '0', display: 'flex', alignItems: 'center' }}>
+          <button onClick={() => setMenuAjustesAbierto(true)} style={{ background: 'transparent', border: 'none', color: 'var(--color-primario)', fontSize: '2rem', cursor: 'pointer', padding: '0', display: 'flex', alignItems: 'center' }}>
             ☰
           </button>
         </div>
@@ -89,7 +92,7 @@ function App() {
               <select 
                 value={tema} 
                 onChange={(e) => setTema(e.target.value)} 
-                style={{ backgroundColor: 'var(--fondo-pagina)', color: '#00e5ff', border: '1px solid var(--borde-tarjeta)', padding: '8px 12px', borderRadius: '6px', fontWeight: 'bold', outline: 'none', cursor: 'pointer', transition: 'all 0.3s ease' }}
+                style={{ backgroundColor: 'var(--fondo-pagina)', color: 'var(--color-primario)', border: '1px solid var(--borde-tarjeta)', padding: '8px 12px', borderRadius: '6px', fontWeight: 'bold', outline: 'none', cursor: 'pointer', transition: 'all 0.3s ease' }}
               >
                 <option value="oscuro">Modo Oscuro</option>
                 <option value="claro">Modo Claro</option>
@@ -98,7 +101,7 @@ function App() {
 
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', backgroundColor: 'var(--fondo-tarjeta)', padding: '15px 20px', borderRadius: '10px', border: '1px solid var(--borde-tarjeta)', transition: 'all 0.3s ease' }}>
               <span style={{ color: 'var(--texto-principal)', fontWeight: 'bold', fontSize: '0.95rem', display: 'flex', alignItems: 'center', gap: '8px', transition: 'color 0.3s ease' }}>💵 Moneda base</span>
-              <select style={{ backgroundColor: 'var(--fondo-pagina)', color: '#00e5ff', border: '1px solid var(--borde-tarjeta)', padding: '8px 12px', borderRadius: '6px', fontWeight: 'bold', outline: 'none', cursor: 'pointer', transition: 'all 0.3s ease' }}>
+              <select style={{ backgroundColor: 'var(--fondo-pagina)', color: 'var(--color-primario)', border: '1px solid var(--borde-tarjeta)', padding: '8px 12px', borderRadius: '6px', fontWeight: 'bold', outline: 'none', cursor: 'pointer', transition: 'all 0.3s ease' }}>
                 <option value="ars">Pesos (ARS)</option>
                 <option value="usd">Dólares (USD)</option>
               </select>
@@ -107,7 +110,7 @@ function App() {
             <div style={{ marginTop: 'auto', borderTop: '1px solid var(--borde-tarjeta)', paddingTop: '20px', transition: 'border-color 0.3s ease' }}>
               <Link to="/comunidad" onClick={() => setMenuAjustesAbierto(false)} style={{ color: 'var(--texto-secundario)', textDecoration: 'none', fontSize: '0.9rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 0', transition: 'color 0.3s ease' }}>
                 <span>Avisos Legales y Privacidad</span>
-                <span style={{ color: '#00e5ff' }}>➜</span>
+                <span style={{ color: 'var(--color-primario)' }}>➜</span>
               </Link>
             </div>
           </div>

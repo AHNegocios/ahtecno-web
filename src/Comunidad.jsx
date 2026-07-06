@@ -3,10 +3,11 @@ import React from 'react';
 
 function Comunidad() {
   return (
-    <div style={{ padding: '50px', textAlign: 'center', color: 'white' }}>
-      <h2 style={{ color: '#00e5ff', fontSize: '2.5rem', marginBottom: '20px' }}>Conectá con A&H Tecno</h2>
-      <p style={{ fontSize: '1.1rem', marginBottom: '40px', color: '#aaa' }}>
-        Enterate de los nuevos ingresos, sorteos y ofertas relámpago en nuestras redes oficiales.
+      <div style={{ padding: '60px 20px', minHeight: '100vh', backgroundColor: 'var(--fondo-pagina)', color: 'var(--texto-principal)', transition: 'background-color 0.3s ease, color 0.3s ease' }}>      <h1 style={{ color: 'var(--color-primario)', textAlign: 'center', fontSize: '2.5rem', marginBottom: '20px' }}>
+        Comunidad A&H
+      </h1>
+      <p style={{ color: 'var(--texto-secundario)', textAlign: 'center', maxWidth: '600px', margin: '0 auto', transition: 'color 0.3s ease' }}>
+        Próximamente vas a poder interactuar con otros apasionados por el hardware, compartir tu setup y enterarte de sorteos exclusivos.
       </p>
       
       <div style={{ display: 'flex', justifyContent: 'center', gap: '20px' }}>

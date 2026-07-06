@@ -2,19 +2,21 @@
    1. VARIABLES GLOBALES (ESTO VA ARRIBA DE TODO, SUELTO)
    ========================================================================== */
 :root, body.tema-oscuro {
-  --fondo-pagina: #0d0d12;
-  --fondo-tarjeta: #1e1e24;
-  --borde-tarjeta: #333333;
-  --texto-principal: #ffffff;
-  --texto-secundario: #aaaaaa;
+  --fondo-pagina: #0d0d12; /* 1. Cambiá este código para el fondo de la web oscuro */
+  --fondo-tarjeta: #1e1e24; /* 2. Cambiá este para las tarjetas oscuras */
+  --borde-tarjeta: #333333; /* 3. Cambiá este para las líneas divisorias oscuras */
+  --texto-principal: #ffffff; /* 4. Color de títulos en modo oscuro */
+  --texto-secundario: #aaaaaa; /* 5. Color de descripciones en modo oscuro */
+  --color-primario: #00e5ff;
 }
 
 body.tema-claro {
-  --fondo-pagina: #eef2f9;
-  --fondo-tarjeta: #ffffff;
-  --borde-tarjeta: #cce0ff;
-  --texto-principal: #111111;
-  --texto-secundario: #555555;
+  --fondo-pagina: #ffffff; /* 1. Cambiá este para el fondo de la web claro */
+  --fondo-tarjeta: #e8e8e8; /* 2. Cambiá este para las tarjetas claras */
+  --borde-tarjeta: #cce0ff; /* 3. Cambiá este para las líneas claras */
+  --texto-principal: #111111; /* 4. Color de títulos en modo claro */
+  --texto-secundario: #555555; /* 5. Color de descripciones en modo claro */
+  --color-primario: #00bcd4;
 }
 
 /* ==========================================================================
@@ -465,3 +467,18 @@ code {
   border-bottom: 1px solid #1e1e24;
 }
 
+/* Fuerza a que todas las tarjetas de productos obedezcan al tema dinámico */
+.grilla-productos > div, 
+.producto,
+.tarjeta-producto {
+  background-color: var(--fondo-tarjeta) !important;
+  color: var(--texto-principal) !important;
+  border-color: var(--borde-tarjeta) !important;
+}
+
+/* Fuerza a que los títulos y descripciones de las tarjetas también cambien */
+.grilla-productos h3,
+.grilla-productos p,
+.grilla-productos span {
+  color: var(--texto-principal);
+}
