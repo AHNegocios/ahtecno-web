@@ -82,7 +82,7 @@ function App() {
           
           <div style={{ position: 'fixed', top: 0, right: 0, width: '350px', height: '100vh', backgroundColor: 'var(--fondo-pagina)', borderLeft: '1px solid var(--borde-tarjeta)', zIndex: 9999, padding: '30px', display: 'flex', flexDirection: 'column', gap: '25px', boxShadow: '-10px 0 30px rgba(0,0,0,0.8)', transition: 'background-color 0.3s ease' }}>
             
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
+            <div className="menu-deslizable" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
               <h2 style={{ color: 'var(--texto-principal)', margin: 0, fontSize: '1.6rem', fontWeight: '900', transition: 'color 0.3s ease' }}>Configuración</h2>
               <button onClick={() => setMenuAjustesAbierto(false)} style={{ background: 'var(--fondo-tarjeta)', border: '1px solid var(--borde-tarjeta)', color: 'var(--texto-principal)', fontSize: '1.2rem', cursor: 'pointer', width: '35px', height: '35px', borderRadius: '50%', display: 'flex', justifyContent: 'center', alignItems: 'center', transition: 'all 0.2s' }}>✕</button>
             </div>

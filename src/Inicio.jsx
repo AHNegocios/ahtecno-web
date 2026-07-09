@@ -5,7 +5,8 @@ import { supabase } from './supabaseClient'
 
 function Inicio() {
   const [busqueda, setBusqueda] = useState("")
-  const [panelAbierto, setPanelAbierto] = useState(true)
+// Si la pantalla es ancha (PC) arranca abierto, si es chica (Celu) arranca cerrado
+  const [panelAbierto, setPanelAbierto] = useState(window.innerWidth > 768);
   const [vista, setVista] = useState("grilla")
   const [ofertas, setOfertas] = useState([])
   
@@ -43,11 +44,15 @@ function Inicio() {
 
       <div className="layout-principal" style={{ padding: '20px', display: 'flex', gap: '20px' }}>
 
+       {panelAbierto && (
+          <div className="fondo-oscuro-filtros" onClick={() => setPanelAbierto(false)}></div>
+        )}
+
         {panelAbierto && (
           <aside className="panel-lateral" style={{ backgroundColor: 'var(--fondo-tarjeta)', border: '1px solid var(--borde-tarjeta)', borderRadius: '12px', padding: '20px', width: '250px', transition: 'all 0.3s ease' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '15px' }}>
               <h3 style={{ margin: 0, color: 'var(--texto-principal)' }}>FILTROS</h3>
-              <button onClick={() => setPanelAbierto(false)} style={{ padding: '5px 10px', fontSize: '0.8rem', width: 'auto', backgroundColor: 'transparent', color: 'var(--color-primario)', border: '1px solid #00e5ff', borderRadius: '4px', cursor: 'pointer' }}>
+              <button onClick={() => setPanelAbierto(false)} style={{ padding: '5px 10px', fontSize: '0.8rem', width: 'auto', backgroundColor: 'transparent', color: '#00e5ff', border: '1px solid #00e5ff', borderRadius: '4px', cursor: 'pointer' }}>
                 Ocultar
               </button>
             </div>
@@ -59,7 +64,7 @@ function Inicio() {
               <button 
                 className={`boton-filtro ${orden === 'menor_precio' ? 'activo' : ''}`}
                 onClick={() => setOrden('menor_precio')}
-                style={{ backgroundColor: orden === 'menor_precio' ? 'var(--color-primario)' : 'transparent', color: orden === 'menor_precio' ? '#000' : 'var(--texto-principal)', border: '1px solid var(--borde-tarjeta)', width: '100%', padding: '10px', marginBottom: '10px', borderRadius: '6px', textAlign: 'left', transition: 'all 0.2s', cursor: 'pointer' }}
+                style={{ backgroundColor: orden === 'menor_precio' ? '#00e5ff' : 'transparent', color: orden === 'menor_precio' ? '#000' : 'var(--texto-principal)', border: '1px solid var(--borde-tarjeta)', width: '100%', padding: '10px', marginBottom: '10px', borderRadius: '6px', textAlign: 'left', transition: 'all 0.2s', cursor: 'pointer' }}
               >
                 Menor Precio <span>⬇</span>
               </button>
@@ -67,7 +72,7 @@ function Inicio() {
               <button 
                 className={`boton-filtro ${orden === 'mayor_precio' ? 'activo' : ''}`}
                 onClick={() => setOrden('mayor_precio')}
-                style={{ backgroundColor: orden === 'mayor_precio' ? 'var(--color-primario)' : 'transparent', color: orden === 'mayor_precio' ? '#000' : 'var(--texto-principal)', border: '1px solid var(--borde-tarjeta)', width: '100%', padding: '10px', marginBottom: '10px', borderRadius: '6px', textAlign: 'left', transition: 'all 0.2s', cursor: 'pointer' }}
+                style={{ backgroundColor: orden === 'mayor_precio' ? '#00e5ff' : 'transparent', color: orden === 'mayor_precio' ? '#000' : 'var(--texto-principal)', border: '1px solid var(--borde-tarjeta)', width: '100%', padding: '10px', marginBottom: '10px', borderRadius: '6px', textAlign: 'left', transition: 'all 0.2s', cursor: 'pointer' }}
               >
                 Mayor Precio <span>⬆</span>
               </button>
@@ -75,7 +80,7 @@ function Inicio() {
               <button 
                 className={`boton-filtro ${orden === 'mas_nuevos' ? 'activo' : ''}`}
                 onClick={() => setOrden('mas_nuevos')}
-                style={{ backgroundColor: orden === 'mas_nuevos' ? 'var(--color-primario)' : 'transparent', color: orden === 'mas_nuevos' ? '#000' : 'var(--texto-principal)', border: '1px solid var(--borde-tarjeta)', width: '100%', padding: '10px', marginBottom: '10px', borderRadius: '6px', textAlign: 'left', transition: 'all 0.2s', cursor: 'pointer' }}
+                style={{ backgroundColor: orden === 'mas_nuevos' ? '#00e5ff' : 'transparent', color: orden === 'mas_nuevos' ? '#000' : 'var(--texto-principal)', border: '1px solid var(--borde-tarjeta)', width: '100%', padding: '10px', marginBottom: '10px', borderRadius: '6px', textAlign: 'left', transition: 'all 0.2s', cursor: 'pointer' }}
               >
                 Más Nuevos <span>✨</span>
               </button>
@@ -93,7 +98,7 @@ function Inicio() {
           <div className="contenedor-buscador" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '30px', backgroundColor: 'var(--fondo-tarjeta)', padding: '15px 20px', borderRadius: '12px', border: '1px solid var(--borde-tarjeta)', transition: 'all 0.3s ease' }}>
 
             {!panelAbierto ? (
-              <button onClick={() => setPanelAbierto(true)} style={{ width: 'auto', padding: '10px 20px', backgroundColor: 'var(--color-primario)', color: '#000', border: 'none', borderRadius: '6px', fontWeight: 'bold', cursor: 'pointer' }}>
+              <button onClick={() => setPanelAbierto(true)} style={{ width: 'auto', padding: '10px 20px', backgroundColor: '#00e5ff', color: '#000', border: 'none', borderRadius: '6px', fontWeight: 'bold', cursor: 'pointer' }}>
                 Mostrar Filtros
               </button>
             ) : (
@@ -104,13 +109,13 @@ function Inicio() {
               <div style={{ display: 'flex', gap: '5px' }}>
                 <button
                   onClick={() => setVista('grilla')}
-                  style={{ padding: '8px 12px', width: 'auto', backgroundColor: vista === 'grilla' ? 'var(--color-primario)' : 'transparent', color: vista === 'grilla' ? '#000' : 'var(--color-primario)', border: '1px solid #00e5ff', borderRadius: '4px', cursor: 'pointer' }}
+                  style={{ padding: '8px 12px', width: 'auto', backgroundColor: vista === 'grilla' ? '#00e5ff' : 'transparent', color: vista === 'grilla' ? '#000' : '#00e5ff', border: '1px solid #00e5ff', borderRadius: '4px', cursor: 'pointer' }}
                 >
                   ⊞
                 </button>
                 <button
                   onClick={() => setVista('lista')}
-                  style={{ padding: '8px 12px', width: 'auto', backgroundColor: vista === 'lista' ? 'var(--color-primario)' : 'transparent', color: vista === 'lista' ? '#000' : 'var(--color-primario)', border: '1px solid #00e5ff', borderRadius: '4px', cursor: 'pointer' }}
+                  style={{ padding: '8px 12px', width: 'auto', backgroundColor: vista === 'lista' ? '#00e5ff' : 'transparent', color: vista === 'lista' ? '#000' : '#00e5ff', border: '1px solid #00e5ff', borderRadius: '4px', cursor: 'pointer' }}
                 >
                   ☰
                 </button>
@@ -128,7 +133,7 @@ function Inicio() {
           </div>
 
           <div 
-            className="grilla-productos"
+            className={`grilla-productos ${vista}`}
             style={{
               display: 'grid',
               gridTemplateColumns: vista === 'lista' ? 'minmax(auto, 950px)' : 'repeat(auto-fit, minmax(240px, 250px))',
