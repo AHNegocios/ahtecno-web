@@ -49,7 +49,7 @@ function Vidriera() {
 
       {/* CARRUSEL DE PRODUCTOS CONECTADOS */}
       <section style={{ maxWidth: '1200px', margin: '0 auto', padding: '0 20px' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '25px' }}>
+        <div className="cabecera-carrusel" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '25px' }}>
           
           <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
             <h2 style={{ fontSize: '1.6rem', margin: 0, borderLeft: '4px solid #00e5ff', paddingLeft: '15px', color: 'var(--texto-principal)', fontWeight: 'bold', transition: 'color 0.3s ease' }}>
@@ -60,7 +60,7 @@ function Vidriera() {
             </Link>
           </div>
           
-          <div style={{ display: 'flex', gap: '10px', alignItems: 'center', flexShrink: 0 }}>
+          <div className="botones-carrusel" style={{ display: 'flex', gap: '10px', alignItems: 'center', flexShrink: 0 }}>
             <button onClick={() => moverCarrusel('izq')} style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', background: 'var(--fondo-tarjeta)', border: '1px solid var(--borde-tarjeta)', color: 'var(--color-primario)', width: '40px', height: '40px', borderRadius: '50%', cursor: 'pointer', transition: 'all 0.3s ease' }}>❮</button>
             <button onClick={() => moverCarrusel('der')} style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', background: 'var(--fondo-tarjeta)', border: '1px solid var(--borde-tarjeta)', color: 'var(--color-primario)', width: '40px', height: '40px', borderRadius: '50%', cursor: 'pointer', transition: 'all 0.3s ease' }}>❯</button>
           </div>

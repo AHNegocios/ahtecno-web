@@ -34,8 +34,8 @@ function App() {
         </Link>
 
         {/* NAVEGACIÓN Y BOTÓN 3 RAYITAS */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '30px' }}>
-          <nav style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
+        <div className="contenedor-derecho" style={{ display: 'flex', alignItems: 'center', gap: '30px' }}>
+          <nav className="cinta-enlaces" style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
             <NavLink to="/" style={({ isActive }) => ({ color: isActive ? 'var(--color-primario)' : 'var(--texto-principal)', textDecoration: 'none', fontWeight: '600', fontSize: '0.95rem' })} end>Inicio</NavLink>
             
             {/* MENÚ DESPLEGABLE */}
@@ -65,7 +65,7 @@ function App() {
             <NavLink to="/comunidad" style={({ isActive }) => ({ color: isActive ? 'var(--color-primario)' : 'var(--texto-principal)', textDecoration: 'none', fontWeight: '600', fontSize: '0.95rem' })}>Comunidad</NavLink>
           </nav>
 
-          <button onClick={() => setMenuAjustesAbierto(true)} style={{ background: 'transparent', border: 'none', color: 'var(--color-primario)', fontSize: '2rem', cursor: 'pointer', padding: '0', display: 'flex', alignItems: 'center' }}>
+          <button className="boton-menu" onClick={() => setMenuAjustesAbierto(true)} style={{ background: 'transparent', border: 'none', color: 'var(--color-primario)', fontSize: '2rem', cursor: 'pointer', padding: '0', display: 'flex', alignItems: 'center' }}>
             ☰
           </button>
         </div>
