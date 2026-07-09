@@ -507,6 +507,16 @@ code {
   display: none;
 }
 
+/* Motor de animación para la persiana de filtros */
+@keyframes persianaSubir {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+
 /* ==========================================================================
    3. ADAPTACIÓN PARA CELULARES (MEDIA QUERIES)
    ========================================================================== */

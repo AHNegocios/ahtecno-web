@@ -49,7 +49,7 @@ function Inicio() {
         )}
 
         {panelAbierto && (
-          <aside className="panel-lateral" style={{ backgroundColor: 'var(--fondo-tarjeta)', border: '1px solid var(--borde-tarjeta)', borderRadius: '12px', padding: '20px', width: '250px', transition: 'all 0.3s ease' }}>
+          <aside className="panel-lateral" style={{ backgroundColor: 'var(--fondo-tarjeta)', border: '1px solid var(--borde-tarjeta)', borderRadius: '12px', padding: '20px', width: '250px' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '15px' }}>
               <h3 style={{ margin: 0, color: 'var(--texto-principal)' }}>FILTROS</h3>
               <button onClick={() => setPanelAbierto(false)} style={{ padding: '5px 10px', fontSize: '0.8rem', width: 'auto', backgroundColor: 'transparent', color: '#00e5ff', border: '1px solid #00e5ff', borderRadius: '4px', cursor: 'pointer' }}>
