@@ -1,16 +1,48 @@
-# React + Vite
+# AH Tecno
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Catálogo web de ofertas tecnológicas seleccionadas y enlazadas a tiendas externas mediante enlaces de afiliados.
 
-Currently, two official plugins are available:
+## Tecnologías
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+- React 19 y Vite.
+- React Router.
+- Supabase para el catálogo.
+- Vercel para vistas previas y producción.
 
-## React Compiler
+## Desarrollo local
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+```bash
+npm install
+npm run dev
+```
 
-## Expanding the ESLint configuration
+Controles antes de subir cambios:
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+```bash
+npm run lint
+npm run build
+```
+
+## Configuración
+
+Copiar `.env.example` como `.env.local` y completar las variables publicables de Supabase. No se deben guardar claves privadas, tokens de Mercado Libre ni claves `service_role` dentro del repositorio.
+
+## Flujo de publicación
+
+1. Crear una rama desde `main`.
+2. Implementar y probar los cambios.
+3. Subir la rama y revisar la vista previa de Vercel.
+4. Abrir un pull request.
+5. Fusionar con `main` únicamente después de la aprobación.
+
+## Estructura principal
+
+- `src/App.jsx`: rutas y estructura global.
+- `src/Navbar.jsx`: navegación, menú móvil y preferencias.
+- `src/Inicio.jsx`: catálogo, búsqueda, orden y filtros.
+- `src/Producto.jsx`: tarjeta y detalle de cada producto.
+- `src/useProducts.js`: acceso centralizado al catálogo de Supabase.
+- `src/catalogConfig.js`: categorías y clasificación temporal.
+- `src/siteConfig.js`: datos públicos y enlaces sociales.
+
+La clasificación por palabras clave es transitoria. Cuando se integre la API de Mercado Libre, cada producto deberá guardar una categoría normalizada en Supabase.
