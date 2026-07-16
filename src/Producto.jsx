@@ -1,4 +1,5 @@
 import { useEffect, useId, useState } from 'react'
+import { categories, getProductCategory } from './catalogConfig'
 import './Producto.css'
 
 const formatCurrency = (amount) => {
@@ -17,6 +18,8 @@ function Producto({ titulo, precio, linkOferta, imagen, vista = 'grilla', esPrim
   const [modalOpen, setModalOpen] = useState(false)
   const titleId = useId()
   const cleanLink = linkOferta?.trim() || ''
+  const categorySlug = getProductCategory({ titulo })
+  const category = categories.find(({ slug }) => slug === categorySlug)
 
   useEffect(() => {
     if (!modalOpen) return undefined
@@ -44,21 +47,26 @@ function Producto({ titulo, precio, linkOferta, imagen, vista = 'grilla', esPrim
 
         <div className="product-card__body">
           <div className="product-card__copy">
+            <div className="product-card__meta">
+              <span>{category?.label || 'Tecnología'}</span>
+              <span>Mercado Libre</span>
+            </div>
             <h3 id={titleId}>{titulo}</h3>
+            <span className="product-card__price-label">Precio publicado</span>
             <p className="product-card__price">{formatCurrency(precio)}</p>
           </div>
 
           <div className="product-card__actions">
             {cleanLink ? (
               <a className="product-action product-action--primary" href={cleanLink} target="_blank" rel="noopener noreferrer sponsored">
-                Ver oferta
+                Ver oferta <span aria-hidden="true">↗</span>
               </a>
             ) : (
               <span className="product-action product-action--disabled">Sin enlace</span>
             )}
 
             <button className="product-action product-action--secondary" type="button" onClick={() => setModalOpen(true)}>
-              Más info
+              Detalles
             </button>
           </div>
         </div>
@@ -84,6 +92,11 @@ function Producto({ titulo, precio, linkOferta, imagen, vista = 'grilla', esPrim
               <p className="product-modal__notice">
                 El precio y la disponibilidad definitivos se confirman en Mercado Libre.
               </p>
+
+              <ul className="product-modal__checks">
+                <li><span aria-hidden="true">✓</span> Revisá reputación y condiciones del vendedor</li>
+                <li><span aria-hidden="true">✓</span> Confirmá envío y precio antes de comprar</li>
+              </ul>
 
               {ml_id && <p className="product-modal__reference">Referencia: {ml_id}</p>}
 

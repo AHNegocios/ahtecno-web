@@ -1,23 +1,30 @@
 import { Link } from 'react-router-dom'
+import { categories } from './catalogConfig'
 import Producto from './Producto'
 import { useProducts } from './useProducts'
 
 const trustItems = [
   {
-    icon: '⌁',
-    title: 'Encontrá más rápido',
-    description: 'Ordenamos oportunidades para que compares menos y encuentres antes lo que buscás.',
+    icon: '01',
+    title: 'Selección humana',
+    description: 'Revisamos cada publicación antes de sumarla para evitarte búsquedas y opciones irrelevantes.',
   },
   {
-    icon: '✓',
-    title: 'Enlaces revisados',
-    description: 'Verificamos los enlaces al publicarlos y te enviamos al sitio donde se concreta la compra.',
+    icon: '02',
+    title: 'Compra en Mercado Libre',
+    description: 'Te llevamos a la publicación original para que confirmes precio, envío y reputación del vendedor.',
   },
   {
-    icon: '◇',
-    title: 'Selección curada',
-    description: 'Priorizamos tecnología útil, buenas propuestas y productos relevantes para la comunidad.',
+    icon: '03',
+    title: 'Afiliación transparente',
+    description: 'Podemos recibir una comisión si comprás desde nuestros enlaces, sin costo adicional para vos.',
   },
+]
+
+const radarSteps = [
+  'Exploramos publicaciones y tendencias',
+  'Filtramos opciones que aportan valor',
+  'Vos comparás y decidís en el sitio oficial',
 ]
 
 function Vidriera() {
@@ -25,30 +32,77 @@ function Vidriera() {
 
   return (
     <main className="landing-page">
-      <section className="hero">
-        <div className="hero__content">
-          <p className="eyebrow">Tu radar de tecnología</p>
-          <h1>
-            Menos búsqueda.<br />
-            <span>Mejores hallazgos.</span>
-          </h1>
-          <p className="hero__lead">
-            Filtramos ofertas y productos tecnológicos para ayudarte a descubrir opciones interesantes sin recorrer publicaciones infinitas.
-          </p>
-          <div className="hero__actions">
-            <Link className="button button--primary" to="/productos">Explorar catálogo</Link>
-            <Link className="button button--secondary" to="/categorias">Ver categorías</Link>
+      <section className="hero" aria-labelledby="hero-title">
+        <div className="hero__layout">
+          <div className="hero__content">
+            <p className="eyebrow hero__eyebrow"><span aria-hidden="true" /> Selección tecnológica independiente</p>
+            <h1 id="hero-title">
+              Tecnología útil,
+              <span>sin perder horas buscando.</span>
+            </h1>
+            <p className="hero__lead">
+              Encontramos y ordenamos productos tecnológicos publicados en Mercado Libre para que llegues más rápido a una opción que valga la pena comparar.
+            </p>
+            <div className="hero__actions">
+              <Link className="button button--primary" to="/productos">Explorar productos <span aria-hidden="true">→</span></Link>
+              <Link className="button button--secondary" to="/categorias">Buscar por categoría</Link>
+            </div>
+            <ul className="hero__proofs" aria-label="Características del servicio">
+              <li><span aria-hidden="true">✓</span> Catálogo curado</li>
+              <li><span aria-hidden="true">✓</span> Enlaces directos</li>
+              <li><span aria-hidden="true">✓</span> Sin costo para vos</li>
+            </ul>
           </div>
+
+          <aside className="hero-radar" aria-label="Cómo selecciona productos AH Tecno">
+            <div className="hero-radar__header">
+              <div>
+                <span className="hero-radar__signal" aria-hidden="true" />
+                <strong>AH Radar</strong>
+              </div>
+              <span className="hero-radar__status">Selección activa</span>
+            </div>
+
+            <p className="hero-radar__label">Cómo funciona</p>
+            <ol className="hero-radar__steps">
+              {radarSteps.map((step, index) => (
+                <li key={step}>
+                  <span>{String(index + 1).padStart(2, '0')}</span>
+                  <p>{step}</p>
+                </li>
+              ))}
+            </ol>
+
+            <div className="hero-radar__footer">
+              <strong>{loading ? '...' : products.length}</strong>
+              <span>{products.length === 1 ? 'hallazgo reciente' : 'hallazgos recientes'} en la vidriera</span>
+            </div>
+          </aside>
+        </div>
+      </section>
+
+      <section className="category-shortcuts" aria-labelledby="shortcut-title">
+        <div className="category-shortcuts__intro">
+          <p className="eyebrow">Acceso rápido</p>
+          <h2 id="shortcut-title">¿Qué estás buscando?</h2>
+        </div>
+        <div className="category-shortcuts__list">
+          {categories.slice(0, 6).map((category) => (
+            <Link to={`/productos?categoria=${category.slug}`} key={category.slug}>
+              <span aria-hidden="true">{category.icon}</span>
+              {category.label}
+            </Link>
+          ))}
         </div>
       </section>
 
       <section className="landing-section" aria-labelledby="latest-title">
         <div className="section-heading">
           <div>
-            <p className="eyebrow">Recién publicados</p>
-            <h2 id="latest-title">Últimos ingresos</h2>
+            <p className="eyebrow">Vidriera actual</p>
+            <h2 id="latest-title">Productos para mirar hoy</h2>
           </div>
-          <Link className="section-link" to="/ofertas-semana">Ver todos →</Link>
+          <Link className="section-link" to="/productos">Ver catálogo completo →</Link>
         </div>
 
         {loading && (
@@ -85,8 +139,8 @@ function Vidriera() {
       <section className="landing-section" aria-labelledby="why-title">
         <div className="section-heading">
           <div>
-            <p className="eyebrow">Por qué AH Tecno</p>
-            <h2 id="why-title">Un catálogo pensado para decidir mejor</h2>
+            <p className="eyebrow">Nuestra forma de trabajar</p>
+            <h2 id="why-title">Menos ruido. Más claridad para decidir.</h2>
           </div>
         </div>
         <div className="trust-grid">

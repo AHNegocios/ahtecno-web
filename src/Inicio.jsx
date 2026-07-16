@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
-import { categories, getCategoryLabel, getProductCategory } from './catalogConfig'
+import { categories, getCategoryLabel, getProductCategory, normalizeText } from './catalogConfig'
 import Producto from './Producto'
 import { useProducts } from './useProducts'
 
@@ -33,10 +33,10 @@ function Inicio() {
   }
 
   const filteredProducts = useMemo(() => {
-    const normalizedQuery = query.trim().toLowerCase()
+    const normalizedQuery = normalizeText(query)
 
     return products.filter((product) => {
-      const matchesSearch = !normalizedQuery || product.titulo.toLowerCase().includes(normalizedQuery)
+      const matchesSearch = !normalizedQuery || normalizeText(product.titulo).includes(normalizedQuery)
       const matchesCategory =
         selectedCategory === 'todas' || getProductCategory(product) === selectedCategory
 
@@ -52,9 +52,9 @@ function Inicio() {
   return (
     <main className="catalog-page">
       <header className="page-heading">
-        <p className="eyebrow">Selección curada</p>
-        <h1>Catálogo de productos</h1>
-        <p>Buscá, ordená y filtrá las oportunidades que seleccionamos para vos.</p>
+        <p className="eyebrow">Explorá a tu manera</p>
+        <h1>Encontrá tecnología sin dar vueltas</h1>
+        <p>Buscá por nombre, explorá categorías y ordená la selección para llegar más rápido a lo que necesitás.</p>
       </header>
 
       <div className="catalog-layout">
@@ -124,15 +124,22 @@ function Inicio() {
               <span aria-hidden="true">☷</span>
             </button>
 
-            <label className="catalog-search">
-              <span className="sr-only">Buscar oferta</span>
+            <div className="catalog-search">
+              <label className="sr-only" htmlFor="catalog-query">Buscar producto</label>
+              <span className="catalog-search__icon" aria-hidden="true">⌕</span>
               <input
+                id="catalog-query"
                 type="search"
-                placeholder="Buscar oferta..."
+                placeholder="Buscar producto o accesorio..."
                 value={query}
                 onChange={(event) => updateParam('q', event.target.value)}
               />
-            </label>
+              {query && (
+                <button type="button" aria-label="Limpiar búsqueda" onClick={() => updateParam('q', '')}>
+                  Limpiar
+                </button>
+              )}
+            </div>
 
             <div className="view-switch" aria-label="Vista del catálogo">
               <button type="button" aria-label="Vista en grilla" aria-pressed={view === 'grilla'} onClick={() => setView('grilla')}>
@@ -145,10 +152,26 @@ function Inicio() {
           </div>
 
           {!loading && !error && (
-            <p className="results-summary">
-              {filteredProducts.length} {filteredProducts.length === 1 ? 'resultado' : 'resultados'}
-              {selectedCategory !== 'todas' ? ` en ${getCategoryLabel(selectedCategory)}` : ''}
-            </p>
+            <div className="catalog-context">
+              <p className="results-summary">
+                <strong>{filteredProducts.length}</strong> {filteredProducts.length === 1 ? 'producto encontrado' : 'productos encontrados'}
+              </p>
+
+              {(query || selectedCategory !== 'todas') && (
+                <div className="active-filters" aria-label="Filtros activos">
+                  {query && (
+                    <button type="button" onClick={() => updateParam('q', '')}>
+                      Búsqueda: “{query}” <span aria-hidden="true">×</span>
+                    </button>
+                  )}
+                  {selectedCategory !== 'todas' && (
+                    <button type="button" onClick={() => selectCategory('todas')}>
+                      {getCategoryLabel(selectedCategory)} <span aria-hidden="true">×</span>
+                    </button>
+                  )}
+                </div>
+              )}
+            </div>
           )}
 
           {loading && (

@@ -1,7 +1,7 @@
 .product-card {
   position: relative;
   min-width: 0;
-  min-height: 410px;
+  min-height: 430px;
   padding: 16px;
   border: 1px solid var(--border);
   border-radius: var(--radius-md);
@@ -69,6 +69,23 @@
   flex: 1;
 }
 
+.product-card__meta {
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  color: var(--text-secondary);
+  font-size: 0.66rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.product-card__meta span:first-child {
+  color: var(--accent);
+}
+
 .product-card h3 {
   margin: 0;
   display: -webkit-box;
@@ -76,17 +93,25 @@
   color: var(--text-primary);
   font-size: 1rem;
   line-height: 1.42;
-  text-align: center;
+  text-align: left;
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 3;
 }
 
+.product-card__price-label {
+  margin-top: 14px;
+  display: block;
+  color: var(--text-secondary);
+  font-size: 0.68rem;
+  font-weight: 750;
+}
+
 .product-card__price {
-  margin: 12px 0 16px;
+  margin: 2px 0 16px;
   color: var(--accent);
   font-size: 1.32rem;
   font-weight: 900;
-  text-align: center;
+  text-align: left;
 }
 
 .product-card__actions {
@@ -108,10 +133,11 @@
   font-weight: 900;
   text-align: center;
   text-decoration: none;
-  text-transform: uppercase;
+  letter-spacing: 0.01em;
 }
 
 .product-action--primary {
+  gap: 6px;
   background: var(--accent);
   color: #031014;
 }
@@ -256,6 +282,28 @@
   line-height: 1.55;
 }
 
+.product-modal__checks {
+  margin: 18px 0;
+  padding: 0;
+  display: grid;
+  gap: 9px;
+  color: var(--text-secondary);
+  font-size: 0.84rem;
+  line-height: 1.45;
+  list-style: none;
+}
+
+.product-modal__checks li {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.product-modal__checks span {
+  color: var(--accent);
+  font-weight: 900;
+}
+
 .product-modal__reference {
   font-size: 0.82rem;
 }
@@ -283,8 +331,19 @@
     -webkit-line-clamp: 2;
   }
 
+  .product-card__meta {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 3px;
+    font-size: 0.58rem;
+  }
+
+  .product-card__price-label {
+    margin-top: 10px;
+  }
+
   .product-card__price {
-    margin: 8px 0 11px;
+    margin: 1px 0 11px;
     font-size: 1.08rem;
   }
 
@@ -314,7 +373,7 @@
 
   .product-card--list h3,
   .product-card--list .product-card__price {
-    text-align: center;
+    text-align: left;
   }
 
   .product-modal__dialog {

@@ -36,7 +36,10 @@ function Navbar() {
       <header className="site-header">
         <div className="site-header__inner">
           <Link className="brand-link" to="/" onClick={closeMenu}>
-            <img src="/LogoAHTecno.png" alt="Logo de A&H Tecno" />
+            <span className="brand-mark" aria-hidden="true">
+              <span>A</span>
+              <span>H</span>
+            </span>
             <span>
               <strong>A&H</strong> TECNO
             </span>
