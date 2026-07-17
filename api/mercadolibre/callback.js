@@ -45,7 +45,7 @@ export async function GET(request) {
     )
     await saveOAuthTokens(createSupabaseAdmin(), tokenPayload)
 
-    const destination = new URL('/', request.url)
+    const destination = new URL('/admin', request.url)
     destination.searchParams.set('mercadolibre', 'connected')
     const headers = new Headers({
       Location: destination.toString(),
