@@ -1,544 +1,400 @@
-/* src/Producto.css */
-
-/* ==========================================================================
-   MODO GRILLA (Tarjetas Cuadradas Uniformes)
-   ========================================================================== */
-.tarjeta {
-  background-color: #2b2b36; /* Gris más claro y moderno */
-  border: 1px solid #4d4d5e; /* Borde más suave */
-  padding: 20px;
-  border-radius: 12px;
-  width: 240px;               /* Ancho fijo para mantener la simetría */
-  min-height: 420px;          /* Altura mínima para que ninguna quede más corta */
+.product-card {
+  position: relative;
+  min-width: 0;
+  min-height: 430px;
+  padding: 16px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
   display: flex;
   flex-direction: column;
-  justify-content: space-between; /* Empuja el botón siempre abajo de todo */
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-  box-shadow: 0 8px 16px rgba(0, 229, 255, 0.05); 
-  box-sizing: border-box;
+  background: var(--surface);
+  box-shadow: var(--shadow-sm);
+  transition: transform 160ms ease, border-color 160ms ease, box-shadow 160ms ease;
 }
 
-.tarjeta:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 12px 20px rgba(0, 229, 255, 0.15);
+.product-card:hover {
+  transform: translateY(-3px);
+  border-color: color-mix(in srgb, var(--accent) 55%, var(--border));
+  box-shadow: var(--shadow-lg);
 }
 
-/* Contenedor de imagen fijo para evitar que fotos deformes rompan la tarjeta */
-.contenedor-imagen {
+.product-card__badge {
+  position: absolute;
+  top: -12px;
+  left: 50%;
+  z-index: 2;
+  padding: 5px 11px;
+  border-radius: 999px;
+  transform: translateX(-50%);
+  background: var(--accent);
+  color: #031014;
+  font-size: 0.7rem;
+  font-weight: 900;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.product-card__image-wrap {
+  --image-inset: 12px;
+  --image-padding: 24px;
   width: 100%;
-  height: 160px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  background-color: #ffffff;
-  border-radius: 8px;
-  margin-bottom: 15px;
+  aspect-ratio: 1 / 1;
+  position: relative;
+  border-radius: 9px;
   overflow: hidden;
-  flex-shrink: 0;
+  background: #fff;
 }
 
-.tarjeta img {
-  max-width: 100%;
-  max-height: 100%;
+.product-card__image-wrap img {
+  position: absolute;
+  inset: var(--image-inset);
+  width: calc(100% - var(--image-padding));
+  height: calc(100% - var(--image-padding));
+  max-width: none;
   object-fit: contain;
 }
 
-.info-producto {
-  display: flex;
-  flex-direction: column;
-  flex-grow: 1;
-  justify-content: space-between;
+.product-card__image-placeholder {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 12px;
+  color: #687077;
+  font-size: 0.82rem;
+  text-align: center;
 }
 
-.tarjeta h3 { 
-  color: #ffffff; 
-  font-size: 1rem; 
-  margin: 0 0 10px 0; 
-  text-align: center;
+.product-card__body {
+  flex: 1;
+  padding-top: 16px;
+  display: flex;
+  flex-direction: column;
+}
+
+.product-card__copy {
+  flex: 1;
+}
+
+.product-card__meta {
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  color: var(--text-secondary);
+  font-size: 0.66rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.product-card__meta span:first-child {
+  color: var(--accent);
+}
+
+.product-card h3 {
+  margin: 0;
   display: -webkit-box;
-  -webkit-line-clamp: 2; /* Si el título es muy largo, lo corta en 2 líneas con puntos suspensivos */
-  -webkit-box-orient: vertical;
   overflow: hidden;
-}
-
-.precio { 
-  color: #00e5ff; 
-  font-weight: bold; 
-  font-size: 1.3rem; 
-  margin-bottom: 15px; 
-  text-align: center; 
-}
-
-button { 
-  background-color: transparent; 
-  color: #00e5ff; 
-  border: 2px solid #00e5ff; 
-  padding: 10px; 
-  border-radius: 6px; 
-  cursor: pointer; 
-  width: 100%; 
-  text-transform: uppercase; 
-  font-weight: bold; 
-  transition: all 0.3s ease;
-}
-
-button:hover { 
-  background-color: #00e5ff; 
-  color: #121212; 
-}
-
-/* ==========================================================================
-   MODO LISTA (Tarjetas Horizontales Flfluidas)
-   ========================================================================== */
-.tarjeta.modo-lista {
-  width: 100%;
-  max-width: 1000px;
-  flex-direction: row;
-  align-items: center;
-  min-height: 120px;
-  gap: 20px;
-  padding: 15px;
-}
-
-.tarjeta.modo-lista .contenedor-imagen {
-  width: 100px;
-  height: 100px;
-  margin-bottom: 0;
-  flex-shrink: 0;
-}
-
-.tarjeta.modo-lista .info-producto {
-  flex-direction: row; /* Alinea todo en horizontal */
-  align-items: center;
-  justify-content: space-between;
-  width: 100%;
-  gap: 20px;
-}
-
-.tarjeta.modo-lista h3 {
-  text-align: left;
-  margin: 0;
-  flex: 2; /* El título ocupa el mayor espacio */
-}
-
-.tarjeta.modo-lista .precio {
-  margin: 0;
-  flex: 1;
-  text-align: center;
-}
-
-/* Contenedor de los dos botones en modo lista */
-.tarjeta.modo-lista .botones-dobles {
-  flex: 1;
-  display: flex;
-  gap: 10px;
-  max-width: 200px; /* Evita que el botón OFERTA se vuelva gigante */
-}
-
-/* ==========================================================================
-   ESTRUCTURA DE LA GRILLA Y FILTROS LATERALES
-   ========================================================================== */
-.grilla-productos {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: flex-start; /* Alinea los productos a la izquierda de su contenedor */
-  align-items: flex-start;
-  gap: 25px;
-  width: 100%;
-  padding: 20px;
-  box-sizing: border-box;
-}
-
-.boton-filtro {
-  background-color: #1e1e24;
-  color: #ffffff;
-  border: 1px solid #333333;
-  padding: 12px 15px;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  width: 100%;
-  text-align: left;
-  margin-bottom: 12px;
-  font-weight: 600;
-  font-size: 0.95rem;
-  display: flex;
-  justify-content: space-between;
-}
-
-.boton-filtro:hover, .boton-filtro.activo {
-  background-color: rgba(0, 229, 255, 0.1);
-  color: #00e5ff;
-  border-color: #00e5ff;
-  box-shadow: 0 0 10px rgba(0, 229, 255, 0.2);
-}
-
-.titulo-filtro {
-  color: #00e5ff;
-  font-size: 0.85rem;
-  letter-spacing: 1px;
-  text-transform: uppercase;
-  margin-bottom: 15px;
-  margin-top: 20px;
-}
-
-/* =========================================
-   ADAPTACIÓN PARA CELULARES Y TABLETS
-   ========================================= */
-@media (max-width: 768px) {
-  /* Separa el botón del texto FILTROS en la tablet */
-  .panel-lateral div[style*="display: flex"] {
-    gap: 15px;
-  }
-
-  /* Desamontona la grilla en el celu */
-  .grilla-productos {
-    gap: 15px;
-    padding: 10px;
-    justify-content: center;
-  }
-
-  /* Hace que las tarjetas no se aplasten y ocupen bien el ancho del celu */
-  .tarjeta {
-    width: 100%;
-    max-width: 320px;
-    min-height: auto; /* Deja que crezcan si es necesario */
-  }
-
-  /* Si está en modo lista en celu, lo pasa a columna para que no se pise todo */
-  .tarjeta.modo-lista {
-    flex-direction: column;
-    height: auto;
-    text-align: center;
-  }
-  
-  .tarjeta.modo-lista .contenedor-imagen {
-    margin-right: 0;
-    margin-bottom: 15px;
-  }
-
-  .tarjeta.modo-lista .info-producto {
-    flex-direction: column;
-  }
-  
-  /* 1. MAGIA ANTI-DESBORDE: Corta cualquier cosa que se salga de la pantalla */
-  body, html {
-    overflow-x: hidden;
-    width: 100%;
-  }
-
-  /* 2. Acomoda el buscador y los botones de vista para que no empujen la pantalla */
-  .contenedor-buscador {
-    flex-direction: column;
-    width: 100%;
-    align-items: stretch !important;
-    gap: 15px;
-  }
-
-  .buscador {
-    width: 100%;
-    box-sizing: border-box;
-  }
-
-  /* ... (dejá acá el resto de las reglas de celular que ya habías pegado) ... */
-}
-
-/* =========================================
-   ESTRUCTURA PRINCIPAL (Catálogo)
-   ========================================= */
-.layout-principal {
-  display: flex; /* Esto pone el panel y los productos uno al lado del otro */
-  gap: 30px;
-  padding: 20px 40px;
-  align-items: flex-start; /* Evita que el panel lateral se estire hacia abajo */
-  max-width: 1400px;
-  margin: 0 auto;
-}
-
-.panel-lateral {
-  width: 260px;
-  flex-shrink: 0; /* Impide que el panel se achaste si hay muchos productos */
-  background-color: transparent;
-}
-
-.contenido-derecha {
-  flex-grow: 1;
-  width: 100%;
-}
-
-/* =========================================
-   DISEÑO DEL BUSCADOR (Moderno)
-   ========================================= */
-.buscador {
-  background-color: #1e1e24;
-  color: #ffffff;
-  border: 1px solid #333333;
-  padding: 12px 20px;
-  border-radius: 8px;
+  color: var(--text-primary);
   font-size: 1rem;
-  width: 300px;
-  outline: none;
-  transition: all 0.3s ease;
-  box-shadow: inset 0 2px 4px rgba(0,0,0,0.2);
-}
-
-.buscador::placeholder {
-  color: #666666;
-}
-
-.buscador:focus {
-  border-color: #00e5ff;
-  box-shadow: 0 0 8px rgba(0, 229, 255, 0.3);
-}
-
-/* =========================================
-   ADAPTACIÓN PARA CELULARES
-   ========================================= */
-@media (max-width: 768px) {
-  .layout-principal {
-    flex-direction: column; /* En celular sí queremos que se apile uno arriba del otro */
-    padding: 15px;
-  }
-  
-  .panel-lateral {
-    width: 100%;
-  }
-
-  .buscador {
-    width: 100%; /* El buscador ocupa toda la pantalla en el celu */
-    box-sizing: border-box;
-  }
-}
-
-/* MODO GRILLA */
-.tarjeta {
-  background-color: #2b2b36;
-  border: 1px solid #4d4d5e;
-  padding: 20px;
-  border-radius: 12px;
-  width: 240px;
-  min-height: 400px;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-  box-shadow: 0 8px 16px rgba(0, 229, 255, 0.05);
-  box-sizing: border-box;
-}
-
-.tarjeta:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 12px 20px rgba(0, 229, 255, 0.15);
-}
-
-.contenedor-imagen {
-  width: 100%;
-  height: 160px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  background-color: #ffffff;
-  border-radius: 8px;
-  margin-bottom: 15px;
-  overflow: hidden;
-  flex-shrink: 0;
-}
-
-.tarjeta img {
-  max-width: 100%;
-  max-height: 100%;
-  object-fit: contain;
-}
-
-.info-producto {
-  display: flex;
-  flex-direction: column;
-  flex-grow: 1;
-  justify-content: space-between;
-}
-
-/* Título completo y agrupado sin puntos suspensivos */
-.tarjeta h3 { 
-  color: #ffffff; 
-  font-size: 1.05rem; 
-  margin: 0 0 12px 0; 
-  text-align: center;
-  line-height: 1.4;
-}
-
-.precio { 
-  color: #00e5ff; 
-  font-weight: bold; 
-  font-size: 1.35rem; 
-  margin-bottom: 15px; 
-  text-align: center; 
-}
-
-/* Botón Premium */
-.tarjeta button {
-  background-color: transparent;
-  color: #00e5ff;
-  border: 2px solid #00e5ff;
-  padding: 10px;
-  border-radius: 6px;
-  cursor: pointer;
-  width: 100%;
-  text-transform: uppercase;
-  font-weight: bold;
-  transition: all 0.3s ease;
-}
-
-.tarjeta button:hover {
-  background-color: #00e5ff;
-  color: #121212;
-}
-
-/* MODO LISTA */
-.tarjeta.modo-lista {
-  width: 100%;
-  max-width: 900px;
-  flex-direction: row;
-  align-items: center;
-  min-height: 130px;
-  gap: 20px;
-}
-
-.tarjeta.modo-lista .contenedor-imagen {
-  width: 120px;
-  height: 100px;
-  margin-bottom: 0;
-  flex-shrink: 0;
-}
-
-.tarjeta.modo-lista .info-producto {
-  flex-direction: row;
-  align-items: center;
-  justify-content: space-between;
-  width: 100%;
-  gap: 25px;
-}
-
-.tarjeta.modo-lista h3 {
+  line-height: 1.42;
   text-align: left;
-  margin: 0;
-  flex: 2;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
 }
 
-.tarjeta.modo-lista .precio {
-  margin: 0;
-  flex: 1;
-  text-align: right;
+.product-card__price-label {
+  margin-top: 14px;
+  display: block;
+  color: var(--text-secondary);
+  font-size: 0.68rem;
+  font-weight: 750;
 }
 
-.tarjeta.modo-lista a {
-  flex: 1;
-  max-width: 160px;
+.product-card__price {
+  margin: 2px 0 16px;
+  color: var(--accent);
+  font-size: 1.32rem;
+  font-weight: 900;
+  text-align: left;
 }
 
-/* GRILLA CONTENEDORA */
-.grilla-productos {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: flex-start;
-  align-items: flex-start;
-  gap: 25px;
-  width: 100%;
+.product-card__actions {
+  display: grid;
+  grid-template-columns: 1.35fr 1fr;
+  gap: 8px;
 }
 
-/* =========================================
-   MODAL FLOTANTE (Pop-up de Detalles)
-   ========================================= */
-.modal-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
-  background-color: rgba(0, 0, 0, 0.85); /* Sombra oscura */
-  display: flex;
-  justify-content: center;
+.product-action {
+  min-height: 40px;
+  padding: 8px 10px;
+  border: 1px solid var(--accent);
+  border-radius: 7px;
+  display: inline-flex;
   align-items: center;
-  z-index: 9999; /* Se pone por encima de todo */
+  justify-content: center;
+  cursor: pointer;
+  font-size: 0.78rem;
+  font-weight: 900;
+  text-align: center;
+  text-decoration: none;
+  letter-spacing: 0.01em;
+}
+
+.product-action--primary {
+  gap: 6px;
+  background: var(--accent);
+  color: #031014;
+}
+
+.product-action--primary:hover {
+  background: var(--accent-strong);
+}
+
+.product-action--secondary {
+  background: transparent;
+  color: var(--accent);
+}
+
+.product-action--secondary:hover {
+  background: var(--accent-soft);
+}
+
+.product-action--disabled {
+  border-color: var(--border);
+  background: var(--surface-muted);
+  color: var(--text-secondary);
+  cursor: not-allowed;
+}
+
+.product-card--list {
+  min-height: 190px;
+  display: grid;
+  grid-template-columns: 170px minmax(0, 1fr);
+  gap: 22px;
+}
+
+.product-card--list .product-card__image-wrap {
+  width: 170px;
+  height: 170px;
+  aspect-ratio: 1 / 1;
+  align-self: center;
+}
+
+.product-card--list .product-card__body {
+  min-width: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 240px;
+  gap: 24px;
+  align-items: center;
+}
+
+.product-card--list h3,
+.product-card--list .product-card__price {
+  text-align: left;
+}
+
+.product-card--list .product-card__price {
+  margin-bottom: 0;
+}
+
+.product-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 3000;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+}
+
+.product-modal__backdrop {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border: 0;
+  background: rgb(0 0 0 / 78%);
+  cursor: pointer;
   backdrop-filter: blur(5px);
 }
 
-.modal-contenido {
-  background-color: #1e1e24;
-  border: 1px solid #00e5ff;
-  border-radius: 12px;
-  width: 90%;
-  max-width: 500px;
-  padding: 30px;
+.product-modal__dialog {
   position: relative;
-  box-shadow: 0 10px 30px rgba(0, 229, 255, 0.2);
-  display: flex;
-  flex-direction: column;
-  gap: 15px;
+  z-index: 1;
+  width: min(100%, 780px);
+  max-height: min(680px, 92vh);
+  padding: 24px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  display: grid;
+  grid-template-columns: minmax(240px, 0.9fr) minmax(0, 1.1fr);
+  gap: 28px;
+  overflow-y: auto;
+  background: var(--surface);
+  box-shadow: var(--shadow-lg);
 }
 
-.boton-cerrar-modal {
+.product-modal__close {
   position: absolute;
-  top: 15px;
-  right: 15px;
-  background: transparent;
-  border: none;
-  color: #aaaaaa;
-  font-size: 1.5rem;
+  top: 14px;
+  right: 14px;
+  z-index: 2;
+  width: 40px;
+  height: 40px;
+  border: 1px solid var(--border);
+  border-radius: 50%;
+  background: var(--surface-raised);
+  color: var(--text-primary);
   cursor: pointer;
-  width: auto;
+}
+
+.product-modal__image {
+  min-height: 310px;
+  padding: 18px;
+  border-radius: var(--radius-md);
+  display: grid;
+  place-items: center;
+  background: #fff;
+}
+
+.product-modal__image img {
+  width: 100%;
+  height: 100%;
+  max-height: 360px;
+  object-fit: contain;
+}
+
+.product-modal__content {
+  align-self: center;
+}
+
+.product-modal__content h2 {
+  margin: 8px 0 16px;
+  padding-right: 36px;
+  font-size: clamp(1.45rem, 4vw, 2.2rem);
+  line-height: 1.15;
+}
+
+.product-modal__price {
+  margin-bottom: 18px;
+  color: var(--accent);
+  font-size: 1.8rem;
+  font-weight: 900;
+}
+
+.product-modal__notice,
+.product-modal__reference {
+  color: var(--text-secondary);
+  line-height: 1.55;
+}
+
+.product-modal__checks {
+  margin: 18px 0;
   padding: 0;
+  display: grid;
+  gap: 9px;
+  color: var(--text-secondary);
+  font-size: 0.84rem;
+  line-height: 1.45;
+  list-style: none;
 }
 
-.boton-cerrar-modal:hover {
-  color: #ff4444;
-  background: transparent;
-}
-
-.modal-etiquetas {
+.product-modal__checks li {
   display: flex;
-  gap: 10px;
-  margin-top: 10px;
-  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 8px;
 }
 
-.etiqueta-modal {
-  background-color: #2b2b36;
-  color: #aaaaaa;
-  padding: 5px 12px;
-  border-radius: 4px;
-  font-size: 0.85rem;
-  border: 1px solid #333;
+.product-modal__checks span {
+  color: var(--accent);
+  font-weight: 900;
 }
 
-/* PARCHE: MODO LISTA HORIZONTAL (Pegar al final del archivo) */
-.tarjeta.modo-lista {
-  width: 100%;
-  max-width: 900px;
-  flex-direction: row !important;
-  min-height: 120px !important;
-  padding: 15px !important;
-  display: flex;
-  align-items: center;
+.product-modal__reference {
+  font-size: 0.82rem;
 }
 
-.tarjeta.modo-lista .info-producto {
-  flex-direction: row !important;
-  align-items: center !important;
-  justify-content: space-between !important;
-  width: 100%;
-  gap: 20px;
+.product-modal__content .button {
+  margin-top: 8px;
 }
 
-.tarjeta.modo-lista h3 {
-  flex: 2 !important;
-  text-align: left !important;
-  margin: 0 !important;
-  font-size: 1rem !important;
-}
+@media (max-width: 680px) {
+  .product-card {
+    min-height: 320px;
+    padding: 10px;
+  }
 
-.tarjeta.modo-lista .botones-dobles {
-  flex: 1 !important;
-  max-width: 250px !important;
-  margin-top: 0 !important;
-  flex-direction: row !important;
+  .product-card__image-wrap {
+    --image-inset: 8px;
+    --image-padding: 16px;
+  }
+
+  .product-card__body {
+    padding-top: 10px;
+  }
+
+  .product-card h3 {
+    font-size: 0.85rem;
+    -webkit-line-clamp: 2;
+  }
+
+  .product-card__meta {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 3px;
+    font-size: 0.58rem;
+  }
+
+  .product-card__price-label {
+    margin-top: 10px;
+  }
+
+  .product-card__price {
+    margin: 1px 0 11px;
+    font-size: 1.08rem;
+  }
+
+  .product-card__actions {
+    grid-template-columns: 1fr;
+    gap: 6px;
+  }
+
+  .product-action {
+    min-height: 36px;
+    padding: 7px 5px;
+    font-size: 0.7rem;
+  }
+
+  .product-card--list {
+    display: flex;
+  }
+
+  .product-card--list .product-card__image-wrap {
+    width: 100%;
+    height: auto;
+    aspect-ratio: 1 / 1;
+  }
+
+  .product-card--list .product-card__body {
+    display: flex;
+  }
+
+  .product-card--list h3,
+  .product-card--list .product-card__price {
+    text-align: left;
+  }
+
+  .product-modal__dialog {
+    grid-template-columns: 1fr;
+    gap: 18px;
+  }
+
+  .product-modal__image {
+    min-height: 210px;
+    max-height: 280px;
+  }
 }

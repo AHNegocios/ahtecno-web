@@ -1,764 +1,135 @@
-/* ==========================================================================
-   1. VARIABLES GLOBALES (ESTO VA ARRIBA DE TODO, SUELTO)
-   ========================================================================== */
-:root, body.tema-oscuro {
-  --fondo-pagina: #0d0d12; /* 1. Cambiá este código para el fondo de la web oscuro */
-  --fondo-tarjeta: #1e1e24; /* 2. Cambiá este para las tarjetas oscuras */
-  --borde-tarjeta: #333333; /* 3. Cambiá este para las líneas divisorias oscuras */
-  --texto-principal: #ffffff; /* 4. Color de títulos en modo oscuro */
-  --texto-secundario: #aaaaaa; /* 5. Color de descripciones en modo oscuro */
-  --color-primario: #00e5ff;
+:root,
+body.tema-oscuro {
+  --background: #0d0d12;
+  --surface: #17171e;
+  --surface-raised: #202029;
+  --surface-muted: #292933;
+  --border: #343440;
+  --text-primary: #f8fafc;
+  --text-secondary: #aeb3bd;
+  --accent: #00d9ef;
+  --accent-strong: #00bdd1;
+  --accent-soft: rgb(0 217 239 / 11%);
+  --danger: #ff6b7a;
+  --shadow-sm: 0 8px 24px rgb(0 0 0 / 22%);
+  --shadow-lg: 0 22px 70px rgb(0 0 0 / 38%);
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 18px;
+  --content: 1180px;
+  --content-wide: 1420px;
+  color-scheme: dark;
 }
 
 body.tema-claro {
-  --fondo-pagina: #ffffff; /* 1. Cambiá este para el fondo de la web claro */
-  --fondo-tarjeta: #e8e8e8; /* 2. Cambiá este para las tarjetas claras */
-  --borde-tarjeta: #cce0ff; /* 3. Cambiá este para las líneas claras */
-  --texto-principal: #111111; /* 4. Color de títulos en modo claro */
-  --texto-secundario: #555555; /* 5. Color de descripciones en modo claro */
-  --color-primario: #00bcd4;
+  --background: #f4f7f9;
+  --surface: #ffffff;
+  --surface-raised: #f0f4f6;
+  --surface-muted: #e5edf0;
+  --border: #cedbe0;
+  --text-primary: #10161a;
+  --text-secondary: #52616a;
+  --accent: #008fa3;
+  --accent-strong: #00788a;
+  --accent-soft: rgb(0 143 163 / 10%);
+  --danger: #bd223a;
+  --shadow-sm: 0 8px 24px rgb(20 50 60 / 10%);
+  --shadow-lg: 0 22px 70px rgb(20 50 60 / 18%);
+  color-scheme: light;
 }
 
-/* ==========================================================================
-   2. ESTILOS DE TUS COMPONENTES (DE ACÁ PARA ABAJO VA EL RESTO DE TU CSS)
-   ========================================================================== */
-.bloque-categoria {
-  transition: transform 0.2s ease, borderColor 0.2s ease;
-}
-
-/* Si tenés más clases de CSS abajo (.navbar, .tarjetas, etc.), las dejás ahí */
-/* ==========================================================================
-   RESET ABSOLUTO Y LIMPIEZA DE VITE
-   ========================================================================== */
 * {
   box-sizing: border-box;
 }
 
-html, body, #root {
-  max-width: 100% !important;
-  width: 100% !important;
-  margin: 0 !important;
-  padding: 0 !important;
-  overflow-x: hidden;
-  background-color: #0d0d12;
-}
-
-/* =========================================
-   MENÚ DESPLEGABLE (Categorías)
-   ========================================= */
-.dropdown {
-  position: relative;
-  display: inline-block;
-}
-
-.dropdown-titulo {
-  color: #ffffff;
-  font-weight: 600;
-  font-size: 0.95rem;
-  cursor: pointer;
-  padding-bottom: 10px;
-}
-
-.dropdown:hover .dropdown-titulo {
-  color: #00e5ff;
-}
-
-.dropdown-content {
-  display: none;
-  position: absolute;
-  background-color: #1a1a20;
-  min-width: 180px;
-  border: 1px solid #333333;
-  border-radius: 4px;
-  z-index: 1000;
-  top: 100%;
-  left: 0;
-  padding: 8px 0;
-  box-shadow: 0px 8px 16px rgba(0,0,0,0.5);
-}
-
-.dropdown-content a {
-  color: #cccccc;
-  padding: 10px 20px;
-  text-decoration: none;
-  display: block;
-  font-size: 0.85rem;
-  transition: all 0.2s;
-}
-
-.dropdown-content a:hover {
-  background-color: rgba(0, 229, 255, 0.1);
-  color: #00e5ff;
-  padding-left: 25px;
-}
-
-.dropdown:hover .dropdown-content {
-  display: block;
-}
-
-:root {
-  --text: #6b6375;
-  --text-h: #08060d;
-  --bg: #fff;
-  --border: #e5e4e7;
-  --code-bg: #f4f3ec;
-  --accent: #aa3bff;
-  --accent-bg: rgba(170, 59, 255, 0.1);
-  --accent-border: rgba(170, 59, 255, 0.5);
-  --social-bg: rgba(244, 243, 236, 0.5);
-  --shadow:
-    rgba(0, 0, 0, 0.1) 0 10px 15px -3px, rgba(0, 0, 0, 0.05) 0 4px 6px -2px;
-
-  --sans: system-ui, 'Segoe UI', Roboto, sans-serif;
-  --heading: system-ui, 'Segoe UI', Roboto, sans-serif;
-  --mono: ui-monospace, Consolas, monospace;
-
-  font: 18px/145% var(--sans);
-  letter-spacing: 0.18px;
-  color-scheme: light dark;
-  color: var(--text);
-  background: var(--bg);
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-
-  @media (max-width: 1024px) {
-    font-size: 16px;
-  }
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --text: #9ca3af;
-    --text-h: #f3f4f6;
-    --bg: #16171d;
-    --border: #2e303a;
-    --code-bg: #1f2028;
-    --accent: #c084fc;
-    --accent-bg: rgba(192, 132, 252, 0.15);
-    --accent-border: rgba(192, 132, 252, 0.5);
-    --social-bg: rgba(47, 48, 58, 0.5);
-    --shadow:
-      rgba(0, 0, 0, 0.4) 0 10px 15px -3px, rgba(0, 0, 0, 0.25) 0 4px 6px -2px;
-  }
-
-  #social .button-icon {
-    filter: invert(1) brightness(2);
-  }
+html {
+  min-width: 320px;
+  scroll-behavior: smooth;
 }
 
 body {
+  min-width: 320px;
+  min-height: 100vh;
   margin: 0;
+  overflow-x: hidden;
+  background: var(--background);
+  color: var(--text-primary);
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  transition: background-color 180ms ease, color 180ms ease;
 }
 
-#root {
-  width: 1126px;
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+
+button,
+a {
+  -webkit-tap-highlight-color: transparent;
+}
+
+img {
+  display: block;
   max-width: 100%;
-  margin: 0 auto;
-  text-align: center;
-  border-inline: 1px solid var(--border);
-  min-height: 100svh;
-  display: flex;
-  flex-direction: column;
-  box-sizing: border-box;
 }
 
 h1,
-h2 {
-  font-family: var(--heading);
-  font-weight: 500;
-  color: var(--text-h);
-}
-
-h1 {
-  font-size: 56px;
-  letter-spacing: -1.68px;
-  margin: 32px 0;
-  @media (max-width: 1024px) {
-    font-size: 36px;
-    margin: 20px 0;
-  }
-}
-h2 {
-  font-size: 24px;
-  line-height: 118%;
-  letter-spacing: -0.24px;
-  margin: 0 0 8px;
-  @media (max-width: 1024px) {
-    font-size: 20px;
-  }
-}
+h2,
+h3,
 p {
+  margin-top: 0;
+}
+
+a {
+  color: inherit;
+}
+
+#root {
+  min-height: 100vh;
+}
+
+:focus-visible {
+  outline: 3px solid color-mix(in srgb, var(--accent) 70%, white);
+  outline-offset: 3px;
+}
+
+.eyebrow {
   margin: 0;
+  color: var(--accent);
+  font-size: 0.78rem;
+  font-weight: 850;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
 }
 
-code,
-.counter {
-  font-family: var(--mono);
-  display: inline-flex;
-  border-radius: 4px;
-  color: var(--text-h);
-}
-
-code {
-  font-size: 15px;
-  line-height: 135%;
-  padding: 4px 8px;
-  background: var(--code-bg);
-}
-
-/* Estilos para la Cinta Superior Global */
-.navbar-superior {
-  background-color: #1e1e24;
-  padding: 15px 40px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  border-bottom: 1px solid #333333;
-}
-
-.logo-texto-cyan {
-  color: #00e5ff;
-  font-size: 1.6rem;
-  font-weight: 900;
-  letter-spacing: 1px;
-}
-
-.logo-texto-blanco {
-  color: #ffffff;
-}
-
-.nav-links {
-  display: flex;
-  gap: 30px;
-  align-items: center;
-}
-
-/* MENÚ DESPLEGABLE (Dropdown CSS Puro) */
-.dropdown {
-  position: relative;
-  display: inline-block;
-}
-
-.dropdown-titulo {
-  color: #ffffff;
-  font-weight: 600;
-  font-size: 0.95rem;
-  cursor: pointer;
-  transition: color 0.3s;
-}
-
-.dropdown:hover .dropdown-titulo {
-  color: #00e5ff;
-}
-
-.dropdown-content {
-  display: none;
+.sr-only {
   position: absolute;
-  background-color: #2b2b36;
-  min-width: 160px;
-  box-shadow: 0px 8px 16px rgba(0,0,0,0.3);
-  border: 1px solid #4d4d5e;
-  border-radius: 6px;
-  z-index: 10;
-  top: 100%;
-  left: 0;
-  margin-top: 5px;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
 }
 
-.dropdown-content a {
-  color: #ffffff;
-  padding: 12px 16px;
-  text-decoration: none;
-  display: block;
-  font-size: 0.9rem;
-  font-weight: 500;
-  transition: background 0.2s, color 0.2s;
-}
-
-.dropdown-content a:hover {
-  background-color: rgba(0, 229, 255, 0.1);
-  color: #00e5ff;
-}
-
-.dropdown:hover .dropdown-content {
-  display: block;
-}
-
-/* Estructura de Paneles del Catálogo */
-.layout-principal {
-  display: flex;
-  gap: 30px;
-  width: 100%;
-  max-width: 95vw; /* Usa el 95% del ancho total de la pantalla, sin importar el monitor */
-  margin: 0 auto;
-  padding: 40px 0;
-  align-items: flex-start;
-}
-
-.panel-lateral {
-  width: 260px;
-  flex-shrink: 0;
-}
-
-.contenido-derecha {
-  flex-grow: 1;
-}
-
-/* Buscador Moderno */
-.buscador {
-  background-color: #1e1e24;
-  color: #ffffff;
-  border: 1px solid #4d4d5e;
-  padding: 12px 20px;
-  border-radius: 8px;
-  font-size: 1rem;
-  width: 280px;
-  outline: none;
-  transition: all 0.3s ease;
-}
-
-.buscador:focus {
-  border-color: #00e5ff;
-  box-shadow: 0 0 8px rgba(0, 229, 255, 0.3);
-}
-
-/* =========================================
-   LISTA DESPLEGABLE (Corrección y Minimalismo)
-   ========================================= */
-.dropdown-content {
-  display: none;
-  position: absolute;
-  background-color: #1a1a20; /* Color súper oscuro y premium */
-  min-width: 170px;
-  border: 1px solid #333333;
-  border-radius: 4px; /* Bordes menos redondeados, más serios */
-  z-index: 10;
-  top: 100%; /* MAGIA: Esto lo pega al texto, evita que desaparezca */
-  left: 0;
-  padding: 8px 0;
-}
-
-.dropdown-content a {
-  color: #cccccc;
-  padding: 8px 20px;
-  text-decoration: none;
-  display: block;
-  font-size: 0.85rem; /* Letra más chica y sutil */
-  transition: all 0.2s;
-}
-
-.dropdown-content a:hover {
-  background-color: transparent;
-  color: #00e5ff;
-  padding-left: 25px; /* Pequeño efecto de movimiento al pasar el mouse */
-}
-
-/* =========================================
-   DISEÑO DE LA VIDRIERA (CARRUSEL Y FOOTER)
-   ========================================= */
-.carrusel-contenedor {
-  display: flex;
-  overflow-x: auto; /* Permite el scroll horizontal */
-  scroll-behavior: smooth; /* Movimiento suave */
-  gap: 20px;
-  padding: 20px 0;
-  /* Oculta la barra de scroll nativa para que quede limpio */
-  -ms-overflow-style: none;  
-  scrollbar-width: none;  
-}
-.carrusel-contenedor::-webkit-scrollbar {
-  display: none;
-}
-
-.footer-global {
-  background-color: #121214;
-  border-top: 1px solid #333;
-  padding: 40px 20px;
-  text-align: center;
-  margin-top: 60px;
-}
-
-/* =========================================
-   MENÚ DESPLEGABLE (Dropdown)
-   ========================================= */
-.dropdown {
-  position: relative;
-  display: inline-block;
-}
-
-.dropdown-titulo {
-  color: #ffffff;
-  font-weight: 600;
-  font-size: 0.95rem;
-  cursor: pointer;
-  padding-bottom: 10px; /* IMPORTANTE: Crea un puente invisible para el mouse */
-}
-
-.dropdown:hover .dropdown-titulo {
-  color: #00e5ff;
-}
-
-.dropdown-content {
-  display: none;
-  position: absolute;
-  background-color: #1a1a20;
-  min-width: 180px;
-  border: 1px solid #333333;
-  border-radius: 4px;
-  z-index: 1000;
-  top: 100%; /* Lo pega exactamente abajo del título */
-  left: 0;
-  padding: 8px 0;
-  box-shadow: 0px 8px 16px rgba(0,0,0,0.5);
-}
-
-.dropdown-content a {
-  color: #cccccc;
-  padding: 10px 20px;
-  text-decoration: none;
-  display: block;
-  font-size: 0.85rem;
-  transition: all 0.2s;
-}
-
-.dropdown-content a:hover {
-  background-color: rgba(0, 229, 255, 0.1);
-  color: #00e5ff;
-  padding-left: 25px; /* Efecto Premium al pasar el mouse */
-}
-
-/* Activa el menú al pasar el mouse */
-.dropdown:hover .dropdown-content {
-  display: block;
-}
-
-/* =========================================
-   MENÚ DE AJUSTES LATERAL (3 RAYITAS)
-   ========================================= */
-.menu-ajustes-lateral {
-  position: fixed;
-  top: 0;
-  right: 0;
-  width: 320px;
-  height: 100vh;
-  background-color: #0d0d12;
-  border-left: 1px solid #333;
-  z-index: 9999;
-  padding: 30px;
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-  box-shadow: -5px 0 15px rgba(0, 0, 0, 0.5);
-  animation: deslizarDesdeDerecha 0.3s ease-out forwards;
-}
-
-@keyframes deslizarDesdeDerecha {
-  from { transform: translateX(100%); }
-  to { transform: translateX(0); }
-}
-
-.ajuste-item {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 15px 0;
-  border-bottom: 1px solid #1e1e24;
-}
-
-/* Fuerza a que todas las tarjetas de productos obedezcan al tema dinámico */
-.grilla-productos > div, 
-.producto,
-.tarjeta-producto {
-  background-color: var(--fondo-tarjeta) !important;
-  color: var(--texto-principal) !important;
-  border-color: var(--borde-tarjeta) !important;
-}
-
-/* Fuerza a que los títulos y descripciones de las tarjetas también cambien */
-.grilla-productos h3,
-.grilla-productos p,
-.grilla-productos span {
-  color: var(--texto-principal);
-}
-
-/* Animación para el menú lateral derecho */
-.menu-deslizable {
-  animation: deslizarDerecha 0.3s cubic-bezier(0.25, 1, 0.5, 1) forwards;
-}
-
-.menu-deslizable {
-  will-change: transform;
-  animation: deslizarDerecha 0.25s ease-out forwards;
-}
-
-@keyframes deslizarDerecha {
-  from {
-    transform: translateX(100%);
-  }
-  to {
-    transform: translateX(0);
-  }
-}
-
-/* Oculta la capa oscura de los filtros en la versión de PC */
-.fondo-oscuro-filtros {
-  display: none;
-}
-
-/* Motor de animación para la persiana de filtros */
-@keyframes persianaSubir {
-  from {
-    transform: translateY(100%);
-  }
-  to {
-    transform: translateY(0);
-  }
-}
-
-/* ==========================================================================
-   3. ADAPTACIÓN PARA CELULARES (MEDIA QUERIES)
-   ========================================================================== */
-
-@media (max-width: 768px) {
-  
-  /* --- NAVBAR --- */
-  .navbar-superior {
-    display: grid !important;
-    grid-template-columns: 1fr auto !important; 
-    align-items: center !important;
-    padding: 15px 15px 0 15px !important;
-  }
-  .contenedor-derecho { display: contents !important; }
-  .boton-menu {
-    position: static !important;
-    grid-column: 2 !important;
-    grid-row: 1 !important;
-    margin: 0 !important;
-    z-index: 10 !important;
-  }
-  .cinta-enlaces {
-    grid-column: 1 / -1 !important; 
-    grid-row: 2 !important;
-    width: 100% !important;
-    display: flex !important;
-    gap: 20px !important;
-    overflow-x: auto !important;
-    white-space: nowrap !important;
-    padding: 15px 0 10px 0 !important;
-    margin-top: 10px !important;
-    border-top: 1px solid var(--borde-tarjeta) !important;
-    scrollbar-width: none !important;
-  }
-  .cinta-enlaces::-webkit-scrollbar { display: none !important; }
-  .dropdown-content { display: none !important; }
-
-  /* --- TEXTOS GENERALES --- */
-  .botones-carrusel { display: none !important; }
-  h1, h2, h3 {
-    line-height: 1.3 !important; 
-    margin-bottom: 15px !important;
-    word-wrap: break-word !important; 
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
   }
 
-  /* --- LAYOUT INICIO (PRODUCTOS) --- */
-  .layout-principal {
-    flex-direction: column !important;
-    padding: 10px !important;
-    gap: 20px !important;
-  }
-  .contenedor-buscador {
-    flex-direction: column !important;
-    gap: 15px !important;
-    align-items: stretch !important;
-    padding: 15px !important;
-  }
-  .contenedor-buscador > div {
-    width: 100% !important;
-    justify-content: space-between !important;
-  }
-  .buscador {
-    flex: 1 !important;
-    width: 100% !important;
-  }
-
-  /* --- CAPA OSCURA PARA FILTROS --- */
-  .capa-filtros {
-    display: block !important;
-    position: fixed !important;
-    top: 0 !important;
-    left: 0 !important;
-    width: 100vw !important;
-    height: 100vh !important;
-    background-color: rgba(0,0,0,0.85) !important;
-    z-index: 1999 !important; 
-    backdrop-filter: blur(3px) !important;
-  }
-
-  /* --- PANEL DE FILTROS PERSIANA --- */
-  .panel-lateral {
-    position: fixed !important;
-    bottom: 0 !important;
-    left: 0 !important;
-    width: 100% !important;
-    box-sizing: border-box !important;
-    height: auto !important;
-    max-height: 75vh !important;
-    overflow-y: auto !important;
-    z-index: 2000 !important;
-    border-radius: 20px 20px 0 0 !important;
-    box-shadow: 0 -10px 30px rgba(0, 0, 0, 0.6) !important;
-    margin: 0 !important;
-    padding: 25px 20px !important;
-    animation: persianaSubir 0.35s cubic-bezier(0.25, 1, 0.5, 1) forwards !important;
-  }
-
-  /* --- GRILLA MODO: 2 COLUMNAS CELULAR --- */
-  .grilla-productos.grilla {
-    grid-template-columns: repeat(2, 1fr) !important;
-    gap: 12px !important;
-    padding: 0 !important;
-  }
-  .tarjeta:not(.modo-lista) {
-    width: 100% !important; 
-    padding: 10px !important;
-    min-height: 280px !important; 
-  }
-  .tarjeta:not(.modo-lista) .prod-imagen {
-    height: 120px !important; 
-  }
-  .tarjeta:not(.modo-lista) .prod-titulo {
-    font-size: 0.85rem !important;
-  }
-  .tarjeta:not(.modo-lista) .prod-precio {
-    font-size: 1.15rem !important;
-  }
-
-  /* --- MODO LISTA CELULAR (BOTONES APILADOS) --- */
-  .grilla-productos.lista {
-    grid-template-columns: 1fr !important;
-    gap: 15px !important;
-    padding: 0 !important;
-  }
-  .tarjeta.modo-lista {
-    flex-wrap: wrap !important;
-    padding: 12px !important;
-  }
-  .tarjeta.modo-lista .prod-imagen {
-    width: 120px !important;
-    height: 120px !important;
-  }
-  .tarjeta.modo-lista .prod-info {
-    width: calc(100% - 130px) !important;
-    padding-left: 10px !important;
-    flex-direction: column !important;
-    align-items: flex-start !important;
-  }
-  .tarjeta.modo-lista .prod-textos {
-    flex-direction: column !important;
-    align-items: flex-start !important;
-    gap: 5px !important;
-  }
-  .tarjeta.modo-lista .prod-titulo {
-    text-align: left !important;
-    font-size: 0.9rem !important;
-    display: -webkit-box !important;
-    -webkit-line-clamp: 3 !important;
-    -webkit-box-orient: vertical !important;
-    overflow: hidden !important;
-  }
-  .tarjeta.modo-lista .prod-precio {
-    margin: 0 !important;
-    font-size: 1.2rem !important;
-    text-align: left !important;
-  }
-  .tarjeta.modo-lista .prod-botones {
-    width: 100% !important;
-    flex-direction: column !important;
-    height: auto !important;
-    margin-top: 15px !important;
-  }
-  .tarjeta.modo-lista .prod-botones > a,
-  .tarjeta.modo-lista .prod-botones > button {
-    height: 38px !important;
-    flex: none !important;
-  }
-
-  /* --- MODO LISTA CELULAR (REORDENAMIENTO DE ETIQUETAS) --- */
-  .grilla-productos.lista {
-    grid-template-columns: 1fr !important;
-    gap: 15px !important;
-    padding: 0 !important;
-  }
-  .tarjeta.modo-lista {
-    display: flex !important;
-    flex-direction: row !important; /* Imagen a la izquierda, info a la derecha */
-    flex-wrap: wrap !important;
-    padding: 12px !important;
-  }
-  .tarjeta.modo-lista .prod-imagen {
-    width: 120px !important;
-    height: 120px !important;
-  }
-  .tarjeta.modo-lista .prod-info {
-    width: calc(100% - 130px) !important;
-    padding-left: 10px !important;
-    display: flex !important;
-    flex-direction: column !important;
-    justify-content: space-between !important;
-    align-items: flex-start !important;
-  }
-  .tarjeta.modo-lista .prod-textos {
-    display: flex !important;
-    flex-direction: column !important;
-    align-items: flex-start !important;
-    gap: 5px !important;
-  }
-  .tarjeta.modo-lista .prod-titulo {
-    text-align: left !important;
-    font-size: 0.9rem !important;
-    display: -webkit-box !important;
-    -webkit-line-clamp: 3 !important;
-    -webkit-box-orient: vertical !important;
-    overflow: hidden !important;
-  }
-  .tarjeta.modo-lista .prod-precio {
-    margin: 0 !important;
-    font-size: 1.2rem !important;
-    text-align: left !important;
-  }
-  .tarjeta.modo-lista .prod-botones {
-    width: 100% !important; /* Los botones bajan y ocupan todo el ancho inferior */
-    flex-direction: column !important;
-    height: auto !important;
-    margin-top: 15px !important;
-    gap: 8px !important;
-  }
-  .tarjeta.modo-lista .prod-botones > a,
-  .tarjeta.modo-lista .prod-botones > button {
-    height: 38px !important;
-    width: 100% !important;
-    flex: none !important;
-  }
-
-  /* =========================================
-     CAPA OSCURA PARA CERRAR FILTROS (CELULAR)
-     ========================================= */
-  .fondo-oscuro-filtros {
-    display: block !important;
-    position: fixed !important;
-    top: 0 !important;
-    left: 0 !important;
-    width: 100vw !important;
-    height: 100vh !important;
-    background-color: rgba(0, 0, 0, 0.75) !important; /* Fondo negro semi-transparente */
-    backdrop-filter: blur(3px) !important; /* Efecto desenfoque cheto */
-    z-index: 1999 !important; /* Se pone un nivel por debajo del panel de filtros */
-  }
-
-  /* Asegurarnos de que el panel quede por encima de la capa oscura */
-  .panel-lateral {
-    z-index: 2000 !important;
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
   }
 }
