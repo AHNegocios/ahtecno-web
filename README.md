@@ -57,10 +57,11 @@ Flujo previsto:
 2. Autoriza la aplicación AH Tecno en el dominio oficial de Mercado Libre.
 3. El callback intercambia el código temporal por tokens y los cifra antes de
    guardarlos en Supabase.
-4. En las páginas de producto `/p/`, se carga el ID de catálogo `MLA...`.
-   El backend obtiene la ficha y la oferta ganadora actual para normalizar
-   título, precio, imagen, disponibilidad, descripción y opiniones disponibles.
-   Los IDs de publicaciones tradicionales continúan siendo compatibles.
+4. En las páginas de producto `/p/`, se pega el enlace común completo. El
+   backend extrae el ID de catálogo y la oferta `wid`, consulta la ficha del
+   producto y el precio de venta oficial, y normaliza título, precio, imagen,
+   disponibilidad, descripción y opiniones disponibles. Los IDs de
+   publicaciones tradicionales continúan siendo compatibles.
 5. El enlace de afiliado se conserva en `Productos.link`; nunca se reemplaza
    automáticamente por el permalink común de Mercado Libre.
 6. Vercel ejecuta una sincronización diaria de todos los productos con `ml_id`.

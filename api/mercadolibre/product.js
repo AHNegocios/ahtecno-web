@@ -2,7 +2,7 @@ import { errorResponse, HttpError, jsonResponse, readJsonBody } from '../_lib/ht
 import { requireAdmin } from '../_lib/admin-auth.js'
 import {
   fetchNormalizedProduct,
-  normalizeItemId,
+  parseMercadoLibreReference,
 } from '../_lib/mercadolibre-client.js'
 import { getValidAccessToken } from '../_lib/token-store.js'
 
@@ -10,13 +10,15 @@ export async function POST(request) {
   try {
     const { supabase } = await requireAdmin(request)
     const body = await readJsonBody(request)
-    const itemId = normalizeItemId(body.ml_id)
+    const { productId, offerItemId } = parseMercadoLibreReference(
+      body.ml_reference || body.ml_id,
+    )
     const affiliateUrl = String(body.affiliate_url || '').trim()
 
     const { data: existingProduct, error: existingError } = await supabase
       .from('Productos')
-      .select('id, link, etiqueta')
-      .eq('ml_id', itemId)
+      .select('id, link, etiqueta, ml_item_id')
+      .eq('ml_id', productId)
       .maybeSingle()
 
     if (existingError) throw existingError
@@ -31,7 +33,9 @@ export async function POST(request) {
 
     const accessToken = await getValidAccessToken(supabase)
     const normalized = {
-      ...(await fetchNormalizedProduct(itemId, accessToken)),
+      ...(await fetchNormalizedProduct(productId, accessToken, {
+        offerItemId: offerItemId || existingProduct?.ml_item_id || null,
+      })),
       link: storedAffiliateUrl,
       etiqueta: existingProduct?.etiqueta || 'Nuevo',
     }
