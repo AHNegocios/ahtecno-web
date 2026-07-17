@@ -93,6 +93,8 @@ function AdminDashboard({ session }) {
   const [statusLoading, setStatusLoading] = useState(true)
   const [statusError, setStatusError] = useState('')
   const [connecting, setConnecting] = useState(false)
+  const [syncing, setSyncing] = useState(false)
+  const [syncResult, setSyncResult] = useState(null)
   const [mlId, setMlId] = useState('')
   const [affiliateUrl, setAffiliateUrl] = useState('')
   const [saving, setSaving] = useState(false)
@@ -172,6 +174,22 @@ function AdminDashboard({ session }) {
     }
   }
 
+  const syncProducts = async () => {
+    setSyncing(true)
+    setSyncResult(null)
+    setStatusError('')
+    try {
+      const payload = await apiRequest('/api/mercadolibre/sync', {
+        method: 'POST',
+      })
+      setSyncResult(payload)
+    } catch (error) {
+      setStatusError(error.message)
+    } finally {
+      setSyncing(false)
+    }
+  }
+
   const importProduct = async (event) => {
     event.preventDefault()
     setSaving(true)
@@ -243,12 +261,38 @@ function AdminDashboard({ session }) {
           )}
 
           {status?.connected ? (
-            <div className="admin-connection-detail">
-              <span aria-hidden="true">✓</span>
-              <div>
-                <strong>Credenciales guardadas y cifradas</strong>
-                <p>Vencimiento actual: {formatDate(status.expiresAt)}</p>
+            <div className="admin-sync-actions">
+              <div className="admin-connection-detail">
+                <span aria-hidden="true">✓</span>
+                <div>
+                  <strong>Credenciales guardadas y cifradas</strong>
+                  <p>Vencimiento actual: {formatDate(status.expiresAt)}</p>
+                </div>
               </div>
+
+              <button
+                className="button button--primary"
+                type="button"
+                disabled={syncing}
+                onClick={syncProducts}
+              >
+                {syncing ? 'Actualizando productos…' : 'Actualizar todos ahora'}
+              </button>
+
+              {syncResult && (
+                <p
+                  className={`admin-message ${
+                    syncResult.failed
+                      ? 'admin-message--warning'
+                      : 'admin-message--success'
+                  }`}
+                >
+                  {syncResult.updated} de {syncResult.total} productos actualizados.
+                  {syncResult.failed
+                    ? ` ${syncResult.failed} necesitan revisión.`
+                    : ''}
+                </p>
+              )}
             </div>
           ) : (
             <button

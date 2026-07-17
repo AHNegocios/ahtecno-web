@@ -1,6 +1,9 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { normalizeItemId } from '../api/_lib/mercadolibre-client.js'
+import {
+  normalizeItemId,
+  normalizeProduct,
+} from '../api/_lib/mercadolibre-client.js'
 import { createPkcePair, safeEqual } from '../api/_lib/oauth-state.js'
 import { decryptToken, encryptToken } from '../api/_lib/token-crypto.js'
 
@@ -25,4 +28,35 @@ test('cifra y descifra tokens sin guardarlos en texto plano', () => {
 
   assert.notEqual(encrypted, token)
   assert.equal(decryptToken(encrypted, key), token)
+})
+
+test('normaliza la información que se guarda sin incluir el enlace de afiliado', () => {
+  const normalized = normalizeProduct({
+    item: {
+      id: 'MLA123456',
+      title: 'Producto de prueba',
+      price: 15999,
+      currency_id: 'ARS',
+      pictures: [{ secure_url: 'https://http2.mlstatic.com/producto.jpg' }],
+      attributes: [{ id: 'BRAND', name: 'Marca', value_name: 'AH' }],
+      permalink: 'https://articulo.mercadolibre.com.ar/MLA-123456',
+      status: 'active',
+      available_quantity: 8,
+      sold_quantity: 12,
+    },
+    description: { plain_text: 'Descripción de prueba' },
+    reviews: {
+      rating_average: 4.7,
+      paging: { total: 35 },
+      reviews: [{ id: 10, title: 'Muy bueno', content: 'Cumple', rate: 5 }],
+    },
+  })
+
+  assert.equal(normalized.ml_id, 'MLA123456')
+  assert.equal(normalized.precio, 15999)
+  assert.equal(normalized.reviews_count, 35)
+  assert.equal(normalized.descripcion, 'Descripción de prueba')
+  assert.equal(normalized.attributes[0].value, 'AH')
+  assert.equal(normalized.opiniones[0].rate, 5)
+  assert.equal('link' in normalized, false)
 })

@@ -61,10 +61,15 @@ Flujo previsto:
    imagen, disponibilidad, descripción y opiniones disponibles.
 5. El enlace de afiliado se conserva en `Productos.link`; nunca se reemplaza
    automáticamente por el permalink común de Mercado Libre.
+6. Vercel ejecuta una sincronización diaria de todos los productos con `ml_id`.
+   El panel privado también permite solicitar una actualización inmediata.
 
 Antes de conectar una cuenta se debe ejecutar la migración incluida en
 `supabase/migrations` y configurar en Vercel las variables privadas enumeradas
 en `.env.example`. Los valores reales no se guardan en el repositorio ni se
 comparten por chat.
+
+La tarea automática usa `CRON_SECRET` y se ejecuta a las 09:00 UTC. En el plan
+Hobby, Vercel puede iniciarla en cualquier momento dentro de esa hora.
 
 La clasificación por palabras clave es transitoria. Cuando se integre la API de Mercado Libre, cada producto deberá guardar una categoría normalizada en Supabase.

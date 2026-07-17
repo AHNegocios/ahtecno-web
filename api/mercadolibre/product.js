@@ -1,9 +1,8 @@
 import { errorResponse, HttpError, jsonResponse, readJsonBody } from '../_lib/http.js'
 import { requireAdmin } from '../_lib/admin-auth.js'
 import {
-  fetchProductBundle,
+  fetchNormalizedProduct,
   normalizeItemId,
-  normalizeProduct,
 } from '../_lib/mercadolibre-client.js'
 import { getValidAccessToken } from '../_lib/token-store.js'
 
@@ -16,7 +15,7 @@ export async function POST(request) {
 
     const { data: existingProduct, error: existingError } = await supabase
       .from('Productos')
-      .select('id, link')
+      .select('id, link, etiqueta')
       .eq('ml_id', itemId)
       .maybeSingle()
 
@@ -31,10 +30,10 @@ export async function POST(request) {
     }
 
     const accessToken = await getValidAccessToken(supabase)
-    const bundle = await fetchProductBundle(itemId, accessToken)
     const normalized = {
-      ...normalizeProduct(bundle),
+      ...(await fetchNormalizedProduct(itemId, accessToken)),
       link: storedAffiliateUrl,
+      etiqueta: existingProduct?.etiqueta || 'Nuevo',
     }
 
     const { data, error } = await supabase

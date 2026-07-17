@@ -94,20 +94,49 @@ export const normalizeProduct = ({ item, description, reviews }) => {
       0,
     )
 
+  const pictures = (item.pictures || [])
+    .map((picture) => picture.secure_url || picture.url)
+    .filter(Boolean)
+
+  const attributes = (item.attributes || [])
+    .filter((attribute) => attribute?.name && attribute?.value_name)
+    .map((attribute) => ({
+      id: attribute.id,
+      name: attribute.name,
+      value: attribute.value_name,
+    }))
+
+  const reviewSamples = (reviews?.reviews || []).slice(0, 5).map((review) => ({
+    id: review.id,
+    title: review.title || '',
+    content: review.content || '',
+    rate: review.rate ?? null,
+    date_created: review.date_created || null,
+  }))
+
   return {
     ml_id: item.id,
     titulo: item.title,
     precio: item.price,
-    imagen: item.pictures?.[0]?.secure_url || item.secure_thumbnail || item.thumbnail,
+    original_price: item.original_price ?? null,
+    imagen: pictures[0] || item.secure_thumbnail || item.thumbnail,
+    imagenes: pictures,
     descripcion: description?.plain_text || '',
     currency_id: item.currency_id || 'ARS',
+    category_id: item.category_id || '',
+    condition: item.condition || '',
+    attributes,
     ml_permalink: item.permalink || '',
     ml_status: item.status || '',
     available_quantity: item.available_quantity ?? null,
     sold_quantity: item.sold_quantity ?? null,
     rating_average: reviews?.rating_average ?? null,
     reviews_count: reviewsCount || 0,
+    opiniones: reviewSamples,
     last_synced_at: new Date().toISOString(),
     sync_error: null,
   }
 }
+
+export const fetchNormalizedProduct = async (itemId, accessToken) =>
+  normalizeProduct(await fetchProductBundle(itemId, accessToken))

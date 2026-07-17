@@ -28,6 +28,8 @@ export const getMercadoLibreOAuthConfig = () => ({
 export const getTokenEncryptionKey = () =>
   requireEnv('MELI_TOKEN_ENCRYPTION_KEY')
 
+export const getCronSecret = () => requireEnv('CRON_SECRET')
+
 export const getAdminEmails = () => {
   const emails = requireEnv('AH_ADMIN_EMAILS')
     .split(',')
@@ -50,6 +52,7 @@ export const getConfigurationStatus = () => {
     'MELI_CLIENT_SECRET',
     'MELI_REDIRECT_URI',
     'MELI_TOKEN_ENCRYPTION_KEY',
+    'CRON_SECRET',
   ]
 
   const missing = requiredNames.filter((name) => !readEnv(name))

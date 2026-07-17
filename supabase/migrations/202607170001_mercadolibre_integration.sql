@@ -3,6 +3,12 @@
 alter table public."Productos"
   add column if not exists descripcion text,
   add column if not exists currency_id text,
+  add column if not exists original_price numeric,
+  add column if not exists category_id text,
+  add column if not exists condition text,
+  add column if not exists imagenes jsonb not null default '[]'::jsonb,
+  add column if not exists attributes jsonb not null default '[]'::jsonb,
+  add column if not exists opiniones jsonb not null default '[]'::jsonb,
   add column if not exists ml_permalink text,
   add column if not exists ml_status text,
   add column if not exists available_quantity integer,

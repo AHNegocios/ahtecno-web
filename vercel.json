@@ -1,4 +1,16 @@
 {
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "crons": [
+    {
+      "path": "/api/mercadolibre/sync",
+      "schedule": "0 9 * * *"
+    }
+  ],
+  "functions": {
+    "api/mercadolibre/sync.js": {
+      "maxDuration": 60
+    }
+  },
   "rewrites": [
     {
       "source": "/(.*)",

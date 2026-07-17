@@ -187,12 +187,20 @@
 }
 
 .admin-connection-detail {
-  margin-bottom: 22px;
   padding: 16px;
   border-radius: 12px;
   display: flex;
   gap: 12px;
   background: color-mix(in srgb, #22c55e 9%, var(--surface-raised));
+}
+
+.admin-sync-actions {
+  display: grid;
+  gap: 14px;
+}
+
+.admin-sync-actions .admin-message {
+  margin: 0;
 }
 
 .admin-connection-detail > span {
