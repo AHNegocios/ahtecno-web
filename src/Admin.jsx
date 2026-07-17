@@ -199,7 +199,10 @@ function AdminDashboard({ session }) {
     try {
       const payload = await apiRequest('/api/mercadolibre/product', {
         method: 'POST',
-        body: JSON.stringify({ ml_id: mlId, affiliate_url: affiliateUrl }),
+        body: JSON.stringify({
+          ml_reference: mlId,
+          affiliate_url: affiliateUrl,
+        }),
       })
       setSavedProduct(payload.product)
       setMlId('')
@@ -316,18 +319,17 @@ function AdminDashboard({ session }) {
 
           <form className="admin-form" onSubmit={importProduct}>
             <label htmlFor="product-ml-id">
-              ID de Mercado Libre
+              Enlace común o ID de Mercado Libre
               <input
                 id="product-ml-id"
                 type="text"
-                placeholder="MLA62407115"
-                pattern="[Mm][Ll][Aa][0-9]+"
+                placeholder="Pegá el enlace largo del producto"
                 value={mlId}
                 onChange={(event) => setMlId(event.target.value)}
                 required
               />
               <small>
-                En una página de catálogo, usá el ID que aparece después de /p/.
+                Del enlace extraemos el producto de /p/ y la oferta indicada como wid.
               </small>
             </label>
 

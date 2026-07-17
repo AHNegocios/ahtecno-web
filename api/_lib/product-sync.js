@@ -25,7 +25,9 @@ const syncProduct = async (supabase, product, accessToken) => {
   const itemId = normalizeItemId(product.ml_id)
 
   try {
-    const normalized = await fetchNormalizedProduct(itemId, accessToken)
+    const normalized = await fetchNormalizedProduct(itemId, accessToken, {
+      offerItemId: product.ml_item_id || null,
+    })
     const { data, error } = await supabase
       .from('Productos')
       .update(normalized)
@@ -44,7 +46,7 @@ const syncProduct = async (supabase, product, accessToken) => {
 export const syncAllProducts = async (supabase) => {
   const { data: products, error } = await supabase
     .from('Productos')
-    .select('id, ml_id')
+    .select('id, ml_id, ml_item_id')
     .not('ml_id', 'is', null)
     .neq('ml_id', '')
     .order('id', { ascending: true })

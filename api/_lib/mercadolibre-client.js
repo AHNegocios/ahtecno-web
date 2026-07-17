@@ -61,12 +61,41 @@ export const normalizeItemId = (value) => {
   const itemId = String(value || '')
     .trim()
     .toUpperCase()
+    .replace(/^MLA-/, 'MLA')
 
   if (!/^MLA\d+$/.test(itemId)) {
     throw new HttpError(400, 'El ID debe tener el formato MLA seguido de números.')
   }
 
   return itemId
+}
+
+export const parseMercadoLibreReference = (value) => {
+  const reference = String(value || '').trim().replaceAll('&amp;', '&')
+
+  if (/^MLA-?\d+$/i.test(reference)) {
+    const productId = normalizeItemId(reference)
+    return { productId, offerItemId: null }
+  }
+
+  const catalogMatch = reference.match(/\/p\/(MLA-?\d+)/i)
+  const offerMatch = reference.match(/[?&#]wid=(MLA-?\d+)/i)
+  const traditionalMatch = reference.match(/\/(MLA-?\d+)(?:[-/?#]|$)/i)
+  const productId = catalogMatch
+    ? normalizeItemId(catalogMatch[1])
+    : traditionalMatch
+      ? normalizeItemId(traditionalMatch[1])
+      : null
+  const offerItemId = offerMatch ? normalizeItemId(offerMatch[1]) : null
+
+  if (!productId) {
+    throw new HttpError(
+      400,
+      'Pegá el enlace común de Mercado Libre o un ID con formato MLA seguido de números.',
+    )
+  }
+
+  return { productId, offerItemId }
 }
 
 const normalizePictures = (pictures = []) =>
@@ -131,6 +160,7 @@ export const normalizeProduct = ({ item, description, reviews }) => {
 
   return {
     ml_id: item.id,
+    ml_item_id: item.id,
     titulo: item.title,
     precio: item.price,
     original_price: item.original_price ?? null,
@@ -153,17 +183,24 @@ export const normalizeProduct = ({ item, description, reviews }) => {
   }
 }
 
-const fetchCatalogProductBundle = async (productId, accessToken) => {
+const fetchCatalogProductBundle = async (
+  productId,
+  accessToken,
+  requestedOfferItemId,
+) => {
   const product = await authorizedGet(
     `/products/${encodeURIComponent(productId)}`,
     accessToken,
   )
-  const winnerItemId = product.buy_box_winner?.item_id
-
-  const reviewsResult = winnerItemId
+  const offerItemId = requestedOfferItemId || product.buy_box_winner?.item_id
+  const [salePriceResult, reviewsResult] = offerItemId
     ? await Promise.allSettled([
         authorizedGet(
-          `/reviews/item/${encodeURIComponent(winnerItemId)}?catalog_product_id=${encodeURIComponent(productId)}`,
+          `/items/${encodeURIComponent(offerItemId)}/sale_price?context=channel_marketplace`,
+          accessToken,
+        ),
+        authorizedGet(
+          `/reviews/item/${encodeURIComponent(offerItemId)}?catalog_product_id=${encodeURIComponent(productId)}`,
           accessToken,
         ),
       ])
@@ -171,20 +208,29 @@ const fetchCatalogProductBundle = async (productId, accessToken) => {
 
   return {
     product,
-    reviews:
-      reviewsResult[0]?.status === 'fulfilled' ? reviewsResult[0].value : null,
+    offerItemId,
+    salePrice:
+      salePriceResult?.status === 'fulfilled' ? salePriceResult.value : null,
+    reviews: reviewsResult?.status === 'fulfilled' ? reviewsResult.value : null,
   }
 }
 
-export const normalizeCatalogProduct = ({ product, reviews }) => {
+export const normalizeCatalogProduct = ({
+  product,
+  offerItemId,
+  salePrice,
+  reviews,
+}) => {
   const winner = product.buy_box_winner
   const fallbackPrice = product.buy_box_winner_price_range?.min
-  const price = winner?.price ?? fallbackPrice?.price
+  const price = salePrice?.amount ?? winner?.price ?? fallbackPrice?.price
 
   if (price === null || price === undefined) {
     throw new HttpError(
       409,
-      'Este producto de catálogo no tiene una oferta activa en este momento.',
+      offerItemId
+        ? 'Mercado Libre no informó un precio activo para la oferta indicada.'
+        : 'Pegá el enlace común completo para que podamos detectar la oferta que aparece como wid.',
     )
   }
 
@@ -194,13 +240,18 @@ export const normalizeCatalogProduct = ({ product, reviews }) => {
 
   return {
     ml_id: product.id,
+    ml_item_id: offerItemId || winner?.item_id || null,
     titulo: product.name || product.family_name || 'Producto de Mercado Libre',
     precio: price,
-    original_price: winner?.original_price ?? null,
+    original_price: salePrice?.regular_amount ?? winner?.original_price ?? null,
     imagen: pictures[0] || '',
     imagenes: pictures,
     descripcion: product.short_description?.content || '',
-    currency_id: winner?.currency_id || fallbackPrice?.currency_id || 'ARS',
+    currency_id:
+      salePrice?.currency_id ||
+      winner?.currency_id ||
+      fallbackPrice?.currency_id ||
+      'ARS',
     category_id: winner?.category_id || product.domain_id || '',
     condition: winner?.condition || '',
     attributes,
@@ -216,10 +267,18 @@ export const normalizeCatalogProduct = ({ product, reviews }) => {
   }
 }
 
-export const fetchNormalizedProduct = async (mercadoLibreId, accessToken) => {
+export const fetchNormalizedProduct = async (
+  mercadoLibreId,
+  accessToken,
+  { offerItemId = null } = {},
+) => {
   try {
     return normalizeCatalogProduct(
-      await fetchCatalogProductBundle(mercadoLibreId, accessToken),
+      await fetchCatalogProductBundle(
+        mercadoLibreId,
+        accessToken,
+        offerItemId,
+      ),
     )
   } catch (catalogError) {
     if (!isMissingResource(catalogError)) throw catalogError
