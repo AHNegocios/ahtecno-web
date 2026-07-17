@@ -45,4 +45,26 @@ Copiar `.env.example` como `.env.local` y completar las variables publicables de
 - `src/catalogConfig.js`: categorías y clasificación temporal.
 - `src/siteConfig.js`: datos públicos y enlaces sociales.
 
+## Integración con Mercado Libre
+
+La integración se ejecuta en funciones privadas de Vercel ubicadas en
+`api/mercadolibre`. El navegador nunca recibe el `client_secret`, la clave
+privada de Supabase ni los tokens de Mercado Libre.
+
+Flujo previsto:
+
+1. Un administrador inicia sesión con Supabase Auth.
+2. Autoriza la aplicación AH Tecno en el dominio oficial de Mercado Libre.
+3. El callback intercambia el código temporal por tokens y los cifra antes de
+   guardarlos en Supabase.
+4. Al cargar un ID `MLA...`, el backend obtiene y normaliza título, precio,
+   imagen, disponibilidad, descripción y opiniones disponibles.
+5. El enlace de afiliado se conserva en `Productos.link`; nunca se reemplaza
+   automáticamente por el permalink común de Mercado Libre.
+
+Antes de conectar una cuenta se debe ejecutar la migración incluida en
+`supabase/migrations` y configurar en Vercel las variables privadas enumeradas
+en `.env.example`. Los valores reales no se guardan en el repositorio ni se
+comparten por chat.
+
 La clasificación por palabras clave es transitoria. Cuando se integre la API de Mercado Libre, cada producto deberá guardar una categoría normalizada en Supabase.
