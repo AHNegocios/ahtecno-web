@@ -320,13 +320,15 @@ function AdminDashboard({ session }) {
               <input
                 id="product-ml-id"
                 type="text"
-                placeholder="MLA123456789"
+                placeholder="MLA62407115"
                 pattern="[Mm][Ll][Aa][0-9]+"
                 value={mlId}
                 onChange={(event) => setMlId(event.target.value)}
                 required
               />
-              <small>Lo encontrás dentro del enlace o la publicación.</small>
+              <small>
+                En una página de catálogo, usá el ID que aparece después de /p/.
+              </small>
             </label>
 
             <label htmlFor="product-affiliate-url">
