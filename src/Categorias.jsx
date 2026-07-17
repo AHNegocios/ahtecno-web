@@ -12,7 +12,12 @@ function Categorias() {
 
       <div className="categories-grid">
         {categories.map((category) => (
-          <Link className="category-card" to={`/productos?categoria=${category.slug}`} key={category.slug}>
+          <Link
+            className="category-card"
+            data-category={category.slug}
+            to={`/productos?categoria=${category.slug}`}
+            key={category.slug}
+          >
             <span className="category-card__icon" aria-hidden="true">{category.icon}</span>
             <div>
               <h2>{category.label}</h2>

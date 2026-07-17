@@ -14,6 +14,7 @@ function Footer() {
         </div>
 
         <nav className="site-footer__links" aria-label="Enlaces del pie de página">
+          <Link to="/ultimos">Últimos subidos</Link>
           <Link to="/productos">Productos</Link>
           <Link to="/comunidad">Comunidad</Link>
           <Link to="/legal">Transparencia y privacidad</Link>

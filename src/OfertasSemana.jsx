@@ -8,10 +8,10 @@ function OfertasSemana() {
   return (
     <main className="offers-page">
       <header className="offers-intro">
-        <img src="/LogoAHTecno.png" alt="Logo de A&H Tecno" />
-        <p className="eyebrow">Selección reciente</p>
-        <h1>Últimos publicados</h1>
-        <p>Los productos incorporados más recientemente a nuestro catálogo.</p>
+        <div className="offers-intro__badge">Link en bio</div>
+        <p className="eyebrow">Lo viste en nuestras redes</p>
+        <h1>Últimos subidos</h1>
+        <p>Los productos más recientes aparecen primero para que encuentres rápido el enlace del video que acabás de ver.</p>
       </header>
 
       {loading && (
@@ -52,7 +52,7 @@ function OfertasSemana() {
           </div>
 
           <div className="hero__actions">
-            <Link className="button button--secondary" to="/productos">Abrir catálogo completo</Link>
+            <Link className="button button--secondary" to="/productos">Explorar todo el catálogo</Link>
           </div>
         </>
       )}

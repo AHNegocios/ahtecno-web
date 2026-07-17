@@ -102,7 +102,7 @@ function Vidriera() {
             <p className="eyebrow">Vidriera actual</p>
             <h2 id="latest-title">Productos para mirar hoy</h2>
           </div>
-          <Link className="section-link" to="/productos">Ver catálogo completo →</Link>
+          <Link className="section-link" to="/ultimos">Ver últimos subidos →</Link>
         </div>
 
         {loading && (
@@ -131,7 +131,7 @@ function Vidriera() {
                 ml_id={product.ml_id}
               />
             ))}
-            <Link className="carousel-more" to="/productos">Ver todo el catálogo →</Link>
+            <Link className="carousel-more" to="/ultimos">Ver últimos subidos →</Link>
           </div>
         )}
       </section>

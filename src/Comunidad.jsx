@@ -13,11 +13,11 @@ function SocialCard({ social }) {
   )
 
   if (!social.url) {
-    return <div className="social-card social-card--disabled" aria-disabled="true">{content}</div>
+    return <div className="social-card social-card--disabled" data-social={social.id} aria-disabled="true">{content}</div>
   }
 
   return (
-    <a className="social-card" href={social.url} target="_blank" rel="noopener noreferrer">
+    <a className="social-card" data-social={social.id} href={social.url} target="_blank" rel="noopener noreferrer">
       {content}
     </a>
   )
@@ -29,7 +29,7 @@ function Comunidad() {
       <header className="page-heading">
         <p className="eyebrow">Más allá del catálogo</p>
         <h1>Comunidad AH Tecno</h1>
-        <p>Acá vas a encontrar nuestros canales oficiales cuando estén listos para recibirte.</p>
+        <p>Seguinos para descubrir nuevos productos, comparativas y los últimos enlaces que compartimos.</p>
       </header>
 
       <div className="community-grid">

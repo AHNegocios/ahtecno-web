@@ -37,8 +37,7 @@ function Navbar() {
         <div className="site-header__inner">
           <Link className="brand-link" to="/" onClick={closeMenu}>
             <span className="brand-mark" aria-hidden="true">
-              <span>A</span>
-              <span>H</span>
+              <img src="/LogoAHTecno.png" alt="" />
             </span>
             <span>
               <strong>A&H</strong> TECNO
@@ -63,6 +62,9 @@ function Navbar() {
           >
             <NavLink to="/" end onClick={closeMenu}>
               Inicio
+            </NavLink>
+            <NavLink className="latest-link" to="/ultimos" onClick={closeMenu}>
+              Últimos subidos
             </NavLink>
             <NavLink to="/categorias" onClick={closeMenu}>
               Categorías

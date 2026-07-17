@@ -30,32 +30,23 @@
 }
 
 .brand-mark {
+  position: relative;
   width: 48px;
   height: 48px;
-  padding: 4px;
   border: 1px solid color-mix(in srgb, var(--accent) 72%, var(--border));
   border-radius: 14px;
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  place-items: center;
   overflow: hidden;
-  background:
-    linear-gradient(145deg, var(--accent-soft), transparent 52%),
-    var(--surface-raised);
+  background: #f7feff;
   box-shadow: inset 0 0 0 1px rgb(255 255 255 / 4%);
-  color: var(--text-primary);
-  font-size: 0.82rem;
-  font-weight: 950;
-  letter-spacing: -0.08em;
 }
 
-.brand-mark span:first-child {
-  color: var(--accent);
-}
-
-.brand-mark span + span {
-  padding-left: 2px;
-  border-left: 1px solid var(--border);
+.brand-mark img {
+  position: absolute;
+  top: -7px;
+  left: 50%;
+  width: 142px;
+  max-width: none;
+  transform: translateX(-50%);
 }
 
 .brand-link strong {
@@ -91,6 +82,10 @@
 .settings-trigger:hover {
   color: var(--accent);
   background: var(--accent-soft);
+}
+
+.site-navigation > a.latest-link {
+  border: 1px solid color-mix(in srgb, var(--accent) 38%, transparent);
 }
 
 .menu-toggle {
@@ -214,6 +209,11 @@
   .brand-mark {
     width: 42px;
     height: 42px;
+  }
+
+  .brand-mark img {
+    top: -5px;
+    width: 124px;
   }
 
   .menu-toggle {

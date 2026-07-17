@@ -718,6 +718,8 @@
 }
 
 .category-card {
+  --category-color: var(--accent);
+  position: relative;
   min-height: 180px;
   padding: 26px;
   border: 1px solid var(--border);
@@ -731,9 +733,28 @@
   transition: transform 160ms ease, border-color 160ms ease, box-shadow 160ms ease;
 }
 
+.category-card::after {
+  content: '';
+  position: absolute;
+  inset: auto 0 0;
+  height: 3px;
+  border-radius: 0 0 var(--radius-md) var(--radius-md);
+  background: linear-gradient(90deg, var(--category-color), transparent 80%);
+}
+
+.category-card[data-category='perifericos'] { --category-color: #00d9ef; }
+.category-card[data-category='componentes'] { --category-color: #a78bfa; }
+.category-card[data-category='equipos'] { --category-color: #60a5fa; }
+.category-card[data-category='energia'] { --category-color: #fbbf24; }
+.category-card[data-category='imagen-video'] { --category-color: #fb7185; }
+.category-card[data-category='audio'] { --category-color: #c084fc; }
+.category-card[data-category='almacenamiento'] { --category-color: #34d399; }
+.category-card[data-category='redes'] { --category-color: #38bdf8; }
+.category-card[data-category='varios'] { --category-color: #f472b6; }
+
 .category-card:hover {
   transform: translateY(-3px);
-  border-color: var(--accent);
+  border-color: var(--category-color);
   box-shadow: var(--shadow-sm);
 }
 
@@ -743,14 +764,14 @@
   border-radius: 12px;
   display: grid;
   place-items: center;
-  background: var(--accent-soft);
-  color: var(--accent);
+  background: color-mix(in srgb, var(--category-color) 15%, var(--surface-raised));
+  color: var(--category-color);
   font-size: 1.5rem;
 }
 
 .category-card h2 {
   margin: 2px 0 8px;
-  color: var(--accent);
+  color: var(--category-color);
   font-size: 1.25rem;
 }
 
@@ -768,6 +789,7 @@
 }
 
 .social-card {
+  --social-color: var(--accent);
   padding: 20px;
   border: 1px solid var(--border);
   border-radius: var(--radius-md);
@@ -778,11 +800,18 @@
   background: var(--surface);
   color: var(--text-primary);
   text-decoration: none;
+  transition: transform 160ms ease, border-color 160ms ease, box-shadow 160ms ease;
 }
 
 .social-card[href]:hover {
-  border-color: var(--accent);
+  transform: translateY(-2px);
+  border-color: var(--social-color);
+  box-shadow: var(--shadow-sm);
 }
+
+.social-card[data-social='tiktok'] { --social-color: #25f4ee; }
+.social-card[data-social='instagram'] { --social-color: #f472b6; }
+.social-card[data-social='youtube'] { --social-color: #ff4e5b; }
 
 .social-card--disabled {
   opacity: 0.72;
@@ -792,15 +821,20 @@
   width: 48px;
   height: 48px;
   border-radius: 50%;
-  display: grid;
-  place-items: center;
-  background: var(--accent-soft);
-  color: var(--accent);
-  font-size: 1.4rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: color-mix(in srgb, var(--social-color) 18%, var(--surface-raised));
+  color: var(--social-color);
+  font-size: 0.78rem;
+  font-weight: 950;
+  letter-spacing: 0.04em;
+  line-height: 1;
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--social-color) 42%, transparent);
 }
 
 .social-card strong,
-.social-card span {
+.social-card__status {
   display: block;
 }
 
@@ -810,15 +844,31 @@
 }
 
 .social-card__status {
-  color: var(--accent);
+  color: var(--social-color);
   font-size: 0.8rem;
   font-weight: 850;
   text-transform: uppercase;
 }
 
 .offers-intro {
+  max-width: 760px;
+  margin-inline: auto;
   margin-bottom: 42px;
   text-align: center;
+}
+
+.offers-intro__badge {
+  width: fit-content;
+  margin: 0 auto 20px;
+  padding: 7px 12px;
+  border: 1px solid color-mix(in srgb, var(--accent) 45%, var(--border));
+  border-radius: 999px;
+  background: var(--accent-soft);
+  color: var(--accent);
+  font-size: 0.72rem;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
 }
 
 .offers-intro img {

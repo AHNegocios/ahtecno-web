@@ -19,6 +19,7 @@ function App() {
         <Route path="/" element={<Vidriera />} />
         <Route path="/productos" element={<Inicio />} />
         <Route path="/comunidad" element={<Comunidad />} />
+        <Route path="/ultimos" element={<OfertasSemana />} />
         <Route path="/ofertas-semana" element={<OfertasSemana />} />
         <Route path="/categorias" element={<Categorias />} />
         <Route path="/legal" element={<Legal />} />
