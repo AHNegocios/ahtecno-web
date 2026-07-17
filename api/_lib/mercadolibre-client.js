@@ -54,6 +54,9 @@ const authorizedGet = (path, accessToken) =>
     },
   })
 
+const isMissingResource = (error) =>
+  [400, 403, 404].includes(error?.status)
+
 export const normalizeItemId = (value) => {
   const itemId = String(value || '')
     .trim()
@@ -64,6 +67,42 @@ export const normalizeItemId = (value) => {
   }
 
   return itemId
+}
+
+const normalizePictures = (pictures = []) =>
+  pictures
+    .map((picture) => picture.secure_url || picture.url)
+    .filter(Boolean)
+
+const normalizeAttributes = (attributes = []) =>
+  attributes
+    .filter((attribute) => attribute?.name && attribute?.value_name)
+    .map((attribute) => ({
+      id: attribute.id,
+      name: attribute.name,
+      value: attribute.value_name,
+    }))
+
+const normalizeReviews = (reviews) => {
+  const ratingLevels = reviews?.rating_levels || {}
+  const reviewsCount =
+    reviews?.paging?.total ??
+    Object.values(ratingLevels).reduce(
+      (total, value) => total + (Number(value) || 0),
+      0,
+    )
+
+  return {
+    ratingAverage: reviews?.rating_average ?? null,
+    reviewsCount: reviewsCount || 0,
+    samples: (reviews?.reviews || []).slice(0, 5).map((review) => ({
+      id: review.id,
+      title: review.title || '',
+      content: review.content || '',
+      rate: review.rate ?? null,
+      date_created: review.date_created || null,
+    })),
+  }
 }
 
 export const fetchProductBundle = async (itemId, accessToken) => {
@@ -86,33 +125,9 @@ export const fetchProductBundle = async (itemId, accessToken) => {
 }
 
 export const normalizeProduct = ({ item, description, reviews }) => {
-  const ratingLevels = reviews?.rating_levels || {}
-  const reviewsCount =
-    reviews?.paging?.total ??
-    Object.values(ratingLevels).reduce(
-      (total, value) => total + (Number(value) || 0),
-      0,
-    )
-
-  const pictures = (item.pictures || [])
-    .map((picture) => picture.secure_url || picture.url)
-    .filter(Boolean)
-
-  const attributes = (item.attributes || [])
-    .filter((attribute) => attribute?.name && attribute?.value_name)
-    .map((attribute) => ({
-      id: attribute.id,
-      name: attribute.name,
-      value: attribute.value_name,
-    }))
-
-  const reviewSamples = (reviews?.reviews || []).slice(0, 5).map((review) => ({
-    id: review.id,
-    title: review.title || '',
-    content: review.content || '',
-    rate: review.rate ?? null,
-    date_created: review.date_created || null,
-  }))
+  const pictures = normalizePictures(item.pictures)
+  const attributes = normalizeAttributes(item.attributes)
+  const reviewSummary = normalizeReviews(reviews)
 
   return {
     ml_id: item.id,
@@ -130,13 +145,87 @@ export const normalizeProduct = ({ item, description, reviews }) => {
     ml_status: item.status || '',
     available_quantity: item.available_quantity ?? null,
     sold_quantity: item.sold_quantity ?? null,
-    rating_average: reviews?.rating_average ?? null,
-    reviews_count: reviewsCount || 0,
-    opiniones: reviewSamples,
+    rating_average: reviewSummary.ratingAverage,
+    reviews_count: reviewSummary.reviewsCount,
+    opiniones: reviewSummary.samples,
     last_synced_at: new Date().toISOString(),
     sync_error: null,
   }
 }
 
-export const fetchNormalizedProduct = async (itemId, accessToken) =>
-  normalizeProduct(await fetchProductBundle(itemId, accessToken))
+const fetchCatalogProductBundle = async (productId, accessToken) => {
+  const product = await authorizedGet(
+    `/products/${encodeURIComponent(productId)}`,
+    accessToken,
+  )
+  const winnerItemId = product.buy_box_winner?.item_id
+
+  const reviewsResult = winnerItemId
+    ? await Promise.allSettled([
+        authorizedGet(
+          `/reviews/item/${encodeURIComponent(winnerItemId)}?catalog_product_id=${encodeURIComponent(productId)}`,
+          accessToken,
+        ),
+      ])
+    : []
+
+  return {
+    product,
+    reviews:
+      reviewsResult[0]?.status === 'fulfilled' ? reviewsResult[0].value : null,
+  }
+}
+
+export const normalizeCatalogProduct = ({ product, reviews }) => {
+  const winner = product.buy_box_winner
+  const fallbackPrice = product.buy_box_winner_price_range?.min
+  const price = winner?.price ?? fallbackPrice?.price
+
+  if (price === null || price === undefined) {
+    throw new HttpError(
+      409,
+      'Este producto de catálogo no tiene una oferta activa en este momento.',
+    )
+  }
+
+  const pictures = normalizePictures(product.pictures)
+  const attributes = normalizeAttributes(product.attributes)
+  const reviewSummary = normalizeReviews(reviews)
+
+  return {
+    ml_id: product.id,
+    titulo: product.name || product.family_name || 'Producto de Mercado Libre',
+    precio: price,
+    original_price: winner?.original_price ?? null,
+    imagen: pictures[0] || '',
+    imagenes: pictures,
+    descripcion: product.short_description?.content || '',
+    currency_id: winner?.currency_id || fallbackPrice?.currency_id || 'ARS',
+    category_id: winner?.category_id || product.domain_id || '',
+    condition: winner?.condition || '',
+    attributes,
+    ml_permalink: product.permalink || '',
+    ml_status: product.status || '',
+    available_quantity: winner?.available_quantity ?? null,
+    sold_quantity: product.sold_quantity ?? null,
+    rating_average: reviewSummary.ratingAverage,
+    reviews_count: reviewSummary.reviewsCount,
+    opiniones: reviewSummary.samples,
+    last_synced_at: new Date().toISOString(),
+    sync_error: null,
+  }
+}
+
+export const fetchNormalizedProduct = async (mercadoLibreId, accessToken) => {
+  try {
+    return normalizeCatalogProduct(
+      await fetchCatalogProductBundle(mercadoLibreId, accessToken),
+    )
+  } catch (catalogError) {
+    if (!isMissingResource(catalogError)) throw catalogError
+  }
+
+  return normalizeProduct(
+    await fetchProductBundle(mercadoLibreId, accessToken),
+  )
+}
