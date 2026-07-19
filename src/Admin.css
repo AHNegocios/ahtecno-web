@@ -359,6 +359,10 @@
   align-items: center;
 }
 
+.admin-price-item__product > div {
+  min-width: 0;
+}
+
 .admin-price-item__product img {
   width: 56px;
   height: 56px;
@@ -370,10 +374,14 @@
 
 .admin-price-item h3 {
   margin: 0 0 4px;
+  display: -webkit-box;
   overflow: hidden;
   font-size: 0.9rem;
+  line-height: 1.3;
+  overflow-wrap: anywhere;
   text-overflow: ellipsis;
-  white-space: nowrap;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
 }
 
 .admin-price-item small {
