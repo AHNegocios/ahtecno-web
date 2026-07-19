@@ -212,6 +212,10 @@ function Inicio() {
                   precio={product.precio}
                   linkOferta={product.link}
                   imagen={product.imagen}
+                  imagenes={product.imagenes}
+                  descripcion={product.descripcion}
+                  caracteristicas={product.attributes}
+                  condicion={product.condition}
                   vista={view}
                   ml_id={product.ml_id}
                 />
