@@ -459,52 +459,52 @@ function AdminDashboard({ session }) {
                     ? 'Precio automático de Mercado Libre'
                     : 'Precio manual · necesita revisión'}
                 </strong>
-                <div className="admin-data-summary">
-                  <strong>Datos recibidos en esta importación</strong>
-                  <ul>
-                    <li>
-                      <span>Título</span>
-                      <b>{savedProduct.titulo ? 'Recibido' : 'No disponible'}</b>
-                    </li>
-                    <li>
-                      <span>Imágenes</span>
-                      <b>
-                        {savedProduct.imagenes?.length || savedProduct.imagen
-                          ? `${savedProduct.imagenes?.length || 1} recibida(s)`
-                          : 'No disponibles'}
-                      </b>
-                    </li>
-                    <li>
-                      <span>Descripción</span>
-                      <b>{savedProduct.descripcion ? 'Recibida' : 'No disponible'}</b>
-                    </li>
-                    <li>
-                      <span>Características</span>
-                      <b>
-                        {savedProduct.attributes?.length
-                          ? `${savedProduct.attributes.length} recibida(s)`
-                          : 'No disponibles'}
-                      </b>
-                    </li>
-                    <li>
-                      <span>Calificación</span>
-                      <b>
-                        {savedProduct.rating_average !== null &&
-                        savedProduct.rating_average !== undefined
-                          ? `${savedProduct.rating_average} / 5`
-                          : 'No disponible'}
-                      </b>
-                    </li>
-                    <li>
-                      <span>Opiniones</span>
-                      <b>
-                        {savedProduct.reviews_count
-                          ? `${savedProduct.reviews_count} informada(s)`
-                          : 'No disponibles'}
-                      </b>
-                    </li>
-                  </ul>
-                </div>
+              </div>
+              <div className="admin-data-summary">
+                <strong>Datos recibidos en esta importación</strong>
+                <ul>
+                  <li>
+                    <span>Título</span>
+                    <b>{savedProduct.titulo ? 'Recibido' : 'No entregado'}</b>
+                  </li>
+                  <li>
+                    <span>Imágenes</span>
+                    <b>
+                      {savedProduct.imagenes?.length || savedProduct.imagen
+                        ? `${savedProduct.imagenes?.length || 1} recibida(s)`
+                        : 'No entregadas'}
+                    </b>
+                  </li>
+                  <li>
+                    <span>Descripción</span>
+                    <b>{savedProduct.descripcion ? 'Recibida' : 'No entregada'}</b>
+                  </li>
+                  <li>
+                    <span>Características</span>
+                    <b>
+                      {savedProduct.attributes?.length
+                        ? `${savedProduct.attributes.length} recibida(s)`
+                        : 'No entregadas'}
+                    </b>
+                  </li>
+                  <li>
+                    <span>Calificación</span>
+                    <b>
+                      {savedProduct.rating_average !== null &&
+                      savedProduct.rating_average !== undefined
+                        ? `${savedProduct.rating_average} / 5`
+                        : 'No entregada por la API'}
+                    </b>
+                  </li>
+                  <li>
+                    <span>Opiniones</span>
+                    <b>
+                      {savedProduct.reviews_count
+                        ? `${savedProduct.reviews_count} informada(s)`
+                        : 'No entregadas por la API'}
+                    </b>
+                  </li>
+                </ul>
               </div>
             </article>
           )}
