@@ -7,6 +7,25 @@ import {
 } from '../_lib/mercadolibre-client.js'
 import { getValidAccessToken } from '../_lib/token-store.js'
 
+export const saveProduct = async (supabase, existingProduct, normalized) => {
+  const productsTable = supabase.from('Productos')
+  const saveQuery = existingProduct
+    ? productsTable.update(normalized).eq('id', existingProduct.id)
+    : productsTable.insert(normalized)
+  const { data, error } = await saveQuery.select('*').single()
+
+  if (error) {
+    console.error(error)
+    const errorCode = error.code ? ` Código: ${error.code}.` : ''
+    throw new HttpError(
+      422,
+      `La base de datos rechazó el producto.${errorCode}`,
+    )
+  }
+
+  return data
+}
+
 export async function POST(request) {
   try {
     const { supabase } = await requireAdmin(request)
@@ -48,13 +67,7 @@ export async function POST(request) {
       etiqueta: existingProduct?.etiqueta || 'Nuevo',
     }
 
-    const { data, error } = await supabase
-      .from('Productos')
-      .upsert(normalized, { onConflict: 'ml_id' })
-      .select('*')
-      .single()
-
-    if (error) throw error
+    const data = await saveProduct(supabase, existingProduct, normalized)
     return jsonResponse({ ok: true, product: data })
   } catch (error) {
     return errorResponse(error)
