@@ -2,6 +2,7 @@ import { errorResponse, HttpError, jsonResponse, readJsonBody } from '../_lib/ht
 import { requireAdmin } from '../_lib/admin-auth.js'
 import {
   fetchNormalizedProduct,
+  normalizeManualPrice,
   parseMercadoLibreReference,
 } from '../_lib/mercadolibre-client.js'
 import { getValidAccessToken } from '../_lib/token-store.js'
@@ -14,10 +15,11 @@ export async function POST(request) {
       body.ml_reference || body.ml_id,
     )
     const affiliateUrl = String(body.affiliate_url || '').trim()
+    const manualPrice = normalizeManualPrice(body.manual_price)
 
     const { data: existingProduct, error: existingError } = await supabase
       .from('Productos')
-      .select('id, link, etiqueta, ml_item_id')
+      .select('id, link, etiqueta, ml_item_id, precio, price_source')
       .eq('ml_id', productId)
       .maybeSingle()
 
@@ -32,9 +34,15 @@ export async function POST(request) {
     }
 
     const accessToken = await getValidAccessToken(supabase)
+    const fallbackPrice = manualPrice ?? existingProduct?.precio ?? null
+    const fallbackPriceSource = manualPrice
+      ? 'manual'
+      : existingProduct?.price_source || 'manual'
     const normalized = {
       ...(await fetchNormalizedProduct(productId, accessToken, {
         offerItemId: offerItemId || existingProduct?.ml_item_id || null,
+        manualPrice: fallbackPrice,
+        fallbackPriceSource,
       })),
       link: storedAffiliateUrl,
       etiqueta: existingProduct?.etiqueta || 'Nuevo',

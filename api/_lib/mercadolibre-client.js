@@ -70,6 +70,20 @@ export const normalizeItemId = (value) => {
   return itemId
 }
 
+export const normalizeManualPrice = (value) => {
+  if (value === null || value === undefined || value === '') return null
+
+  const price = Number(value)
+  if (!Number.isFinite(price) || price <= 0) {
+    throw new HttpError(
+      400,
+      'El precio manual debe ser mayor que cero. Escribilo sin separadores de miles.',
+    )
+  }
+
+  return Math.round(price * 100) / 100
+}
+
 export const parseMercadoLibreReference = (value) => {
   const reference = String(value || '').trim().replaceAll('&amp;', '&')
 
@@ -153,16 +167,29 @@ export const fetchProductBundle = async (itemId, accessToken) => {
   }
 }
 
-export const normalizeProduct = ({ item, description, reviews }) => {
+export const normalizeProduct = (
+  { item, description, reviews },
+  { manualPrice = null, fallbackPriceSource = 'manual' } = {},
+) => {
   const pictures = normalizePictures(item.pictures)
   const attributes = normalizeAttributes(item.attributes)
   const reviewSummary = normalizeReviews(reviews)
+  const apiPrice = item.price ?? null
+  const usesFallbackPrice = apiPrice === null || apiPrice === undefined
+  const price = usesFallbackPrice ? manualPrice : apiPrice
+
+  if (price === null || price === undefined) {
+    throw new HttpError(
+      409,
+      'Mercado Libre no informó un precio activo. Completá el precio manual para guardar el producto.',
+    )
+  }
 
   return {
     ml_id: item.id,
     ml_item_id: item.id,
     titulo: item.title,
-    precio: item.price,
+    precio: price,
     original_price: item.original_price ?? null,
     imagen: pictures[0] || item.secure_thumbnail || item.thumbnail,
     imagenes: pictures,
@@ -178,8 +205,12 @@ export const normalizeProduct = ({ item, description, reviews }) => {
     rating_average: reviewSummary.ratingAverage,
     reviews_count: reviewSummary.reviewsCount,
     opiniones: reviewSummary.samples,
+    price_source: usesFallbackPrice ? fallbackPriceSource : 'mercadolibre',
+    price_needs_review: usesFallbackPrice,
     last_synced_at: new Date().toISOString(),
-    sync_error: null,
+    sync_error: usesFallbackPrice
+      ? 'Mercado Libre no informó el precio; se conserva el valor cargado anteriormente.'
+      : null,
   }
 }
 
@@ -220,16 +251,21 @@ export const normalizeCatalogProduct = ({
   offerItemId,
   salePrice,
   reviews,
-}) => {
+}, {
+  manualPrice = null,
+  fallbackPriceSource = 'manual',
+} = {}) => {
   const winner = product.buy_box_winner
   const fallbackPrice = product.buy_box_winner_price_range?.min
-  const price = salePrice?.amount ?? winner?.price ?? fallbackPrice?.price
+  const apiPrice = salePrice?.amount ?? winner?.price ?? fallbackPrice?.price
+  const usesFallbackPrice = apiPrice === null || apiPrice === undefined
+  const price = usesFallbackPrice ? manualPrice : apiPrice
 
   if (price === null || price === undefined) {
     throw new HttpError(
       409,
       offerItemId
-        ? 'Mercado Libre no informó un precio activo para la oferta indicada.'
+        ? 'Mercado Libre no informó un precio activo para la oferta indicada. Completá el precio manual para guardar el producto.'
         : 'Pegá el enlace común completo para que podamos detectar la oferta que aparece como wid.',
     )
   }
@@ -262,15 +298,23 @@ export const normalizeCatalogProduct = ({
     rating_average: reviewSummary.ratingAverage,
     reviews_count: reviewSummary.reviewsCount,
     opiniones: reviewSummary.samples,
+    price_source: usesFallbackPrice ? fallbackPriceSource : 'mercadolibre',
+    price_needs_review: usesFallbackPrice,
     last_synced_at: new Date().toISOString(),
-    sync_error: null,
+    sync_error: usesFallbackPrice
+      ? 'Mercado Libre no informó el precio; se conserva el valor cargado anteriormente.'
+      : null,
   }
 }
 
 export const fetchNormalizedProduct = async (
   mercadoLibreId,
   accessToken,
-  { offerItemId = null } = {},
+  {
+    offerItemId = null,
+    manualPrice = null,
+    fallbackPriceSource = 'manual',
+  } = {},
 ) => {
   try {
     return normalizeCatalogProduct(
@@ -279,12 +323,14 @@ export const fetchNormalizedProduct = async (
         accessToken,
         offerItemId,
       ),
+      { manualPrice, fallbackPriceSource },
     )
   } catch (catalogError) {
     if (!isMissingResource(catalogError)) throw catalogError
   }
 
-  return normalizeProduct(
-    await fetchProductBundle(mercadoLibreId, accessToken),
-  )
+  return normalizeProduct(await fetchProductBundle(mercadoLibreId, accessToken), {
+    manualPrice,
+    fallbackPriceSource,
+  })
 }
