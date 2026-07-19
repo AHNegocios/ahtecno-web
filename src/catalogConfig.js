@@ -39,7 +39,16 @@ export const categories = [
     label: 'Imagen y video',
     icon: '📷',
     description: 'Monitores, proyectores, cámaras y accesorios para streaming.',
-    keywords: ['proyector', 'monitor', 'camara', 'video', 'streaming'],
+    keywords: [
+      'proyector',
+      'monitor',
+      'camara',
+      'video',
+      'streaming',
+      'smart box',
+      'tv box',
+      'chromecast',
+    ],
   },
   {
     slug: 'audio',
