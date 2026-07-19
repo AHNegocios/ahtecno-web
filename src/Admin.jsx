@@ -3,19 +3,28 @@ import { useSearchParams } from 'react-router-dom'
 import { supabase } from './supabaseClient'
 import './Admin.css'
 
-const formatPrice = (value, currency = 'ARS') =>
-  new Intl.NumberFormat('es-AR', {
+const formatPrice = (value, currency = 'ARS') => {
+  const normalizedCurrency = String(currency || 'ARS').trim().toUpperCase()
+  const safeCurrency = /^[A-Z]{3}$/.test(normalizedCurrency)
+    ? normalizedCurrency
+    : 'ARS'
+
+  return new Intl.NumberFormat('es-AR', {
     style: 'currency',
-    currency,
+    currency: safeCurrency,
     maximumFractionDigits: 0,
   }).format(Number(value) || 0)
+}
 
 const formatDate = (value) => {
   if (!value) return 'Sin vencimiento informado'
+  const date = new Date(value)
+  if (Number.isNaN(date.getTime())) return 'Fecha no disponible'
+
   return new Intl.DateTimeFormat('es-AR', {
     dateStyle: 'short',
     timeStyle: 'short',
-  }).format(new Date(value))
+  }).format(date)
 }
 
 function AdminLogin() {
