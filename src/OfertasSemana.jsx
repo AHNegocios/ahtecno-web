@@ -45,6 +45,10 @@ function OfertasSemana() {
                 precio={product.precio}
                 linkOferta={product.link}
                 imagen={product.imagen}
+                imagenes={product.imagenes}
+                descripcion={product.descripcion}
+                caracteristicas={product.attributes}
+                condicion={product.condition}
                 ml_id={product.ml_id}
                 esPrimero={index === 0}
               />
