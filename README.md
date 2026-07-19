@@ -64,7 +64,10 @@ Flujo previsto:
    publicaciones tradicionales continúan siendo compatibles.
 5. El enlace de afiliado se conserva en `Productos.link`; nunca se reemplaza
    automáticamente por el permalink común de Mercado Libre.
-6. Vercel ejecuta una sincronización diaria de todos los productos con `ml_id`.
+6. Si Mercado Libre no informa un precio, el administrador puede cargar un
+   respaldo manual. El producto queda marcado para revisión y las siguientes
+   sincronizaciones conservan ese valor hasta recibir uno oficial.
+7. Vercel ejecuta una sincronización diaria de todos los productos con `ml_id`.
    El panel privado también permite solicitar una actualización inmediata.
 
 Antes de conectar una cuenta se debe ejecutar la migración incluida en

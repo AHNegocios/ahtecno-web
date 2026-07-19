@@ -27,12 +27,14 @@ const syncProduct = async (supabase, product, accessToken) => {
   try {
     const normalized = await fetchNormalizedProduct(itemId, accessToken, {
       offerItemId: product.ml_item_id || null,
+      manualPrice: product.precio,
+      fallbackPriceSource: product.price_source || 'manual',
     })
     const { data, error } = await supabase
       .from('Productos')
       .update(normalized)
       .eq('id', product.id)
-      .select('id, ml_id, titulo, precio, last_synced_at')
+      .select('id, ml_id, titulo, precio, price_source, price_needs_review, last_synced_at')
       .single()
 
     if (error) throw error
@@ -46,14 +48,14 @@ const syncProduct = async (supabase, product, accessToken) => {
 export const syncAllProducts = async (supabase) => {
   const { data: products, error } = await supabase
     .from('Productos')
-    .select('id, ml_id, ml_item_id')
+    .select('id, ml_id, ml_item_id, precio, price_source')
     .not('ml_id', 'is', null)
     .neq('ml_id', '')
     .order('id', { ascending: true })
 
   if (error) throw error
   if (!products?.length) {
-    return { total: 0, updated: 0, failed: 0, failures: [] }
+    return { total: 0, updated: 0, failed: 0, needsReview: 0, failures: [] }
   }
 
   const accessToken = await getValidAccessToken(supabase)
@@ -79,10 +81,14 @@ export const syncAllProducts = async (supabase) => {
   }
 
   const failures = results.filter((result) => !result.ok)
+  const needsReview = results.filter(
+    (result) => result.ok && result.product.price_needs_review,
+  ).length
   return {
     total: results.length,
     updated: results.length - failures.length,
     failed: failures.length,
+    needsReview,
     failures,
   }
 }

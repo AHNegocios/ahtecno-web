@@ -97,9 +97,14 @@ function AdminDashboard({ session }) {
   const [syncResult, setSyncResult] = useState(null)
   const [mlId, setMlId] = useState('')
   const [affiliateUrl, setAffiliateUrl] = useState('')
+  const [manualPrice, setManualPrice] = useState('')
+  const [manualPriceNeeded, setManualPriceNeeded] = useState(false)
   const [saving, setSaving] = useState(false)
   const [formError, setFormError] = useState('')
   const [savedProduct, setSavedProduct] = useState(null)
+  const [priceOverview, setPriceOverview] = useState([])
+  const [priceOverviewLoading, setPriceOverviewLoading] = useState(true)
+  const [priceOverviewError, setPriceOverviewError] = useState('')
 
   const apiRequest = useCallback(
     async (path, options = {}) => {
@@ -132,6 +137,19 @@ function AdminDashboard({ session }) {
     }
   }, [apiRequest])
 
+  const loadPriceOverview = useCallback(async () => {
+    setPriceOverviewLoading(true)
+    setPriceOverviewError('')
+    try {
+      const payload = await apiRequest('/api/mercadolibre/products')
+      setPriceOverview(payload.products || [])
+    } catch (error) {
+      setPriceOverviewError(error.message)
+    } finally {
+      setPriceOverviewLoading(false)
+    }
+  }, [apiRequest])
+
   useEffect(() => {
     let active = true
 
@@ -144,6 +162,25 @@ function AdminDashboard({ session }) {
       })
       .finally(() => {
         if (active) setStatusLoading(false)
+      })
+
+    return () => {
+      active = false
+    }
+  }, [apiRequest])
+
+  useEffect(() => {
+    let active = true
+
+    apiRequest('/api/mercadolibre/products')
+      .then((payload) => {
+        if (active) setPriceOverview(payload.products || [])
+      })
+      .catch((error) => {
+        if (active) setPriceOverviewError(error.message)
+      })
+      .finally(() => {
+        if (active) setPriceOverviewLoading(false)
       })
 
     return () => {
@@ -183,6 +220,7 @@ function AdminDashboard({ session }) {
         method: 'POST',
       })
       setSyncResult(payload)
+      await loadPriceOverview()
     } catch (error) {
       setStatusError(error.message)
     } finally {
@@ -195,6 +233,7 @@ function AdminDashboard({ session }) {
     setSaving(true)
     setFormError('')
     setSavedProduct(null)
+    setManualPriceNeeded(false)
 
     try {
       const payload = await apiRequest('/api/mercadolibre/product', {
@@ -202,13 +241,17 @@ function AdminDashboard({ session }) {
         body: JSON.stringify({
           ml_reference: mlId,
           affiliate_url: affiliateUrl,
+          manual_price: manualPrice,
         }),
       })
       setSavedProduct(payload.product)
+      await loadPriceOverview()
       setMlId('')
       setAffiliateUrl('')
+      setManualPrice('')
     } catch (error) {
       setFormError(error.message)
+      setManualPriceNeeded(error.message.toLowerCase().includes('precio manual'))
     } finally {
       setSaving(false)
     }
@@ -285,7 +328,7 @@ function AdminDashboard({ session }) {
               {syncResult && (
                 <p
                   className={`admin-message ${
-                    syncResult.failed
+                    syncResult.failed || syncResult.needsReview
                       ? 'admin-message--warning'
                       : 'admin-message--success'
                   }`}
@@ -293,6 +336,9 @@ function AdminDashboard({ session }) {
                   {syncResult.updated} de {syncResult.total} productos actualizados.
                   {syncResult.failed
                     ? ` ${syncResult.failed} necesitan revisión.`
+                    : ''}
+                  {syncResult.needsReview
+                    ? ` ${syncResult.needsReview} conservaron su precio anterior porque Mercado Libre no informó uno nuevo.`
                     : ''}
                 </p>
               )}
@@ -346,7 +392,34 @@ function AdminDashboard({ session }) {
               <small>Este enlace se conserva y nunca se reemplaza por uno común.</small>
             </label>
 
-            {formError && (
+            <label htmlFor="product-manual-price">
+              Precio manual <span className="admin-optional">(solo si hace falta)</span>
+              <input
+                id="product-manual-price"
+                type="number"
+                inputMode="decimal"
+                min="0.01"
+                step="0.01"
+                placeholder="Ejemplo: 48449"
+                value={manualPrice}
+                onChange={(event) => setManualPrice(event.target.value)}
+                aria-describedby="product-manual-price-help"
+                required={manualPriceNeeded}
+              />
+              <small id="product-manual-price-help">
+                Dejalo vacío para intentar usar el precio automático. Si la API no
+                lo entrega, escribí el importe sin puntos de miles.
+              </small>
+            </label>
+
+            {manualPriceNeeded && (
+              <p className="admin-message admin-message--warning">
+                Mercado Libre entregó la ficha, pero no el precio. Completá el
+                precio manual y volvé a presionar Importar producto.
+              </p>
+            )}
+
+            {formError && !manualPriceNeeded && (
               <p className="admin-message admin-message--error">{formError}</p>
             )}
 
@@ -366,11 +439,138 @@ function AdminDashboard({ session }) {
                 <span>Producto guardado</span>
                 <h3>{savedProduct.titulo}</h3>
                 <p>{formatPrice(savedProduct.precio, savedProduct.currency_id)}</p>
+                <strong
+                  className={`admin-price-source ${
+                    savedProduct.price_source === 'mercadolibre'
+                      ? 'admin-price-source--automatic'
+                      : 'admin-price-source--manual'
+                  }`}
+                >
+                  {savedProduct.price_source === 'mercadolibre'
+                    ? 'Precio automático de Mercado Libre'
+                    : 'Precio manual · necesita revisión'}
+                </strong>
+                <div className="admin-data-summary">
+                  <strong>Datos recibidos en esta importación</strong>
+                  <ul>
+                    <li>
+                      <span>Título</span>
+                      <b>{savedProduct.titulo ? 'Recibido' : 'No disponible'}</b>
+                    </li>
+                    <li>
+                      <span>Imágenes</span>
+                      <b>
+                        {savedProduct.imagenes?.length || savedProduct.imagen
+                          ? `${savedProduct.imagenes?.length || 1} recibida(s)`
+                          : 'No disponibles'}
+                      </b>
+                    </li>
+                    <li>
+                      <span>Descripción</span>
+                      <b>{savedProduct.descripcion ? 'Recibida' : 'No disponible'}</b>
+                    </li>
+                    <li>
+                      <span>Características</span>
+                      <b>
+                        {savedProduct.attributes?.length
+                          ? `${savedProduct.attributes.length} recibida(s)`
+                          : 'No disponibles'}
+                      </b>
+                    </li>
+                    <li>
+                      <span>Calificación</span>
+                      <b>
+                        {savedProduct.rating_average !== null &&
+                        savedProduct.rating_average !== undefined
+                          ? `${savedProduct.rating_average} / 5`
+                          : 'No disponible'}
+                      </b>
+                    </li>
+                    <li>
+                      <span>Opiniones</span>
+                      <b>
+                        {savedProduct.reviews_count
+                          ? `${savedProduct.reviews_count} informada(s)`
+                          : 'No disponibles'}
+                      </b>
+                    </li>
+                  </ul>
+                </div>
               </div>
             </article>
           )}
         </section>
       </div>
+
+      <section className="admin-card admin-price-overview" aria-labelledby="price-overview-title">
+        <div className="admin-card__header">
+          <div>
+            <p className="eyebrow">Control del catálogo</p>
+            <h2 id="price-overview-title">Estado de precios</h2>
+          </div>
+          <div className="admin-price-legend" aria-label="Referencias">
+            <span className="admin-price-source admin-price-source--automatic">
+              Automático
+            </span>
+            <span className="admin-price-source admin-price-source--manual">
+              Manual o pendiente
+            </span>
+          </div>
+        </div>
+
+        {priceOverviewLoading && (
+          <p className="admin-muted">Cargando estado de precios…</p>
+        )}
+        {priceOverviewError && (
+          <p className="admin-message admin-message--error">{priceOverviewError}</p>
+        )}
+        {!priceOverviewLoading && !priceOverviewError && !priceOverview.length && (
+          <p className="admin-muted">Todavía no hay productos para revisar.</p>
+        )}
+
+        {!!priceOverview.length && (
+          <div className="admin-price-list">
+            {priceOverview.map((product) => {
+              const automatic = product.price_source === 'mercadolibre'
+              return (
+                <article className="admin-price-item" key={product.id}>
+                  <div className="admin-price-item__product">
+                    {product.imagen ? <img src={product.imagen} alt="" /> : null}
+                    <div>
+                      <h3>{product.titulo}</h3>
+                      <small>{product.ml_id || 'Sin referencia de Mercado Libre'}</small>
+                    </div>
+                  </div>
+                  <div className="admin-price-item__value">
+                    <strong>{formatPrice(product.precio, product.currency_id)}</strong>
+                    <span
+                      className={`admin-price-source ${
+                        automatic
+                          ? 'admin-price-source--automatic'
+                          : 'admin-price-source--manual'
+                      }`}
+                    >
+                      {automatic ? 'Automático' : 'Manual'}
+                    </span>
+                  </div>
+                  <div className="admin-price-item__status">
+                    {product.price_needs_review ? (
+                      <strong className="admin-review-label">Revisar precio</strong>
+                    ) : (
+                      <span>Precio confirmado</span>
+                    )}
+                    <small>
+                      {product.last_synced_at
+                        ? `Actualizado: ${formatDate(product.last_synced_at)}`
+                        : 'Sin sincronización registrada'}
+                    </small>
+                  </div>
+                </article>
+              )
+            })}
+          </div>
+        )}
+      </section>
     </main>
   )
 }

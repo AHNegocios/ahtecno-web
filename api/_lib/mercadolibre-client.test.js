@@ -3,12 +3,21 @@ import test from 'node:test'
 import {
   normalizeCatalogProduct,
   normalizeItemId,
+  normalizeManualPrice,
   parseMercadoLibreReference,
 } from './mercadolibre-client.js'
 
 test('normaliza IDs de Mercado Libre sin alterar productos de catálogo', () => {
   assert.equal(normalizeItemId(' mla62407115 '), 'MLA62407115')
   assert.equal(normalizeItemId('MLA-1690892165'), 'MLA1690892165')
+})
+
+test('valida el precio manual sin aceptar valores vacíos o inválidos', () => {
+  assert.equal(normalizeManualPrice(''), null)
+  assert.equal(normalizeManualPrice('48449'), 48449)
+  assert.equal(normalizeManualPrice('48449.90'), 48449.9)
+  assert.throws(() => normalizeManualPrice('48.449,90'), /separadores de miles/)
+  assert.throws(() => normalizeManualPrice(0), /mayor que cero/)
 })
 
 test('extrae producto y oferta desde un enlace de catálogo', () => {
@@ -75,4 +84,42 @@ test('pide el enlace completo cuando el catálogo no informa ganador', () => {
       }),
     /Pegá el enlace común completo/,
   )
+})
+
+test('usa el precio manual cuando Mercado Libre no informa uno', () => {
+  const normalized = normalizeCatalogProduct(
+    {
+      product: {
+        id: 'MLA47264969',
+        name: 'Smart Box Android',
+        pictures: [{ url: 'https://http2.mlstatic.com/smart-box.jpg' }],
+      },
+      offerItemId: 'MLA3592728068',
+      salePrice: null,
+      reviews: null,
+    },
+    { manualPrice: 48449 },
+  )
+
+  assert.equal(normalized.precio, 48449)
+  assert.equal(normalized.price_source, 'manual')
+  assert.equal(normalized.price_needs_review, true)
+  assert.match(normalized.sync_error, /no informó el precio/)
+})
+
+test('prioriza el precio oficial aunque se haya escrito un respaldo manual', () => {
+  const normalized = normalizeCatalogProduct(
+    {
+      product: { id: 'MLA47264969', name: 'Smart Box Android' },
+      offerItemId: 'MLA3592728068',
+      salePrice: { amount: 45999, currency_id: 'ARS' },
+      reviews: null,
+    },
+    { manualPrice: 48449 },
+  )
+
+  assert.equal(normalized.precio, 45999)
+  assert.equal(normalized.price_source, 'mercadolibre')
+  assert.equal(normalized.price_needs_review, false)
+  assert.equal(normalized.sync_error, null)
 })
