@@ -8,6 +8,7 @@ import Legal from './Legal'
 import Navbar from './Navbar'
 import NotFound from './NotFound'
 import OfertasSemana from './OfertasSemana'
+import ProductoDetalle from './ProductoDetalle'
 import Vidriera from './Vidriera'
 import './App.css'
 
@@ -19,6 +20,7 @@ function App() {
       <Routes>
         <Route path="/" element={<Vidriera />} />
         <Route path="/productos" element={<Inicio />} />
+        <Route path="/producto/:productKey/:slug?" element={<ProductoDetalle />} />
         <Route path="/comunidad" element={<Comunidad />} />
         <Route path="/ultimos" element={<OfertasSemana />} />
         <Route path="/ofertas-semana" element={<OfertasSemana />} />

@@ -124,6 +124,7 @@ function Vidriera() {
             {products.map((product) => (
               <Producto
                 key={product.id}
+                id={product.id}
                 titulo={product.titulo}
                 precio={product.precio}
                 linkOferta={product.link}
@@ -132,6 +133,7 @@ function Vidriera() {
                 descripcion={product.descripcion}
                 caracteristicas={product.attributes}
                 condicion={product.condition}
+                categoria={product.categoria}
                 ml_id={product.ml_id}
               />
             ))}

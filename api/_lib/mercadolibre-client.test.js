@@ -54,6 +54,14 @@ test('normaliza un producto de catálogo usando la oferta ganadora', () => {
       },
     },
     offerItemId: 'MLA1690892165',
+    offerItem: {
+      id: 'MLA1690892165',
+      status: 'paused',
+      category_id: 'MLA401457',
+      condition: 'new',
+      available_quantity: 0,
+      permalink: 'https://articulo.mercadolibre.com.ar/MLA1690892165',
+    },
     salePrice: {
       amount: 43999,
       regular_amount: 52999,
@@ -73,6 +81,9 @@ test('normaliza un producto de catálogo usando la oferta ganadora', () => {
   assert.equal(normalized.rating_average, 4.8)
   assert.equal(normalized.reviews_count, 25)
   assert.equal(normalized.attributes[0].value, 'Liliana')
+  assert.equal(normalized.ml_status, 'paused')
+  assert.equal(normalized.category_id, 'MLA401457')
+  assert.equal(normalized.available_quantity, 0)
 })
 
 test('pide el enlace completo cuando el catálogo no informa ganador', () => {

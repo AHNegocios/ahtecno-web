@@ -41,6 +41,7 @@ function OfertasSemana() {
             {products.map((product, index) => (
               <Producto
                 key={product.id}
+                id={product.id}
                 titulo={product.titulo}
                 precio={product.precio}
                 linkOferta={product.link}
@@ -49,6 +50,7 @@ function OfertasSemana() {
                 descripcion={product.descripcion}
                 caracteristicas={product.attributes}
                 condicion={product.condition}
+                categoria={product.categoria}
                 ml_id={product.ml_id}
                 esPrimero={index === 0}
               />

@@ -72,6 +72,21 @@ export const categories = [
     keywords: ['router', 'wifi', 'red', 'extensor', 'mesh'],
   },
   {
+    slug: 'hogar-tecnologia',
+    label: 'Tecnología para el hogar',
+    icon: '🏠',
+    description: 'Aspiradoras, domótica, iluminación y dispositivos útiles para el hogar.',
+    keywords: [
+      'aspiradora',
+      'robot aspirador',
+      'domotica',
+      'hogar inteligente',
+      'smart home',
+      'lampara inteligente',
+      'enchufe inteligente',
+    ],
+  },
+  {
     slug: 'varios',
     label: 'Varios',
     icon: '✨',
@@ -79,6 +94,8 @@ export const categories = [
     keywords: [],
   },
 ]
+
+export const categorySlugs = categories.map(({ slug }) => slug)
 
 export const getProductCategory = (product) => {
   const explicitCategory = normalizeText(product?.categoria || product?.etiqueta)
