@@ -208,6 +208,7 @@ function Inicio() {
               {filteredProducts.map((product) => (
                 <Producto
                   key={product.id}
+                  id={product.id}
                   titulo={product.titulo}
                   precio={product.precio}
                   linkOferta={product.link}
@@ -216,6 +217,7 @@ function Inicio() {
                   descripcion={product.descripcion}
                   caracteristicas={product.attributes}
                   condicion={product.condition}
+                  categoria={product.categoria}
                   vista={view}
                   ml_id={product.ml_id}
                 />

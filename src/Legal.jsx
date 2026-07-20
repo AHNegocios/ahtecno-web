@@ -38,15 +38,18 @@ function Legal() {
         <section className="content-card">
           <h2>Datos de navegación</h2>
           <p>
-            Actualmente no solicitamos datos personales para navegar el catálogo. Antes de
-            incorporar analítica, cuentas o formularios, esta sección será actualizada.
+            No solicitamos datos personales para navegar el catálogo. Para conocer qué ofertas
+            resultan más útiles, nuestra medición propia cuenta los clics que llevan a Mercado
+            Libre y guarda únicamente el producto, la ubicación del botón y el momento del clic.
+            No incorpora correo, cuenta de usuario, cookies publicitarias ni dirección IP a esa
+            medición.
           </p>
         </section>
       </div>
 
       <p className="legal-note">
-        Esta página resume el funcionamiento actual del sitio y deberá revisarse antes de sumar
-        nuevas integraciones o mecanismos de medición.
+        Esta página resume el funcionamiento actual del sitio y se revisará cuando cambien sus
+        integraciones o mecanismos de medición.
       </p>
     </main>
   )

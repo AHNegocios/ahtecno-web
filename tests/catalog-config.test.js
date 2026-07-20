@@ -8,3 +8,10 @@ test('clasifica Smart Box y Chromecast dentro de Imagen y video', () => {
     'imagen-video',
   )
 })
+
+test('clasifica aspiradoras dentro de Tecnología para el hogar', () => {
+  assert.equal(
+    getProductCategory({ titulo: 'Aspiradora Manual Swiftvac 2 En 1' }),
+    'hogar-tecnologia',
+  )
+})

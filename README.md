@@ -40,7 +40,8 @@ Copiar `.env.example` como `.env.local` y completar las variables publicables de
 - `src/App.jsx`: rutas y estructura global.
 - `src/Navbar.jsx`: navegación, menú móvil y preferencias.
 - `src/Inicio.jsx`: catálogo, búsqueda, orden y filtros.
-- `src/Producto.jsx`: tarjeta y detalle de cada producto.
+- `src/Producto.jsx`: tarjeta, galería y detalle reutilizable de cada producto.
+- `src/ProductoDetalle.jsx`: ficha pública compartible con una URL estable.
 - `src/useProducts.js`: acceso centralizado al catálogo de Supabase.
 - `src/catalogConfig.js`: categorías y clasificación temporal.
 - `src/siteConfig.js`: datos públicos y enlaces sociales.
@@ -69,6 +70,11 @@ Flujo previsto:
    sincronizaciones conservan ese valor hasta recibir uno oficial.
 7. Vercel ejecuta una sincronización diaria de todos los productos con `ml_id`.
    El panel privado también permite solicitar una actualización inmediata.
+8. El panel permite asignar una categoría editorial de AH Tecno y ocultar un
+   producto manualmente. Las ofertas `paused`, `closed` o `inactive` dejan de
+   mostrarse automáticamente después de una sincronización.
+9. Los clics salientes se cuentan sin guardar IP, correo, cookies ni otros
+   datos personales. El total aparece en el panel privado.
 
 Antes de conectar una cuenta se debe ejecutar la migración incluida en
 `supabase/migrations` y configurar en Vercel las variables privadas enumeradas
@@ -78,4 +84,6 @@ comparten por chat.
 La tarea automática usa `CRON_SECRET` y se ejecuta a las 09:00 UTC. En el plan
 Hobby, Vercel puede iniciarla en cualquier momento dentro de esa hora.
 
-La clasificación por palabras clave es transitoria. Cuando se integre la API de Mercado Libre, cada producto deberá guardar una categoría normalizada en Supabase.
+`category_id` conserva la clasificación técnica original de Mercado Libre y
+`categoria` guarda la clasificación editorial de AH Tecno. Si esta última se
+deja en automático, la web usa las reglas de `src/catalogConfig.js`.

@@ -1,5 +1,7 @@
 import { useCallback, useEffect, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
+import { categories, getCategoryLabel, getProductCategory } from './catalogConfig'
+import { getProductPublicationState } from './productVisibility'
 import { supabase } from './supabaseClient'
 import './Admin.css'
 
@@ -25,6 +27,62 @@ const formatDate = (value) => {
     dateStyle: 'short',
     timeStyle: 'short',
   }).format(date)
+}
+
+function ProductCatalogControls({ product, apiRequest, onSaved }) {
+  const [category, setCategory] = useState(product.categoria || 'automatico')
+  const [visible, setVisible] = useState(product.is_visible !== false)
+  const [saving, setSaving] = useState(false)
+  const [feedback, setFeedback] = useState('')
+
+  const saveSettings = async () => {
+    setSaving(true)
+    setFeedback('')
+    try {
+      await apiRequest('/api/mercadolibre/product', {
+        method: 'PATCH',
+        body: JSON.stringify({
+          product_id: product.id,
+          category,
+          is_visible: visible,
+        }),
+      })
+      setFeedback('Guardado')
+      await onSaved()
+    } catch (error) {
+      setFeedback(error.message)
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  return (
+    <div className="admin-product-settings">
+      <label>
+        Categoría AH Tecno
+        <select value={category} onChange={(event) => setCategory(event.target.value)}>
+          <option value="automatico">
+            Automática: {getCategoryLabel(getProductCategory(product))}
+          </option>
+          {categories.map((option) => (
+            <option value={option.slug} key={option.slug}>{option.label}</option>
+          ))}
+        </select>
+      </label>
+      <label className="admin-visibility-control">
+        <input
+          type="checkbox"
+          checked={visible}
+          onChange={(event) => setVisible(event.target.checked)}
+        />
+        Mostrar en la web
+      </label>
+      <button className="button button--secondary" type="button" onClick={saveSettings} disabled={saving}>
+        {saving ? 'Guardando…' : 'Guardar cambios'}
+      </button>
+      {feedback && <small role="status">{feedback}</small>}
+    </div>
+  )
 }
 
 function AdminLogin() {
@@ -107,6 +165,7 @@ function AdminDashboard({ session }) {
   const [mlId, setMlId] = useState('')
   const [affiliateUrl, setAffiliateUrl] = useState('')
   const [manualPrice, setManualPrice] = useState('')
+  const [selectedCategory, setSelectedCategory] = useState('automatico')
   const [manualPriceNeeded, setManualPriceNeeded] = useState(false)
   const [saving, setSaving] = useState(false)
   const [formError, setFormError] = useState('')
@@ -251,6 +310,7 @@ function AdminDashboard({ session }) {
           ml_reference: mlId,
           affiliate_url: affiliateUrl,
           manual_price: manualPrice,
+          category: selectedCategory,
         }),
       })
       setSavedProduct(payload.product)
@@ -258,6 +318,7 @@ function AdminDashboard({ session }) {
       setMlId('')
       setAffiliateUrl('')
       setManualPrice('')
+      setSelectedCategory('automatico')
     } catch (error) {
       setFormError(error.message)
       setManualPriceNeeded(error.message.toLowerCase().includes('precio manual'))
@@ -421,6 +482,25 @@ function AdminDashboard({ session }) {
               </small>
             </label>
 
+            <label htmlFor="product-category">
+              Categoría AH Tecno
+              <select
+                id="product-category"
+                value={selectedCategory}
+                onChange={(event) => setSelectedCategory(event.target.value)}
+              >
+                <option value="automatico">Elegir automáticamente</option>
+                {categories.map((category) => (
+                  <option value={category.slug} key={category.slug}>
+                    {category.label}
+                  </option>
+                ))}
+              </select>
+              <small>
+                Es la categoría visible en nuestra web. La categoría técnica de Mercado Libre se conserva aparte.
+              </small>
+            </label>
+
             {manualPriceNeeded && (
               <p className="admin-message admin-message--warning">
                 Mercado Libre entregó la ficha, pero no el precio. Completá el
@@ -448,6 +528,9 @@ function AdminDashboard({ session }) {
                 <span>Producto guardado</span>
                 <h3>{savedProduct.titulo}</h3>
                 <p>{formatPrice(savedProduct.precio, savedProduct.currency_id)}</p>
+                <p className="admin-saved-category">
+                  Categoría: {getCategoryLabel(getProductCategory(savedProduct))}
+                </p>
                 <strong
                   className={`admin-price-source ${
                     savedProduct.price_source === 'mercadolibre'
@@ -541,6 +624,7 @@ function AdminDashboard({ session }) {
           <div className="admin-price-list">
             {priceOverview.map((product) => {
               const automatic = product.price_source === 'mercadolibre'
+              const publicationState = getProductPublicationState(product)
               return (
                 <article className="admin-price-item" key={product.id}>
                   <div className="admin-price-item__product">
@@ -563,6 +647,9 @@ function AdminDashboard({ session }) {
                     </span>
                   </div>
                   <div className="admin-price-item__status">
+                    <strong className={`admin-publication-state admin-publication-state--${publicationState.key}`}>
+                      {publicationState.label}
+                    </strong>
                     {product.price_needs_review ? (
                       <strong className="admin-review-label">Revisar precio</strong>
                     ) : (
@@ -573,7 +660,13 @@ function AdminDashboard({ session }) {
                         ? `Actualizado: ${formatDate(product.last_synced_at)}`
                         : 'Sin sincronización registrada'}
                     </small>
+                    <small>{product.outbound_clicks || 0} clics hacia Mercado Libre</small>
                   </div>
+                  <ProductCatalogControls
+                    product={product}
+                    apiRequest={apiRequest}
+                    onSaved={loadPriceOverview}
+                  />
                 </article>
               )
             })}

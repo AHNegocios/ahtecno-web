@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { saveProduct } from './product.js'
+import { normalizeSiteCategory, saveProduct } from './product.js'
 
 const terminalQuery = (result) => ({
   select: () => ({
@@ -57,4 +57,10 @@ test('actualiza por id cuando el producto ya existe', async () => {
     { operation: 'update', column: 'id', value: 25 },
   )
   assert.equal(saved.precio, 21000)
+})
+
+test('solo acepta categorías editoriales conocidas', () => {
+  assert.equal(normalizeSiteCategory('hogar-tecnologia'), 'hogar-tecnologia')
+  assert.equal(normalizeSiteCategory('automatico'), null)
+  assert.throws(() => normalizeSiteCategory('categoria-inventada'), /categoría válida/)
 })

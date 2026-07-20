@@ -224,8 +224,9 @@ const fetchCatalogProductBundle = async (
     accessToken,
   )
   const offerItemId = requestedOfferItemId || product.buy_box_winner?.item_id
-  const [salePriceResult, reviewsResult] = offerItemId
+  const [offerItemResult, salePriceResult, reviewsResult] = offerItemId
     ? await Promise.allSettled([
+        authorizedGet(`/items/${encodeURIComponent(offerItemId)}`, accessToken),
         authorizedGet(
           `/items/${encodeURIComponent(offerItemId)}/sale_price?context=channel_marketplace`,
           accessToken,
@@ -240,6 +241,8 @@ const fetchCatalogProductBundle = async (
   return {
     product,
     offerItemId,
+    offerItem:
+      offerItemResult?.status === 'fulfilled' ? offerItemResult.value : null,
     salePrice:
       salePriceResult?.status === 'fulfilled' ? salePriceResult.value : null,
     reviews: reviewsResult?.status === 'fulfilled' ? reviewsResult.value : null,
@@ -249,6 +252,7 @@ const fetchCatalogProductBundle = async (
 export const normalizeCatalogProduct = ({
   product,
   offerItemId,
+  offerItem,
   salePrice,
   reviews,
 }, {
@@ -288,12 +292,13 @@ export const normalizeCatalogProduct = ({
       winner?.currency_id ||
       fallbackPrice?.currency_id ||
       'ARS',
-    category_id: winner?.category_id || product.domain_id || '',
-    condition: winner?.condition || '',
+    category_id: offerItem?.category_id || winner?.category_id || product.domain_id || '',
+    condition: offerItem?.condition || winner?.condition || '',
     attributes,
-    ml_permalink: product.permalink || '',
-    ml_status: product.status || '',
-    available_quantity: winner?.available_quantity ?? null,
+    ml_permalink: offerItem?.permalink || product.permalink || '',
+    ml_status: offerItem?.status || product.status || '',
+    available_quantity:
+      offerItem?.available_quantity ?? winner?.available_quantity ?? null,
     sold_quantity: product.sold_quantity ?? null,
     rating_average: reviewSummary.ratingAverage,
     reviews_count: reviewSummary.reviewsCount,

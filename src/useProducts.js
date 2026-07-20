@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { supabase } from './supabaseClient'
+import { isProductPubliclyVisible } from './productVisibility'
 
 const sanitizeProduct = (product) => ({
   ...product,
@@ -22,19 +23,31 @@ export function useProducts({ order = 'mas_nuevos', limit = null } = {}) {
       setLoading(true)
       setError('')
 
-      let query = supabase.from('Productos').select('*')
+      const buildQuery = (withPublicationFilters) => {
+        let query = supabase.from('Productos').select('*')
 
-      if (order === 'menor_precio') {
-        query = query.order('precio', { ascending: true })
-      } else if (order === 'mayor_precio') {
-        query = query.order('precio', { ascending: false })
-      } else {
-        query = query.order('created_at', { ascending: false })
+        if (withPublicationFilters) {
+          query = query
+            .eq('is_visible', true)
+            .or('ml_status.is.null,ml_status.eq.active')
+        }
+
+        if (order === 'menor_precio') {
+          query = query.order('precio', { ascending: true })
+        } else if (order === 'mayor_precio') {
+          query = query.order('precio', { ascending: false })
+        } else {
+          query = query.order('created_at', { ascending: false })
+        }
+
+        return limit ? query.limit(limit) : query
       }
 
-      if (limit) query = query.limit(limit)
-
-      const { data, error: requestError } = await query
+      let result = await buildQuery(true)
+      if (result.error && String(result.error.message).includes('is_visible')) {
+        result = await buildQuery(false)
+      }
+      const { data, error: requestError } = result
 
       if (!active) return
 
@@ -42,7 +55,11 @@ export function useProducts({ order = 'mas_nuevos', limit = null } = {}) {
         setProducts([])
         setError('No pudimos cargar las ofertas. Probá nuevamente en unos segundos.')
       } else {
-        setProducts((data || []).map(sanitizeProduct))
+        setProducts(
+          (data || [])
+            .map(sanitizeProduct)
+            .filter(isProductPubliclyVisible),
+        )
       }
 
       setLoading(false)

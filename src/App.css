@@ -750,6 +750,7 @@
 .category-card[data-category='audio'] { --category-color: #c084fc; }
 .category-card[data-category='almacenamiento'] { --category-color: #34d399; }
 .category-card[data-category='redes'] { --category-color: #38bdf8; }
+.category-card[data-category='hogar-tecnologia'] { --category-color: #fb923c; }
 .category-card[data-category='varios'] { --category-color: #f472b6; }
 
 .category-card:hover {
