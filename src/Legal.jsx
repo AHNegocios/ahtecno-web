@@ -39,10 +39,14 @@ function Legal() {
           <h2>Datos de navegación</h2>
           <p>
             No solicitamos datos personales para navegar el catálogo. Para conocer qué ofertas
-            resultan más útiles, nuestra medición propia cuenta los clics que llevan a Mercado
-            Libre y guarda únicamente el producto, la ubicación del botón y el momento del clic.
-            No incorpora correo, cuenta de usuario, cookies publicitarias ni dirección IP a esa
-            medición.
+            resultan más útiles, nuestra medición propia cuenta las vistas de detalle, los
+            compartidos y los clics que llevan a Mercado Libre. Guarda únicamente el producto,
+            el tipo de acción, la ubicación del botón y el momento. No incorpora correo, cuenta
+            de usuario, cookies publicitarias ni dirección IP a esa medición.
+          </p>
+          <p>
+            También utilizamos las métricas agregadas de Vercel para conocer visitas y
+            rendimiento técnico del sitio sin incorporar publicidad personalizada.
           </p>
         </section>
       </div>

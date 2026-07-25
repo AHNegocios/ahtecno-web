@@ -5,13 +5,33 @@ const INACTIVE_MERCADO_LIBRE_STATUSES = new Set([
   'under_review',
 ])
 
-export const hasInactiveMercadoLibreStatus = (status = '') =>
-  INACTIVE_MERCADO_LIBRE_STATUSES.has(String(status || '').trim().toLowerCase())
+const EXPIRED_MERCADO_LIBRE_STATUSES = new Set([
+  'not_found',
+  'deleted',
+  'expired',
+])
+
+export const hasInactiveMercadoLibreStatus = (status = '') => {
+  const normalizedStatus = String(status || '').trim().toLowerCase()
+  return (
+    INACTIVE_MERCADO_LIBRE_STATUSES.has(normalizedStatus) ||
+    EXPIRED_MERCADO_LIBRE_STATUSES.has(normalizedStatus)
+  )
+}
+
+export const hasExpiredMercadoLibreStatus = (status = '') =>
+  EXPIRED_MERCADO_LIBRE_STATUSES.has(
+    String(status || '').trim().toLowerCase(),
+  )
 
 export const isProductPubliclyVisible = (product = {}) =>
   product.is_visible !== false && !hasInactiveMercadoLibreStatus(product.ml_status)
 
 export const getProductPublicationState = (product = {}) => {
+  if (hasExpiredMercadoLibreStatus(product.ml_status)) {
+    return { key: 'expired', label: 'Producto vencido', public: false }
+  }
+
   if (product.is_visible === false) {
     return { key: 'manual-hidden', label: 'Oculto manualmente', public: false }
   }

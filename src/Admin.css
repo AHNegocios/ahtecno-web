@@ -336,6 +336,67 @@
   margin-top: 20px;
 }
 
+.admin-analytics {
+  margin-top: 20px;
+}
+
+.admin-analytics__scope {
+  padding: 6px 10px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  color: var(--text-secondary);
+  font-size: 0.7rem;
+  font-weight: 850;
+  text-transform: uppercase;
+}
+
+.admin-metrics {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.admin-metrics article {
+  min-width: 0;
+  padding: 16px;
+  border: 1px solid var(--border);
+  border-radius: 11px;
+  display: grid;
+  gap: 5px;
+  background: var(--surface-raised);
+}
+
+.admin-metrics span {
+  color: var(--text-secondary);
+  font-size: 0.72rem;
+  font-weight: 850;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.admin-metrics strong {
+  color: var(--accent);
+  font-size: clamp(1.55rem, 3vw, 2.2rem);
+  line-height: 1;
+}
+
+.admin-metrics small {
+  min-width: 0;
+  color: var(--text-secondary);
+  font-size: 0.72rem;
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+}
+
+.admin-analytics__note {
+  margin: 16px 0 0;
+  padding-top: 14px;
+  border-top: 1px solid var(--border);
+  color: var(--text-secondary);
+  font-size: 0.78rem;
+  line-height: 1.55;
+}
+
 .admin-price-legend {
   display: flex;
   flex-wrap: wrap;
@@ -422,8 +483,24 @@
 }
 
 .admin-publication-state--manual-hidden,
-.admin-publication-state--mercadolibre-inactive {
+.admin-publication-state--mercadolibre-inactive,
+.admin-publication-state--expired {
   color: #fb7185;
+}
+
+.admin-product-events {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+
+.admin-product-events span {
+  padding: 3px 6px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  color: var(--text-secondary);
+  font-size: 0.64rem;
+  font-weight: 750;
 }
 
 .admin-product-settings {
@@ -490,6 +567,10 @@
     grid-template-columns: 1fr;
   }
 
+  .admin-metrics {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
   .admin-price-item {
     grid-template-columns: minmax(0, 1fr) auto;
   }
@@ -553,6 +634,10 @@
   }
 
   .admin-data-summary ul {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-metrics {
     grid-template-columns: 1fr;
   }
 }

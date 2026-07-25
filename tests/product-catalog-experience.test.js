@@ -36,4 +36,13 @@ test('oculta productos pausados, cerrados o desactivados manualmente', () => {
     label: 'Oferta inactiva',
     public: false,
   })
+  assert.deepEqual(getProductPublicationState({ ml_status: 'not_found' }), {
+    key: 'expired',
+    label: 'Producto vencido',
+    public: false,
+  })
+  assert.equal(
+    isProductPubliclyVisible({ ml_status: 'deleted', is_visible: true }),
+    false,
+  )
 })

@@ -327,6 +327,36 @@ function AdminDashboard({ session }) {
     }
   }
 
+  const catalogSummary = priceOverview.reduce(
+    (summary, product) => {
+      const publicationState = getProductPublicationState(product)
+      summary.total += 1
+      summary.productViews += Number(product.product_views) || 0
+      summary.outboundClicks += Number(product.outbound_clicks) || 0
+      summary.shares += Number(product.shares) || 0
+      if (publicationState.public) summary.published += 1
+      if (publicationState.key === 'expired') summary.expired += 1
+      if (!publicationState.public) summary.hidden += 1
+      if (product.price_needs_review) summary.needsReview += 1
+      return summary
+    },
+    {
+      total: 0,
+      published: 0,
+      hidden: 0,
+      expired: 0,
+      needsReview: 0,
+      productViews: 0,
+      outboundClicks: 0,
+      shares: 0,
+    },
+  )
+  const topProduct = [...priceOverview].sort(
+    (first, second) =>
+      (Number(second.outbound_clicks) || 0) -
+      (Number(first.outbound_clicks) || 0),
+  )[0]
+
   return (
     <main className="admin-page">
       <header className="admin-heading">
@@ -398,7 +428,7 @@ function AdminDashboard({ session }) {
               {syncResult && (
                 <p
                   className={`admin-message ${
-                    syncResult.failed || syncResult.needsReview
+                    syncResult.failed || syncResult.needsReview || syncResult.expired
                       ? 'admin-message--warning'
                       : 'admin-message--success'
                   }`}
@@ -409,6 +439,9 @@ function AdminDashboard({ session }) {
                     : ''}
                   {syncResult.needsReview
                     ? ` ${syncResult.needsReview} conservaron su precio anterior porque Mercado Libre no informó uno nuevo.`
+                    : ''}
+                  {syncResult.expired
+                    ? ` ${syncResult.expired} vencidos se ocultaron del catálogo público.`
                     : ''}
                 </p>
               )}
@@ -594,6 +627,59 @@ function AdminDashboard({ session }) {
         </section>
       </div>
 
+      <section className="admin-card admin-analytics" aria-labelledby="analytics-title">
+        <div className="admin-card__header">
+          <div>
+            <p className="eyebrow">Resumen del catálogo</p>
+            <h2 id="analytics-title">Actividad y publicaciones</h2>
+          </div>
+          <span className="admin-analytics__scope">Datos acumulados</span>
+        </div>
+
+        <div className="admin-metrics">
+          <article>
+            <span>Ofertas públicas</span>
+            <strong>{catalogSummary.published}</strong>
+            <small>{catalogSummary.hidden} fuera del catálogo</small>
+          </article>
+          <article>
+            <span>Productos vencidos</span>
+            <strong>{catalogSummary.expired}</strong>
+            <small>Se ocultan automáticamente</small>
+          </article>
+          <article>
+            <span>Vistas de detalle</span>
+            <strong>{catalogSummary.productViews}</strong>
+            <small>Ficha completa o ventana de detalle</small>
+          </article>
+          <article>
+            <span>Clics a Mercado Libre</span>
+            <strong>{catalogSummary.outboundClicks}</strong>
+            <small>Desde tarjetas y fichas de producto</small>
+          </article>
+          <article>
+            <span>Ofertas compartidas</span>
+            <strong>{catalogSummary.shares}</strong>
+            <small>Compartidas o copiadas correctamente</small>
+          </article>
+          <article>
+            <span>Precios a revisar</span>
+            <strong>{catalogSummary.needsReview}</strong>
+            <small>
+              {topProduct?.outbound_clicks
+                ? `Más clics: ${topProduct.titulo}`
+                : 'Todavía no hay una oferta destacada'}
+            </small>
+          </article>
+        </div>
+
+        <p className="admin-analytics__note">
+          Las visitas generales, visitantes y rendimiento de toda la web se consultan
+          en Analytics y Speed Insights del proyecto AH Tecno en Vercel. Este panel
+          muestra la actividad específica de cada producto.
+        </p>
+      </section>
+
       <section className="admin-card admin-price-overview" aria-labelledby="price-overview-title">
         <div className="admin-card__header">
           <div>
@@ -660,7 +746,23 @@ function AdminDashboard({ session }) {
                         ? `Actualizado: ${formatDate(product.last_synced_at)}`
                         : 'Sin sincronización registrada'}
                     </small>
-                    <small>{product.outbound_clicks || 0} clics hacia Mercado Libre</small>
+                    {publicationState.key === 'expired' && (
+                      <small>
+                        Detectado: {formatDate(product.unavailable_since)}
+                      </small>
+                    )}
+                    {!!product.consecutive_sync_failures &&
+                      publicationState.key !== 'expired' && (
+                        <small>
+                          {product.consecutive_sync_failures} intento(s) de
+                          sincronización fallido(s)
+                        </small>
+                      )}
+                    <div className="admin-product-events" aria-label="Actividad del producto">
+                      <span>{product.product_views || 0} vistas</span>
+                      <span>{product.outbound_clicks || 0} clics</span>
+                      <span>{product.shares || 0} compartidos</span>
+                    </div>
                   </div>
                   <ProductCatalogControls
                     product={product}

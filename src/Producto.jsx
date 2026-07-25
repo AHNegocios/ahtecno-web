@@ -63,6 +63,10 @@ export function ProductDetailsContent({ product, context = 'modal', titleId }) {
   const outboundSource = context === 'detail' ? 'detail' : 'modal'
   const ProductTitle = context === 'detail' ? 'h1' : 'h2'
 
+  useEffect(() => {
+    trackProductEvent(id, 'product_view', outboundSource)
+  }, [id, outboundSource])
+
   const shareProduct = async () => {
     const url = new URL(productPath, window.location.origin).toString()
     const shareData = {
@@ -75,11 +79,14 @@ export function ProductDetailsContent({ product, context = 'modal', titleId }) {
       if (navigator.share) {
         await navigator.share(shareData)
         setShareFeedback('Compartido')
+        trackProductEvent(id, 'share', outboundSource)
       } else if (navigator.clipboard?.writeText) {
         await navigator.clipboard.writeText(url)
         setShareFeedback('Enlace copiado')
+        trackProductEvent(id, 'share', outboundSource)
       } else if (copyWithoutClipboardApi(url)) {
         setShareFeedback('Enlace copiado')
+        trackProductEvent(id, 'share', outboundSource)
       } else {
         setShareFeedback('No se pudo copiar')
       }
@@ -137,7 +144,7 @@ export function ProductDetailsContent({ product, context = 'modal', titleId }) {
                 href={cleanLink}
                 target="_blank"
                 rel="noopener noreferrer sponsored"
-                onClick={() => trackProductEvent(id, outboundSource)}
+                onClick={() => trackProductEvent(id, 'outbound_click', outboundSource)}
               >
                 Ver publicación en Mercado Libre <span aria-hidden="true">↗</span>
               </a>
@@ -284,7 +291,7 @@ function Producto({
                 href={cleanLink}
                 target="_blank"
                 rel="noopener noreferrer sponsored"
-                onClick={() => trackProductEvent(id, 'card')}
+                onClick={() => trackProductEvent(id, 'outbound_click', 'card')}
               >
                 Ver oferta <span aria-hidden="true">↗</span>
               </a>
