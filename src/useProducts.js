@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { supabase } from './supabaseClient'
+import { sortProductsByActiveCampaign } from './productCampaigns'
 import { isProductPubliclyVisible } from './productVisibility'
 
 const sanitizeProduct = (product) => ({
@@ -55,10 +56,13 @@ export function useProducts({ order = 'mas_nuevos', limit = null } = {}) {
         setProducts([])
         setError('No pudimos cargar las ofertas. Probá nuevamente en unos segundos.')
       } else {
+        const visibleProducts = (data || [])
+          .map(sanitizeProduct)
+          .filter(isProductPubliclyVisible)
         setProducts(
-          (data || [])
-            .map(sanitizeProduct)
-            .filter(isProductPubliclyVisible),
+          order === 'mas_nuevos'
+            ? sortProductsByActiveCampaign(visibleProducts)
+            : visibleProducts,
         )
       }
 

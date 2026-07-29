@@ -5,6 +5,8 @@ import {
   normalizeManualPrice,
   parseMercadoLibreReference,
 } from '../_lib/mercadolibre-client.js'
+import { verifyAffiliateLink } from '../_lib/affiliate-link.js'
+import { recordPriceHistory } from '../_lib/price-history.js'
 import { getValidAccessToken } from '../_lib/token-store.js'
 import { categorySlugs } from '../../src/catalogConfig.js'
 import { hasInactiveMercadoLibreStatus } from '../../src/productVisibility.js'
@@ -54,7 +56,7 @@ export async function POST(request) {
     let existingResult = await supabase
       .from('Productos')
       .select(
-        'id, link, etiqueta, categoria, ml_item_id, precio, price_source, unavailable_since',
+        'id, link, etiqueta, categoria, ml_item_id, precio, currency_id, price_source, unavailable_since',
       )
       .eq('ml_id', productId)
       .maybeSingle()
@@ -68,7 +70,7 @@ export async function POST(request) {
       hasAvailabilitySchema = false
       existingResult = await supabase
         .from('Productos')
-        .select('id, link, etiqueta, categoria, ml_item_id, precio, price_source')
+        .select('id, link, etiqueta, categoria, ml_item_id, precio, currency_id, price_source')
         .eq('ml_id', productId)
         .maybeSingle()
     }
@@ -82,6 +84,11 @@ export async function POST(request) {
         400,
         'Agregá el enlace de afiliado la primera vez que cargás el producto.',
       )
+    }
+
+    const affiliateLinkResult = await verifyAffiliateLink(storedAffiliateUrl)
+    if (affiliateLinkResult.definitive && affiliateLinkResult.ok === false) {
+      throw new HttpError(400, affiliateLinkResult.reason)
     }
 
     const accessToken = await getValidAccessToken(supabase)
@@ -116,6 +123,12 @@ export async function POST(request) {
     }
 
     const data = await saveProduct(supabase, existingProduct, normalized)
+    await recordPriceHistory(
+      supabase,
+      existingProduct,
+      data,
+      existingProduct ? 'import' : 'initial',
+    )
     return jsonResponse({ ok: true, product: data })
   } catch (error) {
     return errorResponse(error)

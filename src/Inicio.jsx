@@ -1,7 +1,9 @@
 import { useMemo, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { categories, getCategoryLabel, getProductCategory, normalizeText } from './catalogConfig'
+import AffiliateDisclosure from './AffiliateDisclosure'
 import Producto from './Producto'
+import { getActiveCampaignName } from './productCampaigns'
 import { useProducts } from './useProducts'
 
 const orderOptions = [
@@ -56,6 +58,8 @@ function Inicio() {
         <h1>Encontrá tecnología sin dar vueltas</h1>
         <p>Buscá por nombre, explorá categorías y ordená la selección para llegar más rápido a lo que necesitás.</p>
       </header>
+
+      <AffiliateDisclosure compact />
 
       <div className="catalog-layout">
         {panelOpen && (
@@ -220,6 +224,7 @@ function Inicio() {
                   categoria={product.categoria}
                   vista={view}
                   ml_id={product.ml_id}
+                  campania={getActiveCampaignName(product)}
                 />
               ))}
             </div>

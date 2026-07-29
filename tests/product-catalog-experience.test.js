@@ -28,21 +28,86 @@ test('solo admite identificadores públicos controlados', () => {
 })
 
 test('oculta productos pausados, cerrados o desactivados manualmente', () => {
-  assert.equal(isProductPubliclyVisible({ ml_status: 'active', is_visible: true }), true)
-  assert.equal(isProductPubliclyVisible({ ml_status: 'paused', is_visible: true }), false)
-  assert.equal(isProductPubliclyVisible({ ml_status: '', is_visible: false }), false)
-  assert.deepEqual(getProductPublicationState({ ml_status: 'closed' }), {
+  const validLink = 'https://meli.la/2abc123'
+
+  assert.equal(
+    isProductPubliclyVisible({
+      link: validLink,
+      ml_status: 'active',
+      is_visible: true,
+    }),
+    true,
+  )
+  assert.equal(
+    isProductPubliclyVisible({
+      link: validLink,
+      ml_status: 'paused',
+      is_visible: true,
+    }),
+    false,
+  )
+  assert.equal(
+    isProductPubliclyVisible({
+      link: validLink,
+      ml_status: '',
+      is_visible: false,
+    }),
+    false,
+  )
+  assert.deepEqual(getProductPublicationState({
+    link: validLink,
+    ml_status: 'paused',
+  }), {
     key: 'mercadolibre-inactive',
     label: 'Oferta inactiva',
     public: false,
   })
-  assert.deepEqual(getProductPublicationState({ ml_status: 'not_found' }), {
+  assert.deepEqual(getProductPublicationState({
+    link: validLink,
+    ml_status: 'not_found',
+  }), {
     key: 'expired',
-    label: 'Producto vencido',
+    label: 'VENCIDO',
+    reason: 'Mercado Libre informó que la publicación ya no está disponible.',
     public: false,
   })
   assert.equal(
-    isProductPubliclyVisible({ ml_status: 'deleted', is_visible: true }),
+    isProductPubliclyVisible({
+      link: validLink,
+      ml_status: 'deleted',
+      is_visible: true,
+    }),
     false,
+  )
+})
+
+test('oculta productos activos cuando el enlace de afiliado no es utilizable', () => {
+  assert.equal(
+    isProductPubliclyVisible({
+      link: '',
+      ml_status: 'active',
+      is_visible: true,
+    }),
+    false,
+  )
+  assert.equal(
+    isProductPubliclyVisible({
+      link: 'https://ejemplo.com/producto',
+      ml_status: 'active',
+      is_visible: true,
+    }),
+    false,
+  )
+  assert.deepEqual(
+    getProductPublicationState({
+      link: 'https://ejemplo.com/producto',
+      ml_status: 'active',
+    }),
+    {
+      key: 'expired',
+      label: 'VENCIDO',
+      reason: 'El enlace de afiliado está ausente o no es válido.',
+      public: false,
+    },
   )
 })

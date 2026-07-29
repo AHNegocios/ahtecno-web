@@ -3,6 +3,8 @@ import { useSearchParams } from 'react-router-dom'
 import { categories, getCategoryLabel, getProductCategory } from './catalogConfig'
 import { getProductPublicationState } from './productVisibility'
 import { supabase } from './supabaseClient'
+import AdminAnalytics from './AdminAnalytics'
+import AdminDecisionCenter from './AdminDecisionCenter'
 import './Admin.css'
 
 const formatPrice = (value, currency = 'ARS') => {
@@ -34,6 +36,10 @@ function ProductCatalogControls({ product, apiRequest, onSaved }) {
   const [visible, setVisible] = useState(product.is_visible !== false)
   const [saving, setSaving] = useState(false)
   const [feedback, setFeedback] = useState('')
+  const publicationState = getProductPublicationState(product)
+  const automaticallyHidden =
+    publicationState.key === 'expired' ||
+    publicationState.key === 'mercadolibre-inactive'
 
   const saveSettings = async () => {
     setSaving(true)
@@ -69,18 +75,135 @@ function ProductCatalogControls({ product, apiRequest, onSaved }) {
           ))}
         </select>
       </label>
-      <label className="admin-visibility-control">
-        <input
-          type="checkbox"
-          checked={visible}
-          onChange={(event) => setVisible(event.target.checked)}
-        />
-        Mostrar en la web
-      </label>
+      {automaticallyHidden ? (
+        <p className="admin-visibility-control admin-visibility-control--locked">
+          Oculto automáticamente
+        </p>
+      ) : (
+        <label className="admin-visibility-control">
+          <input
+            type="checkbox"
+            checked={visible}
+            onChange={(event) => setVisible(event.target.checked)}
+          />
+          Mostrar en la web
+        </label>
+      )}
       <button className="button button--secondary" type="button" onClick={saveSettings} disabled={saving}>
         {saving ? 'Guardando…' : 'Guardar cambios'}
       </button>
       {feedback && <small role="status">{feedback}</small>}
+    </div>
+  )
+}
+
+function AdminProductRow({ product, apiRequest, onSaved }) {
+  const automatic = product.price_source === 'mercadolibre'
+  const publicationState = getProductPublicationState(product)
+
+  return (
+    <article
+      className={`admin-price-item ${
+        publicationState.key === 'expired'
+          ? 'admin-price-item--expired'
+          : ''
+      }`}
+    >
+      <div className="admin-price-item__product">
+        {product.imagen ? <img src={product.imagen} alt="" /> : null}
+        <div>
+          <h3>{product.titulo}</h3>
+          <small>{product.ml_id || 'Sin referencia de Mercado Libre'}</small>
+        </div>
+      </div>
+      <div className="admin-price-item__value">
+        <strong>{formatPrice(product.precio, product.currency_id)}</strong>
+        <span
+          className={`admin-price-source ${
+            automatic
+              ? 'admin-price-source--automatic'
+              : 'admin-price-source--manual'
+          }`}
+        >
+          {automatic ? 'Automático' : 'Manual'}
+        </span>
+      </div>
+      <div className="admin-price-item__status">
+        <strong
+          className={`admin-publication-state admin-publication-state--${publicationState.key}`}
+        >
+          {publicationState.label}
+        </strong>
+        {product.price_needs_review ? (
+          <strong className="admin-review-label">Revisar precio</strong>
+        ) : (
+          <span>Precio confirmado</span>
+        )}
+        <small>
+          {product.last_synced_at
+            ? `Actualizado: ${formatDate(product.last_synced_at)}`
+            : 'Sin sincronización registrada'}
+        </small>
+        {publicationState.key === 'expired' && (
+          <>
+            <small className="admin-expired-reason">
+              {publicationState.reason || product.sync_error}
+            </small>
+            <small>
+              Detectado: {formatDate(product.unavailable_since)}
+            </small>
+          </>
+        )}
+        {!!product.consecutive_sync_failures &&
+          publicationState.key !== 'expired' && (
+            <small>
+              {product.consecutive_sync_failures} intento(s) de sincronización
+              fallido(s)
+            </small>
+          )}
+        <div className="admin-product-events" aria-label="Actividad del producto">
+          <span>{product.product_views || 0} vistas</span>
+          <span>{product.outbound_clicks || 0} clics</span>
+          <span>{product.shares || 0} compartidos</span>
+        </div>
+      </div>
+      <ProductCatalogControls
+        product={product}
+        apiRequest={apiRequest}
+        onSaved={onSaved}
+      />
+    </article>
+  )
+}
+
+function AdminProductList({
+  products,
+  loading,
+  error,
+  emptyMessage,
+  apiRequest,
+  onSaved,
+}) {
+  if (loading) {
+    return <p className="admin-muted">Cargando productos…</p>
+  }
+  if (error) {
+    return <p className="admin-message admin-message--error">{error}</p>
+  }
+  if (!products.length) {
+    return <p className="admin-muted">{emptyMessage}</p>
+  }
+
+  return (
+    <div className="admin-price-list">
+      {products.map((product) => (
+        <AdminProductRow
+          product={product}
+          apiRequest={apiRequest}
+          onSaved={onSaved}
+          key={product.id}
+        />
+      ))}
     </div>
   )
 }
@@ -156,6 +279,7 @@ function AdminLogin() {
 
 function AdminDashboard({ session }) {
   const [searchParams, setSearchParams] = useSearchParams()
+  const [activeTab, setActiveTab] = useState('overview')
   const [status, setStatus] = useState(null)
   const [statusLoading, setStatusLoading] = useState(true)
   const [statusError, setStatusError] = useState('')
@@ -171,6 +295,17 @@ function AdminDashboard({ session }) {
   const [formError, setFormError] = useState('')
   const [savedProduct, setSavedProduct] = useState(null)
   const [priceOverview, setPriceOverview] = useState([])
+  const [priceHistory, setPriceHistory] = useState([])
+  const [decisionCenter, setDecisionCenter] = useState({
+    campaigns_configured: false,
+    price_history_configured: false,
+  })
+  const [analytics, setAnalytics] = useState({
+    daily: [],
+    product_daily: [],
+    source_daily: [],
+    sources: [],
+  })
   const [priceOverviewLoading, setPriceOverviewLoading] = useState(true)
   const [priceOverviewError, setPriceOverviewError] = useState('')
 
@@ -211,6 +346,17 @@ function AdminDashboard({ session }) {
     try {
       const payload = await apiRequest('/api/mercadolibre/products')
       setPriceOverview(payload.products || [])
+      setAnalytics(payload.analytics || {
+        daily: [],
+        product_daily: [],
+        source_daily: [],
+        sources: [],
+      })
+      setPriceHistory(payload.price_history || [])
+      setDecisionCenter(payload.decision_center || {
+        campaigns_configured: false,
+        price_history_configured: false,
+      })
     } catch (error) {
       setPriceOverviewError(error.message)
     } finally {
@@ -242,7 +388,20 @@ function AdminDashboard({ session }) {
 
     apiRequest('/api/mercadolibre/products')
       .then((payload) => {
-        if (active) setPriceOverview(payload.products || [])
+        if (active) {
+          setPriceOverview(payload.products || [])
+          setAnalytics(payload.analytics || {
+            daily: [],
+            product_daily: [],
+            source_daily: [],
+            sources: [],
+          })
+          setPriceHistory(payload.price_history || [])
+          setDecisionCenter(payload.decision_center || {
+            campaigns_configured: false,
+            price_history_configured: false,
+          })
+        }
       })
       .catch((error) => {
         if (active) setPriceOverviewError(error.message)
@@ -351,11 +510,29 @@ function AdminDashboard({ session }) {
       shares: 0,
     },
   )
-  const topProduct = [...priceOverview].sort(
-    (first, second) =>
-      (Number(second.outbound_clicks) || 0) -
-      (Number(first.outbound_clicks) || 0),
-  )[0]
+  const expiredProducts = priceOverview.filter(
+    (product) => getProductPublicationState(product).key === 'expired',
+  )
+  const currentProducts = priceOverview.filter(
+    (product) => getProductPublicationState(product).key !== 'expired',
+  )
+  const adminTabs = [
+    {
+      id: 'overview',
+      label: 'Vista general',
+      count: currentProducts.length,
+    },
+    {
+      id: 'expired',
+      label: 'Vencidos',
+      count: expiredProducts.length,
+    },
+    {
+      id: 'analytics',
+      label: 'Estadísticas',
+      count: null,
+    },
+  ]
 
   return (
     <main className="admin-page">
@@ -380,6 +557,37 @@ function AdminDashboard({ session }) {
         </p>
       )}
 
+      <nav className="admin-tabs" role="tablist" aria-label="Secciones del panel">
+        {adminTabs.map((tab) => (
+          <button
+            id={`admin-tab-${tab.id}`}
+            className={activeTab === tab.id ? 'is-active' : ''}
+            type="button"
+            role="tab"
+            aria-selected={activeTab === tab.id}
+            aria-controls={`admin-panel-${tab.id}`}
+            key={tab.id}
+            onClick={() => setActiveTab(tab.id)}
+          >
+            <span>{tab.label}</span>
+            {tab.count !== null && <strong>{tab.count}</strong>}
+          </button>
+        ))}
+      </nav>
+
+      {activeTab === 'overview' && (
+        <AdminDecisionCenter
+          products={priceOverview}
+          priceHistory={priceHistory}
+          apiRequest={apiRequest}
+          onReload={loadPriceOverview}
+          onOpenExpired={() => setActiveTab('expired')}
+          onOpenAnalytics={() => setActiveTab('analytics')}
+          configured={decisionCenter.campaigns_configured}
+        />
+      )}
+
+      {activeTab === 'overview' && (
       <div className="admin-grid">
         <section className="admin-card" aria-labelledby="meli-status-title">
           <div className="admin-card__header">
@@ -626,155 +834,106 @@ function AdminDashboard({ session }) {
           )}
         </section>
       </div>
+      )}
 
-      <section className="admin-card admin-analytics" aria-labelledby="analytics-title">
-        <div className="admin-card__header">
-          <div>
-            <p className="eyebrow">Resumen del catálogo</p>
-            <h2 id="analytics-title">Actividad y publicaciones</h2>
+      {activeTab === 'analytics' && (
+        <section
+          id="admin-panel-analytics"
+          role="tabpanel"
+          aria-labelledby="admin-tab-analytics"
+        >
+          <AdminAnalytics
+            analytics={analytics}
+            catalogSummary={catalogSummary}
+            products={priceOverview}
+            priceHistory={priceHistory}
+            priceHistoryConfigured={decisionCenter.price_history_configured}
+          />
+        </section>
+      )}
+
+      {activeTab !== 'analytics' && (
+        <section
+          className={`admin-card admin-price-overview ${
+            activeTab === 'expired' ? 'admin-expired-panel' : ''
+          }`}
+          id={`admin-panel-${activeTab}`}
+          role="tabpanel"
+          aria-labelledby={`admin-tab-${activeTab}`}
+        >
+          <div className="admin-card__header">
+            <div>
+              <p className="eyebrow">
+                {activeTab === 'expired'
+                  ? 'Historial interno'
+                  : 'Control del catálogo'}
+              </p>
+              <h2 id="price-overview-title">
+                {activeTab === 'expired'
+                  ? 'Productos vencidos'
+                  : 'Estado de precios'}
+              </h2>
+              {activeTab === 'expired' && (
+                <p className="admin-expired-panel__description">
+                  Se conservan para consulta y estadísticas, pero están ocultos para
+                  todas las personas que visitan la web.
+                </p>
+              )}
+            </div>
+            {activeTab === 'expired' ? (
+              <div className="admin-expired-panel__actions">
+                <span>{expiredProducts.length} vencido(s)</span>
+                <button
+                  className="button button--secondary"
+                  type="button"
+                  disabled={syncing}
+                  onClick={syncProducts}
+                >
+                  {syncing ? 'Revisando…' : 'Volver a revisar'}
+                </button>
+              </div>
+            ) : (
+              <div className="admin-price-legend" aria-label="Referencias">
+                <span className="admin-price-source admin-price-source--automatic">
+                  Automático
+                </span>
+                <span className="admin-price-source admin-price-source--manual">
+                  Manual o pendiente
+                </span>
+              </div>
+            )}
           </div>
-          <span className="admin-analytics__scope">Datos acumulados</span>
-        </div>
 
-        <div className="admin-metrics">
-          <article>
-            <span>Ofertas públicas</span>
-            <strong>{catalogSummary.published}</strong>
-            <small>{catalogSummary.hidden} fuera del catálogo</small>
-          </article>
-          <article>
-            <span>Productos vencidos</span>
-            <strong>{catalogSummary.expired}</strong>
-            <small>Se ocultan automáticamente</small>
-          </article>
-          <article>
-            <span>Vistas de detalle</span>
-            <strong>{catalogSummary.productViews}</strong>
-            <small>Ficha completa o ventana de detalle</small>
-          </article>
-          <article>
-            <span>Clics a Mercado Libre</span>
-            <strong>{catalogSummary.outboundClicks}</strong>
-            <small>Desde tarjetas y fichas de producto</small>
-          </article>
-          <article>
-            <span>Ofertas compartidas</span>
-            <strong>{catalogSummary.shares}</strong>
-            <small>Compartidas o copiadas correctamente</small>
-          </article>
-          <article>
-            <span>Precios a revisar</span>
-            <strong>{catalogSummary.needsReview}</strong>
-            <small>
-              {topProduct?.outbound_clicks
-                ? `Más clics: ${topProduct.titulo}`
-                : 'Todavía no hay una oferta destacada'}
-            </small>
-          </article>
-        </div>
+          {activeTab === 'expired' && syncResult && (
+            <p
+              className={`admin-message ${
+                syncResult.failed
+                  ? 'admin-message--warning'
+                  : 'admin-message--success'
+              }`}
+            >
+              Revisión terminada: {syncResult.updated} de {syncResult.total}{' '}
+              productos procesados. Quedan {expiredProducts.length} vencido(s)
+              ocultos.
+            </p>
+          )}
 
-        <p className="admin-analytics__note">
-          Las visitas generales, visitantes y rendimiento de toda la web se consultan
-          en Analytics y Speed Insights del proyecto AH Tecno en Vercel. Este panel
-          muestra la actividad específica de cada producto.
-        </p>
-      </section>
-
-      <section className="admin-card admin-price-overview" aria-labelledby="price-overview-title">
-        <div className="admin-card__header">
-          <div>
-            <p className="eyebrow">Control del catálogo</p>
-            <h2 id="price-overview-title">Estado de precios</h2>
-          </div>
-          <div className="admin-price-legend" aria-label="Referencias">
-            <span className="admin-price-source admin-price-source--automatic">
-              Automático
-            </span>
-            <span className="admin-price-source admin-price-source--manual">
-              Manual o pendiente
-            </span>
-          </div>
-        </div>
-
-        {priceOverviewLoading && (
-          <p className="admin-muted">Cargando estado de precios…</p>
-        )}
-        {priceOverviewError && (
-          <p className="admin-message admin-message--error">{priceOverviewError}</p>
-        )}
-        {!priceOverviewLoading && !priceOverviewError && !priceOverview.length && (
-          <p className="admin-muted">Todavía no hay productos para revisar.</p>
-        )}
-
-        {!!priceOverview.length && (
-          <div className="admin-price-list">
-            {priceOverview.map((product) => {
-              const automatic = product.price_source === 'mercadolibre'
-              const publicationState = getProductPublicationState(product)
-              return (
-                <article className="admin-price-item" key={product.id}>
-                  <div className="admin-price-item__product">
-                    {product.imagen ? <img src={product.imagen} alt="" /> : null}
-                    <div>
-                      <h3>{product.titulo}</h3>
-                      <small>{product.ml_id || 'Sin referencia de Mercado Libre'}</small>
-                    </div>
-                  </div>
-                  <div className="admin-price-item__value">
-                    <strong>{formatPrice(product.precio, product.currency_id)}</strong>
-                    <span
-                      className={`admin-price-source ${
-                        automatic
-                          ? 'admin-price-source--automatic'
-                          : 'admin-price-source--manual'
-                      }`}
-                    >
-                      {automatic ? 'Automático' : 'Manual'}
-                    </span>
-                  </div>
-                  <div className="admin-price-item__status">
-                    <strong className={`admin-publication-state admin-publication-state--${publicationState.key}`}>
-                      {publicationState.label}
-                    </strong>
-                    {product.price_needs_review ? (
-                      <strong className="admin-review-label">Revisar precio</strong>
-                    ) : (
-                      <span>Precio confirmado</span>
-                    )}
-                    <small>
-                      {product.last_synced_at
-                        ? `Actualizado: ${formatDate(product.last_synced_at)}`
-                        : 'Sin sincronización registrada'}
-                    </small>
-                    {publicationState.key === 'expired' && (
-                      <small>
-                        Detectado: {formatDate(product.unavailable_since)}
-                      </small>
-                    )}
-                    {!!product.consecutive_sync_failures &&
-                      publicationState.key !== 'expired' && (
-                        <small>
-                          {product.consecutive_sync_failures} intento(s) de
-                          sincronización fallido(s)
-                        </small>
-                      )}
-                    <div className="admin-product-events" aria-label="Actividad del producto">
-                      <span>{product.product_views || 0} vistas</span>
-                      <span>{product.outbound_clicks || 0} clics</span>
-                      <span>{product.shares || 0} compartidos</span>
-                    </div>
-                  </div>
-                  <ProductCatalogControls
-                    product={product}
-                    apiRequest={apiRequest}
-                    onSaved={loadPriceOverview}
-                  />
-                </article>
-              )
-            })}
-          </div>
-        )}
-      </section>
+          <AdminProductList
+            products={
+              activeTab === 'expired' ? expiredProducts : currentProducts
+            }
+            loading={priceOverviewLoading}
+            error={priceOverviewError}
+            emptyMessage={
+              activeTab === 'expired'
+                ? 'No hay productos vencidos. El catálogo está limpio.'
+                : 'Todavía no hay productos para revisar.'
+            }
+            apiRequest={apiRequest}
+            onSaved={loadPriceOverview}
+          />
+        </section>
+      )}
     </main>
   )
 }

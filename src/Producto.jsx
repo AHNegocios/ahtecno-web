@@ -50,6 +50,7 @@ export function ProductDetailsContent({ product, context = 'modal', titleId }) {
     condition = '',
     categoria = '',
     ml_id = '',
+    campaign_name = '',
   } = product
   const categorySlug = getProductCategory({ titulo, categoria })
   const category = categories.find(({ slug }) => slug === categorySlug)
@@ -127,6 +128,9 @@ export function ProductDetailsContent({ product, context = 'modal', titleId }) {
           <p className="product-modal__price">{formatCurrency(precio)}</p>
 
           <div className="product-modal__meta">
+            {campaign_name && (
+              <span className="product-modal__campaign">{campaign_name}</span>
+            )}
             <span>{category?.label || 'Tecnología'}</span>
             {conditionLabel && <span>{conditionLabel}</span>}
           </div>
@@ -219,6 +223,7 @@ function Producto({
   vista = 'grilla',
   esPrimero = false,
   ml_id = '',
+  campania = '',
 }) {
   const [modalOpen, setModalOpen] = useState(false)
   const closeButtonRef = useRef(null)
@@ -238,6 +243,7 @@ function Producto({
     condition: condicion,
     categoria,
     ml_id,
+    campaign_name: campania,
   }
 
   useEffect(() => {
@@ -262,8 +268,18 @@ function Producto({
 
   return (
     <>
-      <article className={`product-card ${vista === 'lista' ? 'product-card--list' : ''}`}>
-        {esPrimero && <span className="product-card__badge">Último ingresado</span>}
+      <article
+        className={`product-card ${
+          vista === 'lista' ? 'product-card--list' : ''
+        } ${campania ? 'product-card--featured' : ''}`}
+      >
+        {campania ? (
+          <span className="product-card__badge product-card__badge--campaign">
+            {campania}
+          </span>
+        ) : (
+          esPrimero && <span className="product-card__badge">Último ingresado</span>
+        )}
 
         <div className="product-card__image-wrap">
           {imagen ? (
