@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom'
 import { categories } from './catalogConfig'
 import Producto from './Producto'
+import { getActiveCampaignName } from './productCampaigns'
 import { useProducts } from './useProducts'
 
 const trustItems = [
@@ -135,6 +136,7 @@ function Vidriera() {
                 condicion={product.condition}
                 categoria={product.categoria}
                 ml_id={product.ml_id}
+                campania={getActiveCampaignName(product)}
               />
             ))}
             <Link className="carousel-more" to="/ultimos">Ver últimos subidos →</Link>

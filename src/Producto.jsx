@@ -50,6 +50,7 @@ export function ProductDetailsContent({ product, context = 'modal', titleId }) {
     condition = '',
     categoria = '',
     ml_id = '',
+    campaign_name = '',
   } = product
   const categorySlug = getProductCategory({ titulo, categoria })
   const category = categories.find(({ slug }) => slug === categorySlug)
@@ -63,6 +64,10 @@ export function ProductDetailsContent({ product, context = 'modal', titleId }) {
   const outboundSource = context === 'detail' ? 'detail' : 'modal'
   const ProductTitle = context === 'detail' ? 'h1' : 'h2'
 
+  useEffect(() => {
+    trackProductEvent(id, 'product_view', outboundSource)
+  }, [id, outboundSource])
+
   const shareProduct = async () => {
     const url = new URL(productPath, window.location.origin).toString()
     const shareData = {
@@ -75,11 +80,14 @@ export function ProductDetailsContent({ product, context = 'modal', titleId }) {
       if (navigator.share) {
         await navigator.share(shareData)
         setShareFeedback('Compartido')
+        trackProductEvent(id, 'share', outboundSource)
       } else if (navigator.clipboard?.writeText) {
         await navigator.clipboard.writeText(url)
         setShareFeedback('Enlace copiado')
+        trackProductEvent(id, 'share', outboundSource)
       } else if (copyWithoutClipboardApi(url)) {
         setShareFeedback('Enlace copiado')
+        trackProductEvent(id, 'share', outboundSource)
       } else {
         setShareFeedback('No se pudo copiar')
       }
@@ -120,6 +128,9 @@ export function ProductDetailsContent({ product, context = 'modal', titleId }) {
           <p className="product-modal__price">{formatCurrency(precio)}</p>
 
           <div className="product-modal__meta">
+            {campaign_name && (
+              <span className="product-modal__campaign">{campaign_name}</span>
+            )}
             <span>{category?.label || 'Tecnología'}</span>
             {conditionLabel && <span>{conditionLabel}</span>}
           </div>
@@ -137,7 +148,7 @@ export function ProductDetailsContent({ product, context = 'modal', titleId }) {
                 href={cleanLink}
                 target="_blank"
                 rel="noopener noreferrer sponsored"
-                onClick={() => trackProductEvent(id, outboundSource)}
+                onClick={() => trackProductEvent(id, 'outbound_click', outboundSource)}
               >
                 Ver publicación en Mercado Libre <span aria-hidden="true">↗</span>
               </a>
@@ -212,6 +223,7 @@ function Producto({
   vista = 'grilla',
   esPrimero = false,
   ml_id = '',
+  campania = '',
 }) {
   const [modalOpen, setModalOpen] = useState(false)
   const closeButtonRef = useRef(null)
@@ -231,6 +243,7 @@ function Producto({
     condition: condicion,
     categoria,
     ml_id,
+    campaign_name: campania,
   }
 
   useEffect(() => {
@@ -255,8 +268,18 @@ function Producto({
 
   return (
     <>
-      <article className={`product-card ${vista === 'lista' ? 'product-card--list' : ''}`}>
-        {esPrimero && <span className="product-card__badge">Último ingresado</span>}
+      <article
+        className={`product-card ${
+          vista === 'lista' ? 'product-card--list' : ''
+        } ${campania ? 'product-card--featured' : ''}`}
+      >
+        {campania ? (
+          <span className="product-card__badge product-card__badge--campaign">
+            {campania}
+          </span>
+        ) : (
+          esPrimero && <span className="product-card__badge">Último ingresado</span>
+        )}
 
         <div className="product-card__image-wrap">
           {imagen ? (
@@ -284,7 +307,7 @@ function Producto({
                 href={cleanLink}
                 target="_blank"
                 rel="noopener noreferrer sponsored"
-                onClick={() => trackProductEvent(id, 'card')}
+                onClick={() => trackProductEvent(id, 'outbound_click', 'card')}
               >
                 Ver oferta <span aria-hidden="true">↗</span>
               </a>

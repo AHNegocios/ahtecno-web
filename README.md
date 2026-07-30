@@ -7,7 +7,7 @@ Catálogo web de ofertas tecnológicas seleccionadas y enlazadas a tiendas exter
 - React 19 y Vite.
 - React Router.
 - Supabase para el catálogo.
-- Vercel para vistas previas y producción.
+- Vercel para vistas previas, producción, Web Analytics y Speed Insights.
 
 ## Desarrollo local
 
@@ -73,13 +73,26 @@ Flujo previsto:
 8. El panel permite asignar una categoría editorial de AH Tecno y ocultar un
    producto manualmente. Las ofertas `paused`, `closed` o `inactive` dejan de
    mostrarse automáticamente después de una sincronización.
-9. Los clics salientes se cuentan sin guardar IP, correo, cookies ni otros
-   datos personales. El total aparece en el panel privado.
+9. Si Mercado Libre confirma con un `404` o `410` que la publicación ya no
+   existe, queda marcada como `not_found`: desaparece del catálogo público,
+   pero se conserva en el panel como “Producto vencido” para no perder su
+   historial.
+10. Las fallas temporales de red o autenticación no ocultan productos. Se
+    registran como intentos fallidos para revisión.
+11. Las vistas de detalle, los compartidos y los clics salientes se cuentan
+    sin guardar IP, correo, cookies ni otros datos personales. Los totales
+    aparecen en el panel privado.
+12. Las visitas generales y el rendimiento técnico se consultan en Web
+    Analytics y Speed Insights dentro del proyecto de Vercel.
 
 Antes de conectar una cuenta se debe ejecutar la migración incluida en
 `supabase/migrations` y configurar en Vercel las variables privadas enumeradas
 en `.env.example`. Los valores reales no se guardan en el repositorio ni se
 comparten por chat.
+
+Para esta versión también se debe ejecutar
+`supabase/migrations/202607250001_product_analytics_and_expiration.sql` y
+habilitar Analytics y Speed Insights desde el panel del proyecto en Vercel.
 
 La tarea automática usa `CRON_SECRET` y se ejecuta a las 09:00 UTC. En el plan
 Hobby, Vercel puede iniciarla en cualquier momento dentro de esa hora.

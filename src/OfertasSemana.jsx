@@ -1,5 +1,7 @@
 import { Link } from 'react-router-dom'
+import AffiliateDisclosure from './AffiliateDisclosure'
 import Producto from './Producto'
+import { getActiveCampaignName } from './productCampaigns'
 import { useProducts } from './useProducts'
 
 function OfertasSemana() {
@@ -13,6 +15,8 @@ function OfertasSemana() {
         <h1>Últimos subidos</h1>
         <p>Los productos más recientes aparecen primero para que encuentres rápido el enlace del video que acabás de ver.</p>
       </header>
+
+      <AffiliateDisclosure compact />
 
       {loading && (
         <div className="status-panel" role="status">
@@ -52,6 +56,7 @@ function OfertasSemana() {
                 condicion={product.condition}
                 categoria={product.categoria}
                 ml_id={product.ml_id}
+                campania={getActiveCampaignName(product)}
                 esPrimero={index === 0}
               />
             ))}

@@ -6,6 +6,7 @@ import {
   normalizeManualPrice,
   parseMercadoLibreReference,
 } from './mercadolibre-client.js'
+import { HttpError } from './http.js'
 
 test('normaliza IDs de Mercado Libre sin alterar productos de catálogo', () => {
   assert.equal(normalizeItemId(' mla62407115 '), 'MLA62407115')
@@ -133,4 +134,25 @@ test('prioriza el precio oficial aunque se haya escrito un respaldo manual', () 
   assert.equal(normalized.price_source, 'mercadolibre')
   assert.equal(normalized.price_needs_review, false)
   assert.equal(normalized.sync_error, null)
+})
+
+test('identifica como vencida una oferta vinculada que Mercado Libre eliminó', () => {
+  assert.throws(
+    () =>
+      normalizeCatalogProduct({
+        product: {
+          id: 'MLA47264969',
+          name: 'Smart Box Android',
+          buy_box_winner: { item_id: 'MLA9999999999', price: 45999 },
+        },
+        requestedOfferItemId: 'MLA3592728068',
+        offerItemId: 'MLA3592728068',
+        offerItem: null,
+        offerItemError: new HttpError(404, 'No encontrado'),
+        reviews: null,
+      }),
+    (error) =>
+      error.status === 410 &&
+      /ya no existe o fue eliminada/.test(error.message),
+  )
 })

@@ -17,13 +17,18 @@ function Footer() {
           <Link to="/ultimos">Últimos subidos</Link>
           <Link to="/productos">Productos</Link>
           <Link to="/comunidad">Comunidad</Link>
-          <Link to="/legal">Transparencia y privacidad</Link>
         </nav>
       </div>
 
       <div className="site-footer__bottom">
-        <p>© {new Date().getFullYear()} A&H Tecno.</p>
-        <p>Las compras se realizan en sitios de terceros.</p>
+        <div className="site-footer__legal">
+          <Link to="/legal#terminos">Términos</Link>
+          <Link to="/legal#privacidad">Privacidad</Link>
+          <Link to="/legal#afiliados">Afiliados</Link>
+          <Link to="/legal#almacenamiento">Almacenamiento local</Link>
+          <Link to="/legal#contacto">Contacto</Link>
+        </div>
+        <p>© {new Date().getFullYear()} A&H Tecno · Las compras se realizan en sitios de terceros.</p>
       </div>
     </footer>
   )

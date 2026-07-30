@@ -241,8 +241,11 @@ const fetchCatalogProductBundle = async (
   return {
     product,
     offerItemId,
+    requestedOfferItemId,
     offerItem:
       offerItemResult?.status === 'fulfilled' ? offerItemResult.value : null,
+    offerItemError:
+      offerItemResult?.status === 'rejected' ? offerItemResult.reason : null,
     salePrice:
       salePriceResult?.status === 'fulfilled' ? salePriceResult.value : null,
     reviews: reviewsResult?.status === 'fulfilled' ? reviewsResult.value : null,
@@ -252,13 +255,26 @@ const fetchCatalogProductBundle = async (
 export const normalizeCatalogProduct = ({
   product,
   offerItemId,
+  requestedOfferItemId,
   offerItem,
+  offerItemError,
   salePrice,
   reviews,
 }, {
   manualPrice = null,
   fallbackPriceSource = 'manual',
 } = {}) => {
+  if (
+    requestedOfferItemId &&
+    !offerItem &&
+    [404, 410].includes(offerItemError?.status)
+  ) {
+    throw new HttpError(
+      410,
+      'La publicación vinculada ya no existe o fue eliminada de Mercado Libre.',
+    )
+  }
+
   const winner = product.buy_box_winner
   const fallbackPrice = product.buy_box_winner_price_range?.min
   const apiPrice = salePrice?.amount ?? winner?.price ?? fallbackPrice?.price
