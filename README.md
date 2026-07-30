@@ -42,6 +42,8 @@ Copiar `.env.example` como `.env.local` y completar las variables publicables de
 - `src/Inicio.jsx`: catálogo, búsqueda, orden y filtros.
 - `src/Producto.jsx`: tarjeta, galería y detalle reutilizable de cada producto.
 - `src/ProductoDetalle.jsx`: ficha pública compartible con una URL estable.
+- `src/Favoritos.jsx`: favoritos guardados sólo en el dispositivo, sin crear
+  una cuenta.
 - `src/useProducts.js`: acceso centralizado al catálogo de Supabase.
 - `src/catalogConfig.js`: categorías y clasificación temporal.
 - `src/siteConfig.js`: datos públicos y enlaces sociales.
@@ -66,8 +68,10 @@ Flujo previsto:
 5. El enlace de afiliado se conserva en `Productos.link`; nunca se reemplaza
    automáticamente por el permalink común de Mercado Libre.
 6. Si Mercado Libre no informa un precio, el administrador puede cargar un
-   respaldo manual. El producto queda marcado para revisión y las siguientes
-   sincronizaciones conservan ese valor hasta recibir uno oficial.
+   respaldo manual. Debe comprobarlo en la publicación y confirmarlo desde
+   Admin; la confirmación registra fecha y administrador y vence a los siete
+   días. Las siguientes sincronizaciones conservan ese valor hasta recibir uno
+   oficial.
 7. Vercel ejecuta una sincronización diaria de todos los productos con `ml_id`.
    El panel privado también permite solicitar una actualización inmediata.
 8. El panel permite asignar una categoría editorial de AH Tecno y ocultar un
@@ -93,6 +97,16 @@ comparten por chat.
 Para esta versión también se debe ejecutar
 `supabase/migrations/202607250001_product_analytics_and_expiration.sql` y
 habilitar Analytics y Speed Insights desde el panel del proyecto en Vercel.
+
+Para habilitar el historial privado de confirmaciones manuales se debe ejecutar
+`supabase/migrations/202607300001_manual_price_reviews.sql`. La tabla de
+auditoría no es accesible para visitantes ni usuarios autenticados comunes; las
+confirmaciones se realizan desde la función privada de Admin.
+
+Los favoritos públicos se guardan en `localStorage` con la clave
+`ahtecno-favorites-v1`. Conservan sólo una referencia mínima del producto, no
+se envían a Supabase ni Mercado Libre y desaparecen al borrar los datos del
+navegador.
 
 La tarea automática usa `CRON_SECRET` y se ejecuta a las 09:00 UTC. En el plan
 Hobby, Vercel puede iniciarla en cualquier momento dentro de esa hora.

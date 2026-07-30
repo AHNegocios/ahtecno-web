@@ -1,6 +1,7 @@
 import { useEffect, useId, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { categories, getProductCategory } from './catalogConfig'
+import { useFavorites } from './useFavorites'
 import { trackProductEvent } from './outboundTracking'
 import {
   formatProductCondition,
@@ -38,6 +39,7 @@ const copyWithoutClipboardApi = (text) => {
 export function ProductDetailsContent({ product, context = 'modal', titleId }) {
   const [activeImageIndex, setActiveImageIndex] = useState(0)
   const [shareFeedback, setShareFeedback] = useState('')
+  const { isFavorite, toggleFavorite } = useFavorites()
   const {
     id,
     titulo,
@@ -63,6 +65,7 @@ export function ProductDetailsContent({ product, context = 'modal', titleId }) {
   const productPath = getProductPath(product)
   const outboundSource = context === 'detail' ? 'detail' : 'modal'
   const ProductTitle = context === 'detail' ? 'h1' : 'h2'
+  const favorite = isFavorite(id)
 
   useEffect(() => {
     trackProductEvent(id, 'product_view', outboundSource)
@@ -156,6 +159,17 @@ export function ProductDetailsContent({ product, context = 'modal', titleId }) {
             <button className="button button--secondary" type="button" onClick={shareProduct}>
               Compartir oferta
             </button>
+            <button
+              className={`button product-favorite-action ${
+                favorite ? 'is-active' : ''
+              }`}
+              type="button"
+              aria-pressed={favorite}
+              onClick={() => toggleFavorite(product)}
+            >
+              <span aria-hidden="true">{favorite ? '♥' : '♡'}</span>
+              {favorite ? 'Guardado en favoritos' : 'Guardar en favoritos'}
+            </button>
             {context === 'modal' && (
               <Link className="product-modal__full-link" to={productPath}>
                 Abrir ficha completa →
@@ -228,6 +242,7 @@ function Producto({
   const [modalOpen, setModalOpen] = useState(false)
   const closeButtonRef = useRef(null)
   const titleId = useId()
+  const { isFavorite, toggleFavorite } = useFavorites()
   const cleanLink = linkOferta?.trim() || ''
   const categorySlug = getProductCategory({ titulo, categoria })
   const category = categories.find(({ slug }) => slug === categorySlug)
@@ -245,6 +260,7 @@ function Producto({
     ml_id,
     campaign_name: campania,
   }
+  const favorite = isFavorite(id)
 
   useEffect(() => {
     if (!modalOpen) return undefined
@@ -280,6 +296,21 @@ function Producto({
         ) : (
           esPrimero && <span className="product-card__badge">Último ingresado</span>
         )}
+
+        <button
+          className={`product-card__favorite ${favorite ? 'is-active' : ''}`}
+          type="button"
+          aria-label={
+            favorite
+              ? `Quitar ${titulo} de favoritos`
+              : `Guardar ${titulo} en favoritos`
+          }
+          aria-pressed={favorite}
+          title={favorite ? 'Quitar de favoritos' : 'Guardar en favoritos'}
+          onClick={() => toggleFavorite(product)}
+        >
+          <span aria-hidden="true">{favorite ? '♥' : '♡'}</span>
+        </button>
 
         <div className="product-card__image-wrap">
           {imagen ? (

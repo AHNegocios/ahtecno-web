@@ -43,8 +43,108 @@
 .catalog-page,
 .categories-page,
 .community-page,
-.offers-page {
+.offers-page,
+.favorites-page {
   min-height: 60vh;
+}
+
+.favorites-page {
+  width: min(calc(100% - 32px), var(--content-wide));
+  margin: 0 auto;
+  padding: 54px 0 88px;
+}
+
+.favorites-page > .page-heading {
+  max-width: 760px;
+}
+
+.favorites-section {
+  margin-top: 42px;
+}
+
+.favorites-section .section-heading {
+  margin-bottom: 20px;
+}
+
+.favorites-section .section-heading h2 {
+  margin: 5px 0 0;
+}
+
+.favorites-empty {
+  margin-top: 34px;
+  padding: clamp(38px, 7vw, 72px) 24px;
+  text-align: center;
+}
+
+.favorites-empty__icon {
+  width: 58px;
+  height: 58px;
+  margin: 0 auto 16px;
+  border: 1px solid color-mix(in srgb, var(--accent) 45%, var(--border));
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: var(--accent-soft);
+  color: var(--accent);
+  font-size: 1.8rem;
+}
+
+.favorites-empty h2 {
+  margin: 0 0 8px;
+}
+
+.favorites-empty p {
+  margin: 0 0 22px;
+}
+
+.favorites-unavailable {
+  padding: 24px;
+  border: 1px solid color-mix(in srgb, #f59e0b 42%, var(--border));
+  border-radius: var(--radius-md);
+  background: color-mix(in srgb, #f59e0b 5%, var(--surface));
+}
+
+.favorites-unavailable__list {
+  display: grid;
+  gap: 10px;
+}
+
+.favorites-unavailable__list article {
+  padding: 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  display: grid;
+  grid-template-columns: 64px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 14px;
+  background: var(--surface-raised);
+}
+
+.favorites-unavailable__list img,
+.favorites-unavailable__placeholder {
+  width: 64px;
+  height: 64px;
+  border-radius: 8px;
+  display: grid;
+  place-items: center;
+  object-fit: contain;
+  background: #fff;
+  color: #687077;
+  font-size: 1.5rem;
+}
+
+.favorites-unavailable__list strong {
+  color: var(--text-primary);
+}
+
+.favorites-unavailable__list p {
+  margin: 4px 0;
+  color: var(--accent);
+  font-weight: 900;
+}
+
+.favorites-unavailable__list small {
+  color: var(--text-secondary);
 }
 
 .hero {

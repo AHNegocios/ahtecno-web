@@ -866,6 +866,38 @@
   gap: 8px;
 }
 
+.admin-price-legend button {
+  min-height: 34px;
+  padding: 6px 10px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--surface-raised);
+  color: var(--text-secondary);
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.7rem;
+  font-weight: 850;
+}
+
+.admin-price-legend button strong {
+  min-width: 20px;
+  padding: 2px 5px;
+  border-radius: 999px;
+  background: var(--surface);
+  color: var(--text-primary);
+  font-size: 0.66rem;
+}
+
+.admin-price-legend button:hover,
+.admin-price-legend button.is-active {
+  border-color: color-mix(in srgb, var(--accent) 58%, var(--border));
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+
 .admin-price-list {
   display: grid;
   gap: 10px;
@@ -944,6 +976,11 @@
   font-size: 0.78rem;
 }
 
+.admin-reviewed-label {
+  color: #22c55e;
+  font-size: 0.78rem;
+}
+
 .admin-publication-state {
   font-size: 0.76rem;
   font-weight: 900;
@@ -987,6 +1024,51 @@
   color: var(--text-secondary);
   font-size: 0.64rem;
   font-weight: 750;
+}
+
+.admin-manual-review {
+  width: 100%;
+  margin-top: 4px;
+  padding-top: 9px;
+  border-top: 1px solid var(--border);
+  display: grid;
+  gap: 7px;
+}
+
+.admin-manual-review > a {
+  color: var(--accent);
+  font-size: 0.7rem;
+  font-weight: 800;
+  text-decoration: none;
+}
+
+.admin-manual-review > a:hover {
+  text-decoration: underline;
+}
+
+.admin-manual-review label {
+  display: grid;
+  gap: 4px;
+  color: var(--text-secondary);
+  font-size: 0.68rem;
+  font-weight: 800;
+}
+
+.admin-manual-review input {
+  width: 100%;
+  min-height: 34px;
+  padding: 6px 8px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--background);
+  color: var(--text-primary);
+  font: inherit;
+}
+
+.admin-manual-review .button {
+  min-height: 34px;
+  padding: 7px 9px;
+  font-size: 0.7rem;
 }
 
 .admin-product-settings {

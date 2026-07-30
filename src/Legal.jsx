@@ -151,8 +151,10 @@ const legalSections = [
         <p>
           La parte pública no utiliza cookies publicitarias ni una aceptación general de cookies.
           Por eso no mostramos un cartel que te obligue a aceptar tecnologías que hoy no usamos.
-          Si incorporamos favoritos locales u otra función opcional, actualizaremos esta sección
-          antes de activarla.
+          La función de favoritos guarda en el almacenamiento local del dispositivo una referencia
+          mínima de los productos elegidos. Esa lista no se envía a AH Tecno, Supabase ni Mercado
+          Libre, no requiere una cuenta y puede eliminarse desde la propia web o borrando los datos
+          del navegador.
         </p>
 
         <h3>Panel privado</h3>

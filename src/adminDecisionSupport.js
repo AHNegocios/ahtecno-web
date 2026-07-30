@@ -8,12 +8,51 @@ const severityWeight = {
   info: 1,
 }
 
+export const MANUAL_PRICE_REVIEW_DAYS = 7
+
 export const hasAutomaticMercadoLibrePrice = (product = {}) =>
   String(product.price_source || '').trim().toLowerCase() === 'mercadolibre'
 
-export const doesPriceNeedReview = (product = {}) =>
-  !hasAutomaticMercadoLibrePrice(product) ||
-  Boolean(product.price_needs_review)
+export const getManualPriceReviewState = (
+  product = {},
+  now = new Date(),
+) => {
+  if (hasAutomaticMercadoLibrePrice(product)) {
+    return {
+      key: product.price_needs_review ? 'pending' : 'automatic',
+      requiresReview: Boolean(product.price_needs_review),
+      reviewedAt: null,
+      expiresAt: null,
+    }
+  }
+
+  const reviewedAt = product.manual_price_reviewed_at
+    ? new Date(product.manual_price_reviewed_at)
+    : null
+  const reviewedTime =
+    reviewedAt && !Number.isNaN(reviewedAt.getTime())
+      ? reviewedAt.getTime()
+      : null
+  const expiresAt = reviewedTime
+    ? new Date(
+        reviewedTime +
+          MANUAL_PRICE_REVIEW_DAYS * 24 * 60 * 60 * 1000,
+      )
+    : null
+  const nowTime = now instanceof Date ? now.getTime() : new Date(now).getTime()
+  const currentTime = Number.isNaN(nowTime) ? Date.now() : nowTime
+  const requiresReview = !expiresAt || expiresAt.getTime() <= currentTime
+
+  return {
+    key: requiresReview ? 'pending' : 'reviewed',
+    requiresReview,
+    reviewedAt,
+    expiresAt,
+  }
+}
+
+export const doesPriceNeedReview = (product = {}, now = new Date()) =>
+  getManualPriceReviewState(product, now).requiresReview
 
 export const getLatestPriceChanges = (history = []) => {
   const grouped = new Map()
@@ -145,14 +184,17 @@ export const buildAdminAlerts = (
       })
     }
 
-    if (publication.public && doesPriceNeedReview(product)) {
+    const manualPriceReview = getManualPriceReviewState(product, now)
+    if (publication.public && manualPriceReview.requiresReview) {
       alerts.push({
         id: `price-${product.id}`,
         productId: product.id,
         severity: 'warning',
         type: 'price',
         title: 'Revisar precio manual',
-        message: `${productName} tiene un valor cargado manualmente que Mercado Libre no confirmó mediante la API.`,
+        message: manualPriceReview.reviewedAt
+          ? `${productName} superó los ${MANUAL_PRICE_REVIEW_DAYS} días desde su última revisión manual.`
+          : `${productName} tiene un valor manual que todavía no fue confirmado por ustedes.`,
       })
     }
 

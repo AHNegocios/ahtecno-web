@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Link, NavLink } from 'react-router-dom'
+import { useFavorites } from './useFavorites'
 import './Navbar.css'
 
 const getInitialTheme = () => {
@@ -8,6 +9,7 @@ const getInitialTheme = () => {
 }
 
 function Navbar() {
+  const { count: favoriteCount } = useFavorites()
   const [menuOpen, setMenuOpen] = useState(false)
   const [settingsOpen, setSettingsOpen] = useState(false)
   const [theme, setTheme] = useState(getInitialTheme)
@@ -71,6 +73,15 @@ function Navbar() {
             </NavLink>
             <NavLink to="/productos" onClick={closeMenu}>
               Productos
+            </NavLink>
+            <NavLink className="favorites-link" to="/favoritos" onClick={closeMenu}>
+              <span aria-hidden="true">♡</span>
+              Favoritos
+              {favoriteCount > 0 && (
+                <strong aria-label={`${favoriteCount} favoritos`}>
+                  {favoriteCount}
+                </strong>
+              )}
             </NavLink>
             <NavLink to="/comunidad" onClick={closeMenu}>
               Comunidad

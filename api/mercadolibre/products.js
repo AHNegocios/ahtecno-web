@@ -12,6 +12,7 @@ const BASE_PRODUCT_FIELDS =
 const AVAILABILITY_FIELDS = ', unavailable_since, consecutive_sync_failures'
 const CAMPAIGN_FIELDS =
   ', campaign_name, featured_from, featured_until, featured_priority'
+const PRICE_REVIEW_FIELDS = ', manual_price_reviewed_at'
 
 const loadAdminProducts = async (supabase) => {
   const runQuery = (fields) =>
@@ -21,39 +22,83 @@ const loadAdminProducts = async (supabase) => {
       .order('created_at', { ascending: false })
       .limit(100)
 
-  let result = await runQuery(
-    `${BASE_PRODUCT_FIELDS}${AVAILABILITY_FIELDS}${CAMPAIGN_FIELDS}`,
-  )
+  let availabilityConfigured = true
   let campaignsConfigured = true
+  let priceReviewsConfigured = true
+  let result
 
-  if (
-    result.error &&
-    /campaign_name|featured_from|featured_until|featured_priority/i.test(
-      String(result.error.message || ''),
-    )
-  ) {
-    campaignsConfigured = false
-    result = await runQuery(`${BASE_PRODUCT_FIELDS}${AVAILABILITY_FIELDS}`)
-  }
+  for (let attempt = 0; attempt < 4; attempt += 1) {
+    const fields = [
+      BASE_PRODUCT_FIELDS,
+      availabilityConfigured ? AVAILABILITY_FIELDS : '',
+      campaignsConfigured ? CAMPAIGN_FIELDS : '',
+      priceReviewsConfigured ? PRICE_REVIEW_FIELDS : '',
+    ].join('')
+    result = await runQuery(fields)
+    if (!result.error) break
 
-  if (
-    result.error &&
-    /unavailable_since|consecutive_sync_failures/i.test(
-      String(result.error.message || ''),
-    )
-  ) {
-    result = await runQuery(BASE_PRODUCT_FIELDS)
+    const message = String(result.error.message || '')
+    if (
+      priceReviewsConfigured &&
+      /manual_price_reviewed_at/i.test(message)
+    ) {
+      priceReviewsConfigured = false
+      continue
+    }
+    if (
+      campaignsConfigured &&
+      /campaign_name|featured_from|featured_until|featured_priority/i.test(
+        message,
+      )
+    ) {
+      campaignsConfigured = false
+      continue
+    }
+    if (
+      availabilityConfigured &&
+      /unavailable_since|consecutive_sync_failures/i.test(message)
+    ) {
+      availabilityConfigured = false
+      continue
+    }
+    break
   }
 
   if (result.error) throw result.error
+
+  const latestReviews = new Map()
+  if (priceReviewsConfigured) {
+    const reviewsResult = await supabase
+      .from('product_manual_price_reviews')
+      .select('product_id, reviewer_email, reviewed_at')
+      .order('reviewed_at', { ascending: false })
+      .limit(200)
+
+    if (reviewsResult.error) {
+      priceReviewsConfigured = false
+    } else {
+      ;(reviewsResult.data || []).forEach((review) => {
+        const productId = String(review.product_id)
+        if (!latestReviews.has(productId)) {
+          latestReviews.set(productId, review)
+        }
+      })
+    }
+  }
+
   return {
     campaignsConfigured,
+    priceReviewsConfigured,
     products: (result.data || []).map((product) => ({
       ...product,
       campaign_name: product.campaign_name || null,
       featured_from: product.featured_from || null,
       featured_until: product.featured_until || null,
       featured_priority: Number(product.featured_priority) || 0,
+      manual_price_reviewed_at:
+        product.manual_price_reviewed_at || null,
+      manual_price_reviewed_by:
+        latestReviews.get(String(product.id))?.reviewer_email || null,
     })),
   }
 }
@@ -127,8 +172,11 @@ const loadAnalytics = async (supabase) => {
 export async function GET(request) {
   try {
     const { supabase } = await requireAdmin(request)
-    const { products: productRows, campaignsConfigured } =
-      await loadAdminProducts(supabase)
+    const {
+      products: productRows,
+      campaignsConfigured,
+      priceReviewsConfigured,
+    } = await loadAdminProducts(supabase)
 
     let eventsResult = await supabase
       .from('product_event_totals')
@@ -183,6 +231,7 @@ export async function GET(request) {
       decision_center: {
         campaigns_configured: campaignsConfigured,
         price_history_configured: priceHistory.configured,
+        price_reviews_configured: priceReviewsConfigured,
       },
     })
   } catch (error) {

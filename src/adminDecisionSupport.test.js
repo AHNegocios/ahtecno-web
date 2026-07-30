@@ -5,6 +5,7 @@ import {
   doesPriceNeedReview,
   getCampaignRecommendation,
   getLatestPriceChanges,
+  getManualPriceReviewState,
 } from './adminDecisionSupport.js'
 
 test('detecta aumentos y descuentos usando los dos últimos precios', () => {
@@ -30,6 +31,28 @@ test('todo precio manual requiere revisión y uno automático no', () => {
       price_needs_review: false,
     }),
     false,
+  )
+})
+
+test('una revisión manual dura siete días y luego vuelve a alertar', () => {
+  const recentlyReviewed = {
+    price_source: 'manual',
+    manual_price_reviewed_at: '2026-07-28T12:00:00Z',
+  }
+
+  assert.equal(
+    getManualPriceReviewState(
+      recentlyReviewed,
+      new Date('2026-07-30T12:00:00Z'),
+    ).key,
+    'reviewed',
+  )
+  assert.equal(
+    doesPriceNeedReview(
+      recentlyReviewed,
+      new Date('2026-08-05T12:00:01Z'),
+    ),
+    true,
   )
 })
 
