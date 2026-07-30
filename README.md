@@ -44,6 +44,10 @@ Copiar `.env.example` como `.env.local` y completar las variables publicables de
 - `src/ProductoDetalle.jsx`: ficha pública compartible con una URL estable.
 - `src/Favoritos.jsx`: favoritos guardados sólo en el dispositivo, sin crear
   una cuenta.
+- `src/ProductComparison.jsx`: comparación de precio, categoría y
+  características de hasta tres favoritos.
+- `src/RecentlyViewed.jsx`: acceso a las últimas fichas consultadas desde el
+  catálogo.
 - `src/useProducts.js`: acceso centralizado al catálogo de Supabase.
 - `src/catalogConfig.js`: categorías y clasificación temporal.
 - `src/siteConfig.js`: datos públicos y enlaces sociales.
@@ -107,6 +111,10 @@ Los favoritos públicos se guardan en `localStorage` con la clave
 `ahtecno-favorites-v1`. Conservan sólo una referencia mínima del producto, no
 se envían a Supabase ni Mercado Libre y desaparecen al borrar los datos del
 navegador.
+
+Los productos vistos recientemente siguen el mismo criterio y se guardan con
+la clave `ahtecno-recent-products-v1`, con un máximo de seis referencias. El
+visitante puede borrar ese historial desde el catálogo.
 
 La tarea automática usa `CRON_SECRET` y se ejecuta a las 09:00 UTC. En el plan
 Hobby, Vercel puede iniciarla en cualquier momento dentro de esa hora.

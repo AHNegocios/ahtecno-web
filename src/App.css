@@ -147,6 +147,107 @@
   color: var(--text-secondary);
 }
 
+.recent-products {
+  margin: 26px 0 30px;
+  padding: 20px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--surface);
+}
+
+.recent-products__heading {
+  margin-bottom: 14px;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.recent-products__heading h2 {
+  margin: 4px 0 0;
+  font-size: 1.25rem;
+}
+
+.recent-products__heading > button {
+  padding: 5px 0;
+  border: 0;
+  background: transparent;
+  color: var(--text-secondary);
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.72rem;
+  font-weight: 800;
+}
+
+.recent-products__heading > button:hover {
+  color: var(--accent);
+}
+
+.recent-products__list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 9px;
+}
+
+.recent-products__list > a {
+  min-width: 0;
+  padding: 9px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  display: grid;
+  grid-template-columns: 48px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 10px;
+  background: var(--surface-raised);
+  color: var(--text-primary);
+  text-decoration: none;
+}
+
+.recent-products__list > a:hover {
+  border-color: color-mix(in srgb, var(--accent) 58%, var(--border));
+}
+
+.recent-products__image {
+  width: 48px;
+  height: 48px;
+  border-radius: 7px;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  background: #fff;
+  color: #687077;
+}
+
+.recent-products__image img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.recent-products__copy {
+  min-width: 0;
+}
+
+.recent-products__copy strong,
+.recent-products__copy small {
+  display: block;
+}
+
+.recent-products__copy strong {
+  overflow: hidden;
+  font-size: 0.75rem;
+  line-height: 1.35;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.recent-products__copy small {
+  margin-top: 4px;
+  color: var(--accent);
+  font-size: 0.72rem;
+  font-weight: 900;
+}
+
 .hero {
   position: relative;
   padding: clamp(72px, 8vw, 118px) 24px;

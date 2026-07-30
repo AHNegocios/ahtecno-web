@@ -11,32 +11,35 @@ import Navbar from './Navbar'
 import NotFound from './NotFound'
 import OfertasSemana from './OfertasSemana'
 import ProductoDetalle from './ProductoDetalle'
+import { RecentProductsProvider } from './RecentProductsContext'
 import Vidriera from './Vidriera'
 import './App.css'
 
 function App() {
   return (
-    <FavoritesProvider>
-      <BrowserRouter>
-        <Navbar />
+    <RecentProductsProvider>
+      <FavoritesProvider>
+        <BrowserRouter>
+          <Navbar />
 
-        <Routes>
-          <Route path="/" element={<Vidriera />} />
-          <Route path="/productos" element={<Inicio />} />
-          <Route path="/producto/:productKey/:slug?" element={<ProductoDetalle />} />
-          <Route path="/favoritos" element={<Favoritos />} />
-          <Route path="/comunidad" element={<Comunidad />} />
-          <Route path="/ultimos" element={<OfertasSemana />} />
-          <Route path="/ofertas-semana" element={<OfertasSemana />} />
-          <Route path="/categorias" element={<Categorias />} />
-          <Route path="/legal" element={<Legal />} />
-          <Route path="/admin" element={<Admin />} />
-          <Route path="*" element={<NotFound />} />
-        </Routes>
+          <Routes>
+            <Route path="/" element={<Vidriera />} />
+            <Route path="/productos" element={<Inicio />} />
+            <Route path="/producto/:productKey/:slug?" element={<ProductoDetalle />} />
+            <Route path="/favoritos" element={<Favoritos />} />
+            <Route path="/comunidad" element={<Comunidad />} />
+            <Route path="/ultimos" element={<OfertasSemana />} />
+            <Route path="/ofertas-semana" element={<OfertasSemana />} />
+            <Route path="/categorias" element={<Categorias />} />
+            <Route path="/legal" element={<Legal />} />
+            <Route path="/admin" element={<Admin />} />
+            <Route path="*" element={<NotFound />} />
+          </Routes>
 
-        <Footer />
-      </BrowserRouter>
-    </FavoritesProvider>
+          <Footer />
+        </BrowserRouter>
+      </FavoritesProvider>
+    </RecentProductsProvider>
   )
 }
 

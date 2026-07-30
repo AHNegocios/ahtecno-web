@@ -9,6 +9,7 @@ import {
   normalizeProductAttributes,
 } from './productDetails'
 import { getProductPath } from './productUrls'
+import { useRecentProducts } from './useRecentProducts'
 import './Producto.css'
 
 const formatCurrency = (amount) => {
@@ -40,10 +41,12 @@ export function ProductDetailsContent({ product, context = 'modal', titleId }) {
   const [activeImageIndex, setActiveImageIndex] = useState(0)
   const [shareFeedback, setShareFeedback] = useState('')
   const { isFavorite, toggleFavorite } = useFavorites()
+  const { addRecentProduct } = useRecentProducts()
   const {
     id,
     titulo,
     precio,
+    currency_id = 'ARS',
     link: cleanLink = '',
     imagen,
     imagenes = [],
@@ -69,7 +72,26 @@ export function ProductDetailsContent({ product, context = 'modal', titleId }) {
 
   useEffect(() => {
     trackProductEvent(id, 'product_view', outboundSource)
-  }, [id, outboundSource])
+    addRecentProduct({
+      id,
+      titulo,
+      precio,
+      currency_id,
+      imagen,
+      categoria,
+      ml_id,
+    })
+  }, [
+    addRecentProduct,
+    categoria,
+    currency_id,
+    id,
+    imagen,
+    ml_id,
+    outboundSource,
+    precio,
+    titulo,
+  ])
 
   const shareProduct = async () => {
     const url = new URL(productPath, window.location.origin).toString()

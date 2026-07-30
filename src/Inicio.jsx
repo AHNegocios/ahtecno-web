@@ -3,6 +3,7 @@ import { useSearchParams } from 'react-router-dom'
 import { categories, getCategoryLabel, getProductCategory, normalizeText } from './catalogConfig'
 import AffiliateDisclosure from './AffiliateDisclosure'
 import Producto from './Producto'
+import RecentlyViewed from './RecentlyViewed'
 import { getActiveCampaignName } from './productCampaigns'
 import { useProducts } from './useProducts'
 
@@ -60,6 +61,7 @@ function Inicio() {
       </header>
 
       <AffiliateDisclosure compact />
+      <RecentlyViewed products={products} />
 
       <div className="catalog-layout">
         {panelOpen && (

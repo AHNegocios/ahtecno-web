@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom'
 import AffiliateDisclosure from './AffiliateDisclosure'
+import ProductComparison from './ProductComparison'
 import Producto from './Producto'
 import { useFavorites } from './useFavorites'
 import { getActiveCampaignName } from './productCampaigns'
@@ -67,6 +68,10 @@ function Favoritos() {
             Reintentar
           </button>
         </div>
+      )}
+
+      {!loading && !error && (
+        <ProductComparison products={availableProducts} />
       )}
 
       {!loading && !error && !!availableProducts.length && (
