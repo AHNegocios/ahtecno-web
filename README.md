@@ -39,7 +39,8 @@ Copiar `.env.example` como `.env.local` y completar las variables publicables de
 
 - `src/App.jsx`: rutas y estructura global.
 - `src/Navbar.jsx`: navegación, menú móvil y preferencias.
-- `src/Inicio.jsx`: catálogo, búsqueda, orden y filtros.
+- `src/Inicio.jsx`: catálogo, búsqueda, orden y filtros por categoría, precio
+  e información disponible.
 - `src/Producto.jsx`: tarjeta, galería y detalle reutilizable de cada producto.
 - `src/ProductoDetalle.jsx`: ficha pública compartible con una URL estable.
 - `src/Favoritos.jsx`: favoritos guardados sólo en el dispositivo, sin crear

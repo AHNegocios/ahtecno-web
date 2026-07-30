@@ -1,6 +1,12 @@
 import { useMemo, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { categories, getCategoryLabel, getProductCategory, normalizeText } from './catalogConfig'
+import {
+  hasExtendedProductDetails,
+  matchesPriceRange,
+  normalizePriceRange,
+  priceRangeOptions,
+} from './catalogFilters'
 import AffiliateDisclosure from './AffiliateDisclosure'
 import Producto from './Producto'
 import RecentlyViewed from './RecentlyViewed'
@@ -21,6 +27,10 @@ function Inicio() {
   const query = searchParams.get('q') || ''
   const selectedCategory = searchParams.get('categoria') || 'todas'
   const selectedOrder = searchParams.get('orden') || 'mas_nuevos'
+  const selectedPriceRange = normalizePriceRange(
+    searchParams.get('precio') || 'todos',
+  )
+  const detailsOnly = searchParams.get('detalle') === '1'
   const { products, loading, error, retry } = useProducts({ order: selectedOrder })
 
   const updateParam = (key, value, defaultValue = '') => {
@@ -42,10 +52,18 @@ function Inicio() {
       const matchesSearch = !normalizedQuery || normalizeText(product.titulo).includes(normalizedQuery)
       const matchesCategory =
         selectedCategory === 'todas' || getProductCategory(product) === selectedCategory
+      const matchesPrice = matchesPriceRange(product, selectedPriceRange)
+      const matchesDetails = !detailsOnly || hasExtendedProductDetails(product)
 
-      return matchesSearch && matchesCategory
+      return matchesSearch && matchesCategory && matchesPrice && matchesDetails
     })
-  }, [products, query, selectedCategory])
+  }, [
+    detailsOnly,
+    products,
+    query,
+    selectedCategory,
+    selectedPriceRange,
+  ])
 
   const selectCategory = (slug) => {
     updateParam('categoria', slug, 'todas')
@@ -121,6 +139,41 @@ function Inicio() {
               ))}
             </div>
           </div>
+
+          <div className="filter-group">
+            <h3>Rango de precio</h3>
+            <div className="filter-list">
+              {priceRangeOptions.map((option) => (
+                <button
+                  className="filter-button"
+                  type="button"
+                  key={option.value}
+                  aria-pressed={selectedPriceRange === option.value}
+                  onClick={() =>
+                    updateParam('precio', option.value, 'todos')
+                  }
+                >
+                  <span>{option.label}</span>
+                  <span aria-hidden="true">$</span>
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="filter-group">
+            <h3>Información</h3>
+            <div className="filter-list">
+              <button
+                className="filter-button"
+                type="button"
+                aria-pressed={detailsOnly}
+                onClick={() => updateParam('detalle', detailsOnly ? '' : '1')}
+              >
+                <span>Con ficha completa</span>
+                <span aria-hidden="true">▤</span>
+              </button>
+            </div>
+          </div>
         </aside>
 
         <section className="catalog-main" aria-live="polite">
@@ -163,7 +216,10 @@ function Inicio() {
                 <strong>{filteredProducts.length}</strong> {filteredProducts.length === 1 ? 'producto encontrado' : 'productos encontrados'}
               </p>
 
-              {(query || selectedCategory !== 'todas') && (
+              {(query ||
+                selectedCategory !== 'todas' ||
+                selectedPriceRange !== 'todos' ||
+                detailsOnly) && (
                 <div className="active-filters" aria-label="Filtros activos">
                   {query && (
                     <button type="button" onClick={() => updateParam('q', '')}>
@@ -173,6 +229,27 @@ function Inicio() {
                   {selectedCategory !== 'todas' && (
                     <button type="button" onClick={() => selectCategory('todas')}>
                       {getCategoryLabel(selectedCategory)} <span aria-hidden="true">×</span>
+                    </button>
+                  )}
+                  {selectedPriceRange !== 'todos' && (
+                    <button
+                      type="button"
+                      onClick={() => updateParam('precio', '', 'todos')}
+                    >
+                      {
+                        priceRangeOptions.find(
+                          (option) => option.value === selectedPriceRange,
+                        )?.label
+                      }{' '}
+                      <span aria-hidden="true">×</span>
+                    </button>
+                  )}
+                  {detailsOnly && (
+                    <button
+                      type="button"
+                      onClick={() => updateParam('detalle', '')}
+                    >
+                      Con ficha completa <span aria-hidden="true">×</span>
                     </button>
                   )}
                 </div>
