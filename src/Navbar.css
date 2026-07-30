@@ -88,6 +88,23 @@
   border: 1px solid color-mix(in srgb, var(--accent) 38%, transparent);
 }
 
+.site-navigation > a.favorites-link {
+  gap: 6px;
+}
+
+.favorites-link strong {
+  min-width: 21px;
+  height: 21px;
+  padding: 0 5px;
+  border-radius: 999px;
+  display: inline-grid;
+  place-items: center;
+  background: var(--accent);
+  color: #031014;
+  font-size: 0.68rem;
+  line-height: 1;
+}
+
 .menu-toggle {
   display: none;
   width: 44px;

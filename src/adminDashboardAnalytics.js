@@ -1,7 +1,15 @@
-const METRIC_KEYS = ['product_views', 'outbound_clicks', 'shares']
+const METRIC_KEYS = [
+  'product_impressions',
+  'product_views',
+  'favorites_added',
+  'outbound_clicks',
+  'shares',
+]
 
 const emptyMetrics = () => ({
+  product_impressions: 0,
   product_views: 0,
+  favorites_added: 0,
   outbound_clicks: 0,
   shares: 0,
 })
@@ -46,6 +54,18 @@ export const getPeriodAnalytics = (analytics = {}, periodDays = 30) => {
       ),
       shares: percentChange(current.shares, previous.shares),
     },
+    currentDetailRate: current.product_impressions
+      ? (current.product_views / current.product_impressions) * 100
+      : 0,
+    previousDetailRate: previous.product_impressions
+      ? (previous.product_views / previous.product_impressions) * 100
+      : 0,
+    currentFavoriteRate: current.product_views
+      ? (current.favorites_added / current.product_views) * 100
+      : 0,
+    previousFavoriteRate: previous.product_views
+      ? (previous.favorites_added / previous.product_views) * 100
+      : 0,
     currentCtr: current.product_views
       ? (current.outbound_clicks / current.product_views) * 100
       : 0,
@@ -99,6 +119,9 @@ export const getProductPeriodPerformance = (
       ...entry,
       ctr: entry.current.product_views
         ? (entry.current.outbound_clicks / entry.current.product_views) * 100
+        : 0,
+      detailRate: entry.current.product_impressions
+        ? (entry.current.product_views / entry.current.product_impressions) * 100
         : 0,
       clickChange: percentChange(
         entry.current.outbound_clicks,

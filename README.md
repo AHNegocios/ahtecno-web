@@ -39,9 +39,16 @@ Copiar `.env.example` como `.env.local` y completar las variables publicables de
 
 - `src/App.jsx`: rutas y estructura global.
 - `src/Navbar.jsx`: navegación, menú móvil y preferencias.
-- `src/Inicio.jsx`: catálogo, búsqueda, orden y filtros.
+- `src/Inicio.jsx`: catálogo, búsqueda, orden y filtros por categoría, precio
+  e información disponible.
 - `src/Producto.jsx`: tarjeta, galería y detalle reutilizable de cada producto.
 - `src/ProductoDetalle.jsx`: ficha pública compartible con una URL estable.
+- `src/Favoritos.jsx`: favoritos guardados sólo en el dispositivo, sin crear
+  una cuenta.
+- `src/ProductComparison.jsx`: comparación de precio, categoría y
+  características de hasta tres favoritos.
+- `src/RecentlyViewed.jsx`: acceso a las últimas fichas consultadas desde el
+  catálogo.
 - `src/useProducts.js`: acceso centralizado al catálogo de Supabase.
 - `src/catalogConfig.js`: categorías y clasificación temporal.
 - `src/siteConfig.js`: datos públicos y enlaces sociales.
@@ -66,8 +73,10 @@ Flujo previsto:
 5. El enlace de afiliado se conserva en `Productos.link`; nunca se reemplaza
    automáticamente por el permalink común de Mercado Libre.
 6. Si Mercado Libre no informa un precio, el administrador puede cargar un
-   respaldo manual. El producto queda marcado para revisión y las siguientes
-   sincronizaciones conservan ese valor hasta recibir uno oficial.
+   respaldo manual. Debe comprobarlo en la publicación y confirmarlo desde
+   Admin; la confirmación registra fecha y administrador y vence a los siete
+   días. Las siguientes sincronizaciones conservan ese valor hasta recibir uno
+   oficial.
 7. Vercel ejecuta una sincronización diaria de todos los productos con `ml_id`.
    El panel privado también permite solicitar una actualización inmediata.
 8. El panel permite asignar una categoría editorial de AH Tecno y ocultar un
@@ -79,9 +88,10 @@ Flujo previsto:
    historial.
 10. Las fallas temporales de red o autenticación no ocultan productos. Se
     registran como intentos fallidos para revisión.
-11. Las vistas de detalle, los compartidos y los clics salientes se cuentan
-    sin guardar IP, correo, cookies ni otros datos personales. Los totales
-    aparecen en el panel privado.
+11. Las apariciones de tarjetas, vistas de detalle, favoritos agregados,
+    compartidos y clics salientes se cuentan sin guardar IP, correo, cookies
+    ni otros datos personales. Los totales y el embudo aparecen en el panel
+    privado.
 12. Las visitas generales y el rendimiento técnico se consultan en Web
     Analytics y Speed Insights dentro del proyecto de Vercel.
 
@@ -94,9 +104,40 @@ Para esta versión también se debe ejecutar
 `supabase/migrations/202607250001_product_analytics_and_expiration.sql` y
 habilitar Analytics y Speed Insights desde el panel del proyecto en Vercel.
 
+Para habilitar el historial privado de confirmaciones manuales se debe ejecutar
+`supabase/migrations/202607300001_manual_price_reviews.sql`. La tabla de
+auditoría no es accesible para visitantes ni usuarios autenticados comunes; las
+confirmaciones se realizan desde la función privada de Admin.
+
+Para habilitar el embudo de actividad y la procedencia general de las visitas se
+debe ejecutar `supabase/migrations/202607300002_visitor_funnel.sql`. Sólo se
+guarda el producto, la acción, la superficie, un canal general como TikTok o
+Instagram y el momento; no se agregan identificadores personales.
+
+Los favoritos públicos se guardan en `localStorage` con la clave
+`ahtecno-favorites-v1`. Conservan sólo una referencia mínima del producto, no
+se envían a Supabase ni Mercado Libre y desaparecen al borrar los datos del
+navegador. Se puede registrar anónimamente el uso del botón de favoritos, pero
+no el contenido privado de la lista.
+
+Los productos vistos recientemente siguen el mismo criterio y se guardan con
+la clave `ahtecno-recent-products-v1`, con un máximo de seis referencias. El
+visitante puede borrar ese historial desde el catálogo.
+
 La tarea automática usa `CRON_SECRET` y se ejecuta a las 09:00 UTC. En el plan
 Hobby, Vercel puede iniciarla en cualquier momento dentro de esa hora.
 
 `category_id` conserva la clasificación técnica original de Mercado Libre y
 `categoria` guarda la clasificación editorial de AH Tecno. Si esta última se
 deja en automático, la web usa las reglas de `src/catalogConfig.js`.
+
+## Descubrimiento y enlaces compartidos
+
+- `robots.txt` permite rastrear la parte pública y excluye Admin y las rutas de
+  API.
+- `/sitemap.xml` se genera con las páginas principales y todos los productos
+  públicos activos.
+- Cada ruta actualiza título, descripción y dirección canónica.
+- Las fichas de producto agregan datos estructurados `Product` sin presentar a
+  AH Tecno como vendedor.
+- `public/og.png` es la tarjeta general que aparece al compartir la web.

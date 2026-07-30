@@ -1,4 +1,5 @@
 export const siteConfig = {
+  siteUrl: 'https://ahtecno-web.vercel.app',
   brandName: 'A&H Tecno',
   shortName: 'A&H TECNO',
   tagline: 'Ofertas tecnológicas seleccionadas para ahorrar tiempo y comprar mejor.',

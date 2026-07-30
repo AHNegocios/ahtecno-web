@@ -79,8 +79,7 @@ const markUnavailable = async (
       ...(hasAvailabilitySchema
         ? {
             unavailable_since: product.unavailable_since || now,
-            consecutive_sync_failures:
-              (Number(product.consecutive_sync_failures) || 0) + 1,
+            consecutive_sync_failures: 0,
           }
         : {}),
     })
@@ -124,6 +123,31 @@ const markLinkOnlyProductAvailable = async (
   return data
 }
 
+const markLinkOnlyProductUnconfirmed = async (
+  supabase,
+  product,
+  reason,
+  hasAvailabilitySchema,
+) => {
+  const fields = hasAvailabilitySchema
+    ? ', unavailable_since, consecutive_sync_failures'
+    : ''
+  const { data, error } = await supabase
+    .from('Productos')
+    .update({
+      sync_error: reason,
+      ...(hasAvailabilitySchema ? { consecutive_sync_failures: 0 } : {}),
+    })
+    .eq('id', product.id)
+    .select(
+      `id, ml_id, titulo, precio, price_source, price_needs_review, ml_status, last_synced_at${fields}`,
+    )
+    .single()
+
+  if (error) throw error
+  return { ...data, sync_skipped: true }
+}
+
 const syncProduct = async (
   supabase,
   product,
@@ -161,9 +185,12 @@ const syncProduct = async (
       )
     }
 
-    const error = new Error(affiliateLinkResult.reason)
-    await markSyncError(supabase, product, error, hasAvailabilitySchema)
-    throw error
+    return markLinkOnlyProductUnconfirmed(
+      supabase,
+      product,
+      affiliateLinkResult.reason,
+      hasAvailabilitySchema,
+    )
   }
 
   try {
@@ -205,12 +232,46 @@ const syncProduct = async (
   }
 }
 
+export const summarizeSyncResults = (results = []) => {
+  const failures = results.filter((result) => !result.ok)
+  const skipped = results.filter((result) => result.ok && result.skipped).length
+  const needsReview = results.filter(
+    (result) =>
+      result.ok &&
+      !result.skipped &&
+      result.product.price_needs_review,
+  ).length
+  const hidden = results.filter(
+    (result) =>
+      result.ok &&
+      !result.skipped &&
+      hasInactiveMercadoLibreStatus(result.product.ml_status),
+  ).length
+  const expired = results.filter(
+    (result) =>
+      result.ok &&
+      !result.skipped &&
+      hasExpiredMercadoLibreStatus(result.product.ml_status),
+  ).length
+
+  return {
+    total: results.length,
+    updated: results.length - failures.length - skipped,
+    failed: failures.length,
+    skipped,
+    needsReview,
+    hidden,
+    expired,
+    failures,
+  }
+}
+
 export const syncAllProducts = async (supabase) => {
   let hasAvailabilitySchema = true
   let productsResult = await supabase
     .from('Productos')
     .select(
-      'id, ml_id, ml_item_id, link, precio, currency_id, price_source, unavailable_since, consecutive_sync_failures',
+      'id, titulo, ml_id, ml_item_id, link, precio, currency_id, price_source, unavailable_since, consecutive_sync_failures',
     )
     .order('id', { ascending: true })
 
@@ -223,7 +284,9 @@ export const syncAllProducts = async (supabase) => {
     hasAvailabilitySchema = false
     productsResult = await supabase
       .from('Productos')
-      .select('id, ml_id, ml_item_id, link, precio, currency_id, price_source')
+      .select(
+        'id, titulo, ml_id, ml_item_id, link, precio, currency_id, price_source',
+      )
       .order('id', { ascending: true })
   }
 
@@ -233,7 +296,16 @@ export const syncAllProducts = async (supabase) => {
       String(product.ml_id || '').trim() || String(product.link || '').trim(),
   )
   if (!products?.length) {
-    return { total: 0, updated: 0, failed: 0, needsReview: 0, failures: [] }
+    return {
+      total: 0,
+      updated: 0,
+      failed: 0,
+      skipped: 0,
+      needsReview: 0,
+      hidden: 0,
+      expired: 0,
+      failures: [],
+    }
   }
 
   const hasApiProducts = products.some((product) => {
@@ -259,10 +331,16 @@ export const syncAllProducts = async (supabase) => {
             accessToken,
             hasAvailabilitySchema,
           )
-          return { ok: true, product: updated }
+          return {
+            ok: true,
+            skipped: Boolean(updated.sync_skipped),
+            product: updated,
+          }
         } catch (syncError) {
           return {
             ok: false,
+            productId: product.id,
+            title: product.titulo || 'Producto sin título',
             mlId: product.ml_id,
             error: safeSyncError(syncError),
           }
@@ -272,25 +350,5 @@ export const syncAllProducts = async (supabase) => {
     results.push(...batchResults)
   }
 
-  const failures = results.filter((result) => !result.ok)
-  const needsReview = results.filter(
-    (result) => result.ok && result.product.price_needs_review,
-  ).length
-  const hidden = results.filter(
-    (result) =>
-      result.ok && hasInactiveMercadoLibreStatus(result.product.ml_status),
-  ).length
-  const expired = results.filter(
-    (result) =>
-      result.ok && hasExpiredMercadoLibreStatus(result.product.ml_status),
-  ).length
-  return {
-    total: results.length,
-    updated: results.length - failures.length,
-    failed: failures.length,
-    needsReview,
-    hidden,
-    expired,
-    failures,
-  }
+  return summarizeSyncResults(results)
 }

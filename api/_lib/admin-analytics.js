@@ -1,13 +1,17 @@
 const DAY_IN_MS = 24 * 60 * 60 * 1000
 const ARGENTINA_TIME_ZONE = 'America/Argentina/Buenos_Aires'
 const EVENT_KEYS = {
+  product_impression: 'product_impressions',
   product_view: 'product_views',
+  favorite_add: 'favorites_added',
   outbound_click: 'outbound_clicks',
   share: 'shares',
 }
 
 const emptyMetrics = () => ({
+  product_impressions: 0,
   product_views: 0,
+  favorites_added: 0,
   outbound_clicks: 0,
   shares: 0,
 })
@@ -68,6 +72,8 @@ export const buildAdminAnalytics = (
   const productDaily = new Map()
   const sourceDaily = new Map()
   const sources = new Map()
+  const channelDaily = new Map()
+  const channels = new Map()
   let totalEvents = 0
 
   rows.forEach((row) => {
@@ -102,6 +108,18 @@ export const buildAdminAnalytics = (
     }
     sourceEntry.count += count
     sourceDaily.set(sourceKey, sourceEntry)
+
+    const channel =
+      String(row.channel || 'direct').trim().toLowerCase() || 'direct'
+    channels.set(channel, (channels.get(channel) || 0) + count)
+    const channelKey = `${date}:${channel}`
+    const channelEntry = channelDaily.get(channelKey) || {
+      date,
+      channel,
+      count: 0,
+    }
+    channelEntry.count += count
+    channelDaily.set(channelKey, channelEntry)
   })
 
   return {
@@ -112,8 +130,20 @@ export const buildAdminAnalytics = (
     daily: [...daily.values()],
     product_daily: [...productDaily.values()],
     source_daily: [...sourceDaily.values()],
+    channel_daily: [...channelDaily.values()],
     sources: [...sources.entries()]
       .map(([source, count]) => ({ source, count }))
-      .sort((first, second) => second.count - first.count),
+      .sort(
+        (first, second) =>
+          second.count - first.count ||
+          first.source.localeCompare(second.source),
+      ),
+    channels: [...channels.entries()]
+      .map(([channel, count]) => ({ channel, count }))
+      .sort(
+        (first, second) =>
+          second.count - first.count ||
+          first.channel.localeCompare(second.channel),
+      ),
   }
 }

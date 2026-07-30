@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom'
 import { categories } from './catalogConfig'
+import { CatalogSkeleton } from './LoadingStates'
 import Producto from './Producto'
 import { getActiveCampaignName } from './productCampaigns'
 import { useProducts } from './useProducts'
@@ -107,14 +108,13 @@ function Vidriera() {
         </div>
 
         {loading && (
-          <div className="status-panel" role="status">
-            <div className="loading-dots" aria-hidden="true"><span /><span /><span /></div>
-            <p>Cargando los últimos ingresos...</p>
-          </div>
+          <CatalogSkeleton count={4} layout="carousel" />
         )}
 
         {!loading && error && (
           <div className="status-panel status-panel--error" role="alert">
+            <span className="status-panel__icon" aria-hidden="true">!</span>
+            <h2>No pudimos cargar la vidriera</h2>
             <p>{error}</p>
             <button className="button button--secondary" type="button" onClick={retry}>Reintentar</button>
           </div>

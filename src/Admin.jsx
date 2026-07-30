@@ -5,6 +5,10 @@ import { getProductPublicationState } from './productVisibility'
 import { supabase } from './supabaseClient'
 import AdminAnalytics from './AdminAnalytics'
 import AdminDecisionCenter from './AdminDecisionCenter'
+import {
+  doesPriceNeedReview,
+  getManualPriceReviewState,
+} from './adminDecisionSupport'
 import './Admin.css'
 
 const formatPrice = (value, currency = 'ARS') => {
@@ -29,6 +33,24 @@ const formatDate = (value) => {
     dateStyle: 'short',
     timeStyle: 'short',
   }).format(date)
+}
+
+function SyncFailureDetails({ failures = [] }) {
+  if (!failures.length) return null
+
+  return (
+    <details className="admin-sync-failures">
+      <summary>Ver por qué fallaron {failures.length} producto(s)</summary>
+      <ul>
+        {failures.map((failure, index) => (
+          <li key={`${failure.productId || failure.mlId || 'sync'}-${index}`}>
+            <strong>{failure.title || failure.mlId || 'Producto sin identificar'}</strong>
+            <span>{failure.error}</span>
+          </li>
+        ))}
+      </ul>
+    </details>
+  )
 }
 
 function ProductCatalogControls({ product, apiRequest, onSaved }) {
@@ -98,8 +120,32 @@ function ProductCatalogControls({ product, apiRequest, onSaved }) {
 }
 
 function AdminProductRow({ product, apiRequest, onSaved }) {
+  const [reviewPrice, setReviewPrice] = useState(String(product.precio || ''))
+  const [reviewSaving, setReviewSaving] = useState(false)
+  const [reviewFeedback, setReviewFeedback] = useState('')
   const automatic = product.price_source === 'mercadolibre'
   const publicationState = getProductPublicationState(product)
+  const priceReview = getManualPriceReviewState(product)
+
+  const confirmManualPrice = async () => {
+    setReviewSaving(true)
+    setReviewFeedback('')
+    try {
+      await apiRequest('/api/admin/price-review', {
+        method: 'POST',
+        body: JSON.stringify({
+          product_id: product.id,
+          manual_price: reviewPrice,
+        }),
+      })
+      setReviewFeedback('Precio confirmado y fecha registrada.')
+      await onSaved()
+    } catch (error) {
+      setReviewFeedback(error.message)
+    } finally {
+      setReviewSaving(false)
+    }
+  }
 
   return (
     <article
@@ -134,10 +180,25 @@ function AdminProductRow({ product, apiRequest, onSaved }) {
         >
           {publicationState.label}
         </strong>
-        {product.price_needs_review ? (
-          <strong className="admin-review-label">Revisar precio</strong>
+        {publicationState.key === 'expired' ? (
+          <span>Sin revisión de precio</span>
+        ) : priceReview.requiresReview ? (
+          <strong className="admin-review-label">
+            Revisar precio manual
+          </strong>
+        ) : priceReview.key === 'reviewed' ? (
+          <>
+            <strong className="admin-reviewed-label">Manual revisado</strong>
+            <small>
+              Confirmado: {formatDate(priceReview.reviewedAt)}
+              {product.manual_price_reviewed_by
+                ? ` por ${product.manual_price_reviewed_by}`
+                : ''}
+            </small>
+            <small>Próxima revisión: {formatDate(priceReview.expiresAt)}</small>
+          </>
         ) : (
-          <span>Precio confirmado</span>
+          <span>Precio automático actualizado</span>
         )}
         <small>
           {product.last_synced_at
@@ -166,6 +227,41 @@ function AdminProductRow({ product, apiRequest, onSaved }) {
           <span>{product.outbound_clicks || 0} clics</span>
           <span>{product.shares || 0} compartidos</span>
         </div>
+        {!automatic && publicationState.key !== 'expired' && (
+          <div className="admin-manual-review">
+            <a
+              href={product.link}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              Comprobar en Mercado Libre ↗
+            </a>
+            <label>
+              Precio verificado
+              <input
+                type="number"
+                min="0.01"
+                step="0.01"
+                inputMode="decimal"
+                value={reviewPrice}
+                onChange={(event) => setReviewPrice(event.target.value)}
+              />
+            </label>
+            <button
+              className="button button--secondary"
+              type="button"
+              disabled={reviewSaving}
+              onClick={confirmManualPrice}
+            >
+              {reviewSaving
+                ? 'Guardando…'
+                : priceReview.key === 'reviewed'
+                  ? 'Volver a confirmar'
+                  : 'Guardar y confirmar'}
+            </button>
+            {reviewFeedback && <small role="status">{reviewFeedback}</small>}
+          </div>
+        )}
       </div>
       <ProductCatalogControls
         product={product}
@@ -201,7 +297,7 @@ function AdminProductList({
           product={product}
           apiRequest={apiRequest}
           onSaved={onSaved}
-          key={product.id}
+          key={`${product.id}-${product.precio}-${product.manual_price_reviewed_at || ''}`}
         />
       ))}
     </div>
@@ -280,6 +376,7 @@ function AdminLogin() {
 function AdminDashboard({ session }) {
   const [searchParams, setSearchParams] = useSearchParams()
   const [activeTab, setActiveTab] = useState('overview')
+  const [priceFilter, setPriceFilter] = useState('all')
   const [status, setStatus] = useState(null)
   const [statusLoading, setStatusLoading] = useState(true)
   const [statusError, setStatusError] = useState('')
@@ -299,6 +396,7 @@ function AdminDashboard({ session }) {
   const [decisionCenter, setDecisionCenter] = useState({
     campaigns_configured: false,
     price_history_configured: false,
+    price_reviews_configured: false,
   })
   const [analytics, setAnalytics] = useState({
     daily: [],
@@ -356,6 +454,7 @@ function AdminDashboard({ session }) {
       setDecisionCenter(payload.decision_center || {
         campaigns_configured: false,
         price_history_configured: false,
+        price_reviews_configured: false,
       })
     } catch (error) {
       setPriceOverviewError(error.message)
@@ -400,6 +499,7 @@ function AdminDashboard({ session }) {
           setDecisionCenter(payload.decision_center || {
             campaigns_configured: false,
             price_history_configured: false,
+            price_reviews_configured: false,
           })
         }
       })
@@ -496,7 +596,9 @@ function AdminDashboard({ session }) {
       if (publicationState.public) summary.published += 1
       if (publicationState.key === 'expired') summary.expired += 1
       if (!publicationState.public) summary.hidden += 1
-      if (product.price_needs_review) summary.needsReview += 1
+      if (publicationState.public && doesPriceNeedReview(product)) {
+        summary.needsReview += 1
+      }
       return summary
     },
     {
@@ -516,6 +618,42 @@ function AdminDashboard({ session }) {
   const currentProducts = priceOverview.filter(
     (product) => getProductPublicationState(product).key !== 'expired',
   )
+  const filteredCurrentProducts = currentProducts.filter((product) => {
+    if (priceFilter === 'automatic') {
+      return product.price_source === 'mercadolibre'
+    }
+    if (priceFilter === 'manual') {
+      return product.price_source !== 'mercadolibre'
+    }
+    if (priceFilter === 'pending') {
+      return doesPriceNeedReview(product)
+    }
+    return true
+  })
+  const priceFilterOptions = [
+    { id: 'all', label: 'Todos', count: currentProducts.length },
+    {
+      id: 'automatic',
+      label: 'Automáticos',
+      count: currentProducts.filter(
+        (product) => product.price_source === 'mercadolibre',
+      ).length,
+    },
+    {
+      id: 'manual',
+      label: 'Manuales',
+      count: currentProducts.filter(
+        (product) => product.price_source !== 'mercadolibre',
+      ).length,
+    },
+    {
+      id: 'pending',
+      label: 'A revisar',
+      count: currentProducts.filter((product) =>
+        doesPriceNeedReview(product),
+      ).length,
+    },
+  ]
   const adminTabs = [
     {
       id: 'overview',
@@ -641,9 +779,13 @@ function AdminDashboard({ session }) {
                       : 'admin-message--success'
                   }`}
                 >
-                  {syncResult.updated} de {syncResult.total} productos actualizados.
+                  Se revisaron {syncResult.total} productos: {syncResult.updated}{' '}
+                  actualizados.
                   {syncResult.failed
-                    ? ` ${syncResult.failed} necesitan revisión.`
+                    ? ` ${syncResult.failed} no pudieron sincronizarse.`
+                    : ''}
+                  {syncResult.skipped
+                    ? ` ${syncResult.skipped} enlaces antiguos quedaron pendientes de comprobación sin contarse como error.`
                     : ''}
                   {syncResult.needsReview
                     ? ` ${syncResult.needsReview} conservaron su precio anterior porque Mercado Libre no informó uno nuevo.`
@@ -653,6 +795,7 @@ function AdminDashboard({ session }) {
                     : ''}
                 </p>
               )}
+              <SyncFailureDetails failures={syncResult?.failures} />
             </div>
           ) : (
             <button
@@ -893,16 +1036,29 @@ function AdminDashboard({ session }) {
                 </button>
               </div>
             ) : (
-              <div className="admin-price-legend" aria-label="Referencias">
-                <span className="admin-price-source admin-price-source--automatic">
-                  Automático
-                </span>
-                <span className="admin-price-source admin-price-source--manual">
-                  Manual o pendiente
-                </span>
+              <div className="admin-price-legend" aria-label="Filtrar por estado del precio">
+                {priceFilterOptions.map((option) => (
+                  <button
+                    className={priceFilter === option.id ? 'is-active' : ''}
+                    type="button"
+                    aria-pressed={priceFilter === option.id}
+                    onClick={() => setPriceFilter(option.id)}
+                    key={option.id}
+                  >
+                    {option.label} <strong>{option.count}</strong>
+                  </button>
+                ))}
               </div>
             )}
           </div>
+
+          {activeTab === 'overview' &&
+            !decisionCenter.price_reviews_configured && (
+              <p className="admin-message admin-message--warning">
+                Ejecutá la migración de revisiones manuales en Supabase para
+                activar las confirmaciones con fecha.
+              </p>
+            )}
 
           {activeTab === 'expired' && syncResult && (
             <p
@@ -912,22 +1068,30 @@ function AdminDashboard({ session }) {
                   : 'admin-message--success'
               }`}
             >
-              Revisión terminada: {syncResult.updated} de {syncResult.total}{' '}
-              productos procesados. Quedan {expiredProducts.length} vencido(s)
-              ocultos.
+              Revisión terminada: {syncResult.total} revisados,{' '}
+              {syncResult.updated} actualizados, {syncResult.failed} con error
+              {syncResult.skipped
+                ? ` y ${syncResult.skipped} enlaces antiguos sin confirmar`
+                : ''}
+              . Quedan {expiredProducts.length} vencido(s) ocultos.
             </p>
+          )}
+          {activeTab === 'expired' && (
+            <SyncFailureDetails failures={syncResult?.failures} />
           )}
 
           <AdminProductList
             products={
-              activeTab === 'expired' ? expiredProducts : currentProducts
+              activeTab === 'expired'
+                ? expiredProducts
+                : filteredCurrentProducts
             }
             loading={priceOverviewLoading}
             error={priceOverviewError}
             emptyMessage={
               activeTab === 'expired'
                 ? 'No hay productos vencidos. El catálogo está limpio.'
-                : 'Todavía no hay productos para revisar.'
+                : 'No hay productos que coincidan con este filtro.'
             }
             apiRequest={apiRequest}
             onSaved={loadPriceOverview}

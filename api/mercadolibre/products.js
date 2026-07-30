@@ -12,6 +12,7 @@ const BASE_PRODUCT_FIELDS =
 const AVAILABILITY_FIELDS = ', unavailable_since, consecutive_sync_failures'
 const CAMPAIGN_FIELDS =
   ', campaign_name, featured_from, featured_until, featured_priority'
+const PRICE_REVIEW_FIELDS = ', manual_price_reviewed_at'
 
 const loadAdminProducts = async (supabase) => {
   const runQuery = (fields) =>
@@ -21,39 +22,83 @@ const loadAdminProducts = async (supabase) => {
       .order('created_at', { ascending: false })
       .limit(100)
 
-  let result = await runQuery(
-    `${BASE_PRODUCT_FIELDS}${AVAILABILITY_FIELDS}${CAMPAIGN_FIELDS}`,
-  )
+  let availabilityConfigured = true
   let campaignsConfigured = true
+  let priceReviewsConfigured = true
+  let result
 
-  if (
-    result.error &&
-    /campaign_name|featured_from|featured_until|featured_priority/i.test(
-      String(result.error.message || ''),
-    )
-  ) {
-    campaignsConfigured = false
-    result = await runQuery(`${BASE_PRODUCT_FIELDS}${AVAILABILITY_FIELDS}`)
-  }
+  for (let attempt = 0; attempt < 4; attempt += 1) {
+    const fields = [
+      BASE_PRODUCT_FIELDS,
+      availabilityConfigured ? AVAILABILITY_FIELDS : '',
+      campaignsConfigured ? CAMPAIGN_FIELDS : '',
+      priceReviewsConfigured ? PRICE_REVIEW_FIELDS : '',
+    ].join('')
+    result = await runQuery(fields)
+    if (!result.error) break
 
-  if (
-    result.error &&
-    /unavailable_since|consecutive_sync_failures/i.test(
-      String(result.error.message || ''),
-    )
-  ) {
-    result = await runQuery(BASE_PRODUCT_FIELDS)
+    const message = String(result.error.message || '')
+    if (
+      priceReviewsConfigured &&
+      /manual_price_reviewed_at/i.test(message)
+    ) {
+      priceReviewsConfigured = false
+      continue
+    }
+    if (
+      campaignsConfigured &&
+      /campaign_name|featured_from|featured_until|featured_priority/i.test(
+        message,
+      )
+    ) {
+      campaignsConfigured = false
+      continue
+    }
+    if (
+      availabilityConfigured &&
+      /unavailable_since|consecutive_sync_failures/i.test(message)
+    ) {
+      availabilityConfigured = false
+      continue
+    }
+    break
   }
 
   if (result.error) throw result.error
+
+  const latestReviews = new Map()
+  if (priceReviewsConfigured) {
+    const reviewsResult = await supabase
+      .from('product_manual_price_reviews')
+      .select('product_id, reviewer_email, reviewed_at')
+      .order('reviewed_at', { ascending: false })
+      .limit(200)
+
+    if (reviewsResult.error) {
+      priceReviewsConfigured = false
+    } else {
+      ;(reviewsResult.data || []).forEach((review) => {
+        const productId = String(review.product_id)
+        if (!latestReviews.has(productId)) {
+          latestReviews.set(productId, review)
+        }
+      })
+    }
+  }
+
   return {
     campaignsConfigured,
+    priceReviewsConfigured,
     products: (result.data || []).map((product) => ({
       ...product,
       campaign_name: product.campaign_name || null,
       featured_from: product.featured_from || null,
       featured_until: product.featured_until || null,
       featured_priority: Number(product.featured_priority) || 0,
+      manual_price_reviewed_at:
+        product.manual_price_reviewed_at || null,
+      manual_price_reviewed_by:
+        latestReviews.get(String(product.id))?.reviewer_email || null,
     })),
   }
 }
@@ -83,13 +128,24 @@ const loadPriceHistory = async (supabase) => {
 const loadAnalytics = async (supabase) => {
   const now = new Date()
   const startDate = getAnalyticsStartDate(now, ANALYTICS_WINDOW_DAYS)
-  const dailyResult = await supabase
+  let dailyResult = await supabase
     .from('product_event_daily')
     .select(
-      'event_date, product_id, event_type, source, event_count',
+      'event_date, product_id, event_type, source, channel, event_count',
     )
     .gte('event_date', startDate)
     .order('event_date', { ascending: true })
+
+  if (
+    dailyResult.error &&
+    /channel/i.test(String(dailyResult.error.message || ''))
+  ) {
+    dailyResult = await supabase
+      .from('product_event_daily')
+      .select('event_date, product_id, event_type, source, event_count')
+      .gte('event_date', startDate)
+      .order('event_date', { ascending: true })
+  }
 
   if (!dailyResult.error) {
     return buildAdminAnalytics(dailyResult.data || [], {
@@ -102,12 +158,24 @@ const loadAnalytics = async (supabase) => {
     now.getTime() -
       (ANALYTICS_WINDOW_DAYS - 1) * 24 * 60 * 60 * 1000,
   ).toISOString()
-  const rawResult = await supabase
+  let rawResult = await supabase
     .from('product_outbound_clicks')
-    .select('created_at, product_id, event_type, source')
+    .select('created_at, product_id, event_type, source, channel')
     .gte('created_at', rawStartDate)
     .order('created_at', { ascending: true })
     .limit(RAW_EVENT_LIMIT)
+
+  if (
+    rawResult.error &&
+    /channel/i.test(String(rawResult.error.message || ''))
+  ) {
+    rawResult = await supabase
+      .from('product_outbound_clicks')
+      .select('created_at, product_id, event_type, source')
+      .gte('created_at', rawStartDate)
+      .order('created_at', { ascending: true })
+      .limit(RAW_EVENT_LIMIT)
+  }
 
   if (rawResult.error) {
     console.error(dailyResult.error, rawResult.error)
@@ -127,30 +195,56 @@ const loadAnalytics = async (supabase) => {
 export async function GET(request) {
   try {
     const { supabase } = await requireAdmin(request)
-    const { products: productRows, campaignsConfigured } =
-      await loadAdminProducts(supabase)
+    const {
+      products: productRows,
+      campaignsConfigured,
+      priceReviewsConfigured,
+    } = await loadAdminProducts(supabase)
 
     let eventsResult = await supabase
       .from('product_event_totals')
-      .select('product_id, product_views, outbound_clicks, shares')
+      .select(
+        'product_id, product_impressions, product_views, favorites_added, outbound_clicks, shares',
+      )
 
     if (eventsResult.error) {
-      const clicksResult = await supabase
-        .from('product_click_totals')
-        .select('product_id, clicks')
+      const legacyEventsResult = await supabase
+        .from('product_event_totals')
+        .select('product_id, product_views, outbound_clicks, shares')
 
-      if (clicksResult.error) {
-        console.error(eventsResult.error, clicksResult.error)
-        eventsResult = { data: [], error: null }
-      } else {
+      if (!legacyEventsResult.error) {
         eventsResult = {
-          data: (clicksResult.data || []).map((row) => ({
-            product_id: row.product_id,
-            product_views: 0,
-            outbound_clicks: row.clicks,
-            shares: 0,
+          data: (legacyEventsResult.data || []).map((row) => ({
+            ...row,
+            product_impressions: 0,
+            favorites_added: 0,
           })),
           error: null,
+        }
+      } else {
+        const clicksResult = await supabase
+          .from('product_click_totals')
+          .select('product_id, clicks')
+
+        if (clicksResult.error) {
+          console.error(
+            eventsResult.error,
+            legacyEventsResult.error,
+            clicksResult.error,
+          )
+          eventsResult = { data: [], error: null }
+        } else {
+          eventsResult = {
+            data: (clicksResult.data || []).map((row) => ({
+              product_id: row.product_id,
+              product_impressions: 0,
+              product_views: 0,
+              favorites_added: 0,
+              outbound_clicks: row.clicks,
+              shares: 0,
+            })),
+            error: null,
+          }
         }
       }
     }
@@ -159,7 +253,9 @@ export async function GET(request) {
       (eventsResult.data || []).map((event) => [
         String(event.product_id),
         {
+          product_impressions: Number(event.product_impressions) || 0,
           product_views: Number(event.product_views) || 0,
+          favorites_added: Number(event.favorites_added) || 0,
           outbound_clicks: Number(event.outbound_clicks) || 0,
           shares: Number(event.shares) || 0,
         },
@@ -167,8 +263,12 @@ export async function GET(request) {
     )
     const products = productRows.map((product) => ({
       ...product,
+      product_impressions:
+        eventTotals.get(String(product.id))?.product_impressions || 0,
       product_views:
         eventTotals.get(String(product.id))?.product_views || 0,
+      favorites_added:
+        eventTotals.get(String(product.id))?.favorites_added || 0,
       outbound_clicks:
         eventTotals.get(String(product.id))?.outbound_clicks || 0,
       shares: eventTotals.get(String(product.id))?.shares || 0,
@@ -183,6 +283,7 @@ export async function GET(request) {
       decision_center: {
         campaigns_configured: campaignsConfigured,
         price_history_configured: priceHistory.configured,
+        price_reviews_configured: priceReviewsConfigured,
       },
     })
   } catch (error) {

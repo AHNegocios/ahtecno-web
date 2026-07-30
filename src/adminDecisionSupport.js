@@ -8,6 +8,52 @@ const severityWeight = {
   info: 1,
 }
 
+export const MANUAL_PRICE_REVIEW_DAYS = 7
+
+export const hasAutomaticMercadoLibrePrice = (product = {}) =>
+  String(product.price_source || '').trim().toLowerCase() === 'mercadolibre'
+
+export const getManualPriceReviewState = (
+  product = {},
+  now = new Date(),
+) => {
+  if (hasAutomaticMercadoLibrePrice(product)) {
+    return {
+      key: product.price_needs_review ? 'pending' : 'automatic',
+      requiresReview: Boolean(product.price_needs_review),
+      reviewedAt: null,
+      expiresAt: null,
+    }
+  }
+
+  const reviewedAt = product.manual_price_reviewed_at
+    ? new Date(product.manual_price_reviewed_at)
+    : null
+  const reviewedTime =
+    reviewedAt && !Number.isNaN(reviewedAt.getTime())
+      ? reviewedAt.getTime()
+      : null
+  const expiresAt = reviewedTime
+    ? new Date(
+        reviewedTime +
+          MANUAL_PRICE_REVIEW_DAYS * 24 * 60 * 60 * 1000,
+      )
+    : null
+  const nowTime = now instanceof Date ? now.getTime() : new Date(now).getTime()
+  const currentTime = Number.isNaN(nowTime) ? Date.now() : nowTime
+  const requiresReview = !expiresAt || expiresAt.getTime() <= currentTime
+
+  return {
+    key: requiresReview ? 'pending' : 'reviewed',
+    requiresReview,
+    reviewedAt,
+    expiresAt,
+  }
+}
+
+export const doesPriceNeedReview = (product = {}, now = new Date()) =>
+  getManualPriceReviewState(product, now).requiresReview
+
 export const getLatestPriceChanges = (history = []) => {
   const grouped = new Map()
   ;[...history]
@@ -43,6 +89,64 @@ export const getLatestPriceChanges = (history = []) => {
   )
 }
 
+export const getCampaignRecommendation = (
+  products = [],
+  priceHistory = [],
+) => {
+  const priceChanges = getLatestPriceChanges(priceHistory)
+  const candidates = products
+    .filter((product) => {
+      const publication = getProductPublicationState(product)
+      return (
+        publication.public &&
+        !doesPriceNeedReview(product) &&
+        Number(product.precio) > 0
+      )
+    })
+    .map((product) => {
+      const priceChange = priceChanges.get(String(product.id))
+      const discount =
+        priceChange?.previous && priceChange.changePercent < 0
+          ? Math.min(Math.abs(priceChange.changePercent), 40)
+          : 0
+      const clicks = Number(product.outbound_clicks) || 0
+      const shares = Number(product.shares) || 0
+      const views = Number(product.product_views) || 0
+      const automaticPriceBonus =
+        String(product.price_source || '').toLowerCase() === 'mercadolibre'
+          ? 10
+          : 0
+      const score =
+        discount * 4 +
+        clicks * 3 +
+        shares * 5 +
+        Math.min(views, 100) * 0.25 +
+        automaticPriceBonus
+
+      let reason = 'está publicado y tiene un precio confirmado'
+      if (discount >= 5) {
+        reason = `bajó ${discount.toFixed(1)}% y puede convertirse en una oferta`
+      } else if (clicks > 0) {
+        reason = `acumula ${clicks} clic(s) hacia Mercado Libre`
+      } else if (shares > 0) {
+        reason = `fue compartido ${shares} vez/veces`
+      } else if (views > 0) {
+        reason = `recibió ${views} vista(s) de detalle`
+      } else if (automaticPriceBonus) {
+        reason = 'está publicado y su precio proviene de Mercado Libre'
+      }
+
+      return { product, reason, score }
+    })
+    .sort(
+      (first, second) =>
+        second.score - first.score ||
+        String(first.product.id).localeCompare(String(second.product.id)),
+    )
+
+  return candidates[0] || null
+}
+
 export const buildAdminAlerts = (
   products = [],
   priceHistory = [],
@@ -69,7 +173,7 @@ export const buildAdminAlerts = (
     }
 
     const failures = Number(product.consecutive_sync_failures) || 0
-    if (failures >= 2) {
+    if (publication.key !== 'expired' && failures >= 2) {
       alerts.push({
         id: `sync-${product.id}`,
         productId: product.id,
@@ -80,14 +184,17 @@ export const buildAdminAlerts = (
       })
     }
 
-    if (product.price_needs_review) {
+    const manualPriceReview = getManualPriceReviewState(product, now)
+    if (publication.public && manualPriceReview.requiresReview) {
       alerts.push({
         id: `price-${product.id}`,
         productId: product.id,
         severity: 'warning',
         type: 'price',
-        title: 'Precio pendiente de revisión',
-        message: `${productName} conserva un valor manual o anterior.`,
+        title: 'Revisar precio manual',
+        message: manualPriceReview.reviewedAt
+          ? `${productName} superó los ${MANUAL_PRICE_REVIEW_DAYS} días desde su última revisión manual.`
+          : `${productName} tiene un valor manual que todavía no fue confirmado por ustedes.`,
       })
     }
 

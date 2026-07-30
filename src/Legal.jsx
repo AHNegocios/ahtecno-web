@@ -61,9 +61,9 @@ const legalSections = [
         <p>
           No necesitás crear una cuenta ni informar tu nombre o correo para explorar el catálogo.
           Nuestra medición propia registra el producto, el tipo de acción —por ejemplo, abrir un
-          detalle, compartir o ir a Mercado Libre—, la ubicación del botón y el momento. Esa
-          medición no agrega tu correo, una cuenta de usuario ni tu dirección IP a nuestra tabla
-          de actividad.
+          detalle, guardar un favorito, compartir o ir a Mercado Libre—, la ubicación del botón,
+          el canal general de procedencia cuando está disponible y el momento. Esa medición no
+          agrega tu correo, una cuenta de usuario ni tu dirección IP a nuestra tabla de actividad.
         </p>
         <p>
           También usamos Vercel Analytics para conocer visitas y rendimiento de manera agregada.
@@ -151,8 +151,12 @@ const legalSections = [
         <p>
           La parte pública no utiliza cookies publicitarias ni una aceptación general de cookies.
           Por eso no mostramos un cartel que te obligue a aceptar tecnologías que hoy no usamos.
-          Si incorporamos favoritos locales u otra función opcional, actualizaremos esta sección
-          antes de activarla.
+          Las funciones de favoritos y vistos recientemente guardan en el almacenamiento local del
+          dispositivo una referencia mínima de los productos elegidos o consultados. Esas listas no
+          se envían a AH Tecno, Supabase ni Mercado Libre. Podemos registrar de manera separada y
+          anónima que se utilizó el botón de favoritos para medir la utilidad de la función, pero no
+          recibimos la lista privada guardada en el dispositivo. No requieren una cuenta y pueden
+          eliminarse desde la propia web o borrando los datos del navegador.
         </p>
 
         <h3>Panel privado</h3>

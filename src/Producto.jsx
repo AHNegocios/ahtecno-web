@@ -1,13 +1,18 @@
 import { useEffect, useId, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { categories, getProductCategory } from './catalogConfig'
-import { trackProductEvent } from './outboundTracking'
+import { useFavorites } from './useFavorites'
+import {
+  trackProductEvent,
+  trackProductImpression,
+} from './outboundTracking'
 import {
   formatProductCondition,
   normalizeGalleryImages,
   normalizeProductAttributes,
 } from './productDetails'
 import { getProductPath } from './productUrls'
+import { useRecentProducts } from './useRecentProducts'
 import './Producto.css'
 
 const formatCurrency = (amount) => {
@@ -35,13 +40,47 @@ const copyWithoutClipboardApi = (text) => {
   return copied
 }
 
+function SafeProductImage({
+  src,
+  alt,
+  loading,
+  className = '',
+  fallback = 'Imagen no disponible',
+}) {
+  const [failedSrc, setFailedSrc] = useState('')
+  const failed = Boolean(src && failedSrc === src)
+
+  if (!src || failed) {
+    return (
+      <span className={`product-image-fallback ${className}`} role="img" aria-label={fallback}>
+        <span aria-hidden="true">▧</span>
+        {fallback}
+      </span>
+    )
+  }
+
+  return (
+    <img
+      src={src}
+      alt={alt}
+      className={className}
+      loading={loading}
+      decoding="async"
+      onError={() => setFailedSrc(src)}
+    />
+  )
+}
+
 export function ProductDetailsContent({ product, context = 'modal', titleId }) {
   const [activeImageIndex, setActiveImageIndex] = useState(0)
   const [shareFeedback, setShareFeedback] = useState('')
+  const { isFavorite, toggleFavorite } = useFavorites()
+  const { addRecentProduct } = useRecentProducts()
   const {
     id,
     titulo,
     precio,
+    currency_id = 'ARS',
     link: cleanLink = '',
     imagen,
     imagenes = [],
@@ -63,10 +102,37 @@ export function ProductDetailsContent({ product, context = 'modal', titleId }) {
   const productPath = getProductPath(product)
   const outboundSource = context === 'detail' ? 'detail' : 'modal'
   const ProductTitle = context === 'detail' ? 'h1' : 'h2'
+  const favorite = isFavorite(id)
+
+  const toggleProductFavorite = () => {
+    if (!favorite) {
+      trackProductEvent(id, 'favorite_add', outboundSource)
+    }
+    toggleFavorite(product)
+  }
 
   useEffect(() => {
     trackProductEvent(id, 'product_view', outboundSource)
-  }, [id, outboundSource])
+    addRecentProduct({
+      id,
+      titulo,
+      precio,
+      currency_id,
+      imagen,
+      categoria,
+      ml_id,
+    })
+  }, [
+    addRecentProduct,
+    categoria,
+    currency_id,
+    id,
+    imagen,
+    ml_id,
+    outboundSource,
+    precio,
+    titulo,
+  ])
 
   const shareProduct = async () => {
     const url = new URL(productPath, window.location.origin).toString()
@@ -101,7 +167,11 @@ export function ProductDetailsContent({ product, context = 'modal', titleId }) {
       <div className="product-modal__hero">
         <div className="product-modal__gallery">
           <div className="product-modal__image">
-            {activeImage ? <img src={activeImage} alt={titulo} /> : <span>Sin imagen</span>}
+            <SafeProductImage
+              src={activeImage}
+              alt={titulo}
+              fallback={`No hay una imagen disponible para ${titulo}`}
+            />
           </div>
 
           {galleryImages.length > 1 && (
@@ -155,6 +225,17 @@ export function ProductDetailsContent({ product, context = 'modal', titleId }) {
             )}
             <button className="button button--secondary" type="button" onClick={shareProduct}>
               Compartir oferta
+            </button>
+            <button
+              className={`button product-favorite-action ${
+                favorite ? 'is-active' : ''
+              }`}
+              type="button"
+              aria-pressed={favorite}
+              onClick={toggleProductFavorite}
+            >
+              <span aria-hidden="true">{favorite ? '♥' : '♡'}</span>
+              {favorite ? 'Guardado en favoritos' : 'Guardar en favoritos'}
             </button>
             {context === 'modal' && (
               <Link className="product-modal__full-link" to={productPath}>
@@ -228,6 +309,7 @@ function Producto({
   const [modalOpen, setModalOpen] = useState(false)
   const closeButtonRef = useRef(null)
   const titleId = useId()
+  const { isFavorite, toggleFavorite } = useFavorites()
   const cleanLink = linkOferta?.trim() || ''
   const categorySlug = getProductCategory({ titulo, categoria })
   const category = categories.find(({ slug }) => slug === categorySlug)
@@ -244,6 +326,18 @@ function Producto({
     categoria,
     ml_id,
     campaign_name: campania,
+  }
+  const favorite = isFavorite(id)
+
+  useEffect(() => {
+    trackProductImpression(id, 'card')
+  }, [id])
+
+  const toggleCardFavorite = () => {
+    if (!favorite) {
+      trackProductEvent(id, 'favorite_add', 'card')
+    }
+    toggleFavorite(product)
   }
 
   useEffect(() => {
@@ -281,12 +375,27 @@ function Producto({
           esPrimero && <span className="product-card__badge">Último ingresado</span>
         )}
 
+        <button
+          className={`product-card__favorite ${favorite ? 'is-active' : ''}`}
+          type="button"
+          aria-label={
+            favorite
+              ? `Quitar ${titulo} de favoritos`
+              : `Guardar ${titulo} en favoritos`
+          }
+          aria-pressed={favorite}
+          title={favorite ? 'Quitar de favoritos' : 'Guardar en favoritos'}
+          onClick={toggleCardFavorite}
+        >
+          <span aria-hidden="true">{favorite ? '♥' : '♡'}</span>
+        </button>
+
         <div className="product-card__image-wrap">
-          {imagen ? (
-            <img src={imagen} alt={titulo} loading="lazy" />
-          ) : (
-            <span className="product-card__image-placeholder">Imagen no disponible</span>
-          )}
+          <SafeProductImage
+            src={imagen}
+            alt={titulo}
+            loading="lazy"
+          />
         </div>
 
         <div className="product-card__body">

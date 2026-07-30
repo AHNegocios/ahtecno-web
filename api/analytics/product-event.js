@@ -1,7 +1,13 @@
 import { createSupabaseAdmin } from '../_lib/supabase-admin.js'
 import { errorResponse, HttpError, jsonResponse, readJsonBody } from '../_lib/http.js'
 
-const allowedEventTypes = new Set(['outbound_click', 'product_view', 'share'])
+const allowedEventTypes = new Set([
+  'product_impression',
+  'product_view',
+  'favorite_add',
+  'outbound_click',
+  'share',
+])
 const allowedSources = new Set(['card', 'modal', 'detail'])
 
 const assertSameOrigin = (request) => {
@@ -25,6 +31,12 @@ export async function POST(request) {
     const productId = String(body.product_id || '').trim()
     const eventType = String(body.event_type || '').trim()
     const source = String(body.source || '').trim()
+    const channel =
+      String(body.channel || 'direct')
+        .trim()
+        .toLowerCase()
+        .replace(/[^a-z0-9_-]/g, '')
+        .slice(0, 40) || 'direct'
 
     if (
       !productId ||
@@ -49,6 +61,7 @@ export async function POST(request) {
       product_id: productId,
       event_type: eventType,
       source,
+      channel,
     })
 
     if (error) throw error

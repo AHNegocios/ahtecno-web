@@ -5,6 +5,47 @@ import {
 } from '../../src/affiliateLinks.js'
 
 const DEFINITIVE_UNAVAILABLE_STATUSES = new Set([404, 410])
+const MAX_RESPONSE_SAMPLE_BYTES = 96_000
+
+const normalizePageText = (value = '') =>
+  String(value)
+    .normalize('NFD')
+    .replace(/\p{Diacritic}/gu, '')
+    .toLowerCase()
+
+export const looksLikeUnavailableProductPage = (value = '') => {
+  const pageText = normalizePageText(value)
+
+  return [
+    /no encontramos (?:este|el) producto/,
+    /producto (?:no encontrado|no disponible)/,
+    /publicacion (?:ya )?no (?:esta )?disponible/,
+    /esta publicacion (?:finalizo|no existe)/,
+  ].some((pattern) => pattern.test(pageText))
+}
+
+const readResponseSample = async (response) => {
+  const reader = response.body?.getReader?.()
+  if (!reader) return ''
+
+  const decoder = new TextDecoder()
+  let received = 0
+  let sample = ''
+
+  try {
+    while (received < MAX_RESPONSE_SAMPLE_BYTES) {
+      const { done, value } = await reader.read()
+      if (done) break
+      received += value.byteLength
+      sample += decoder.decode(value, { stream: true })
+    }
+    sample += decoder.decode()
+  } finally {
+    await reader.cancel().catch(() => {})
+  }
+
+  return sample.slice(0, MAX_RESPONSE_SAMPLE_BYTES)
+}
 
 const requestAffiliateLink = async (url, fetchImpl, timeoutMs) => {
   const response = await fetchImpl(url, {
@@ -14,13 +55,14 @@ const requestAffiliateLink = async (url, fetchImpl, timeoutMs) => {
     headers: {
       Accept: 'text/html,application/xhtml+xml',
       'User-Agent': 'AH-Tecno-Link-Checker/1.0',
-      Range: 'bytes=0-0',
+      Range: `bytes=0-${MAX_RESPONSE_SAMPLE_BYTES - 1}`,
     },
   })
 
-  await response.body?.cancel().catch(() => {})
-
-  return response
+  return {
+    response,
+    sample: await readResponseSample(response),
+  }
 }
 
 export const verifyAffiliateLink = async (
@@ -38,13 +80,26 @@ export const verifyAffiliateLink = async (
   }
 
   try {
-    const response = await requestAffiliateLink(url, fetchImpl, timeoutMs)
+    const { response, sample } = await requestAffiliateLink(
+      url,
+      fetchImpl,
+      timeoutMs,
+    )
 
     if (DEFINITIVE_UNAVAILABLE_STATUSES.has(response.status)) {
       return {
         ok: false,
         definitive: true,
         reason: 'El enlace de afiliado ya no conduce a una publicación disponible.',
+      }
+    }
+
+    if (response.ok && looksLikeUnavailableProductPage(sample)) {
+      return {
+        ok: false,
+        definitive: true,
+        reason:
+          'Mercado Libre muestra que el producto o la publicación ya no está disponible.',
       }
     }
 

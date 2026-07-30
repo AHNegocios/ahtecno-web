@@ -1,7 +1,10 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
 import { isUsableAffiliateLink } from '../../src/affiliateLinks.js'
-import { verifyAffiliateLink } from './affiliate-link.js'
+import {
+  looksLikeUnavailableProductPage,
+  verifyAffiliateLink,
+} from './affiliate-link.js'
 
 test('solo acepta enlaces HTTPS de Mercado Libre', () => {
   assert.equal(isUsableAffiliateLink('https://meli.la/2abc123'), true)
@@ -69,4 +72,30 @@ test('no oculta por errores temporales y admite enlaces disponibles', async () =
 
   assert.equal(availableResult.ok, true)
   assert.equal(availableResult.definitive, true)
+})
+
+test('reconoce una página de producto vencido aunque Mercado Libre responda 200', async () => {
+  assert.equal(
+    looksLikeUnavailableProductPage(
+      '<main><h1>No encontramos este producto</h1></main>',
+    ),
+    true,
+  )
+  assert.equal(
+    looksLikeUnavailableProductPage(
+      '<main><h1>Aspiradora disponible</h1><button>Comprar</button></main>',
+    ),
+    false,
+  )
+
+  const result = await verifyAffiliateLink(
+    'https://www.mercadolibre.com.ar/producto/p/MLA62407115',
+    {
+      fetchImpl: async () =>
+        new Response('<h1>Producto no disponible</h1>', { status: 200 }),
+    },
+  )
+
+  assert.equal(result.ok, false)
+  assert.equal(result.definitive, true)
 })
