@@ -2,6 +2,7 @@ import assert from 'node:assert/strict'
 import test from 'node:test'
 import {
   buildAdminAlerts,
+  getCampaignRecommendation,
   getLatestPriceChanges,
 } from './adminDecisionSupport.js'
 
@@ -40,4 +41,48 @@ test('prioriza vencidos y fallas antes que oportunidades', () => {
 
   assert.equal(alerts[0].severity, 'critical')
   assert.equal(alerts.at(-1).severity, 'opportunity')
+  assert.equal(
+    alerts.filter((alert) => String(alert.productId) === '1').length,
+    1,
+  )
+})
+
+test('recomienda automáticamente una oferta pública con mejores señales', () => {
+  const recommendation = getCampaignRecommendation(
+    [
+      {
+        id: 1,
+        titulo: 'Producto vencido',
+        precio: 1000,
+        link: 'https://meli.la/2abc123',
+        ml_status: 'not_found',
+        price_source: 'mercadolibre',
+      },
+      {
+        id: 2,
+        titulo: 'Producto con descuento',
+        precio: 800,
+        link: 'https://meli.la/2abc456',
+        ml_status: 'active',
+        price_source: 'mercadolibre',
+        outbound_clicks: 2,
+      },
+      {
+        id: 3,
+        titulo: 'Producto con vistas',
+        precio: 1200,
+        link: 'https://meli.la/2abc789',
+        ml_status: 'active',
+        price_source: 'manual',
+        product_views: 3,
+      },
+    ],
+    [
+      { product_id: '2', price: 800, recorded_at: '2026-07-29T12:00:00Z' },
+      { product_id: '2', price: 1000, recorded_at: '2026-07-28T12:00:00Z' },
+    ],
+  )
+
+  assert.equal(recommendation.product.id, 2)
+  assert.match(recommendation.reason, /bajó 20\.0%/)
 })

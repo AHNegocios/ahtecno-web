@@ -43,6 +43,64 @@ export const getLatestPriceChanges = (history = []) => {
   )
 }
 
+export const getCampaignRecommendation = (
+  products = [],
+  priceHistory = [],
+) => {
+  const priceChanges = getLatestPriceChanges(priceHistory)
+  const candidates = products
+    .filter((product) => {
+      const publication = getProductPublicationState(product)
+      return (
+        publication.public &&
+        !product.price_needs_review &&
+        Number(product.precio) > 0
+      )
+    })
+    .map((product) => {
+      const priceChange = priceChanges.get(String(product.id))
+      const discount =
+        priceChange?.previous && priceChange.changePercent < 0
+          ? Math.min(Math.abs(priceChange.changePercent), 40)
+          : 0
+      const clicks = Number(product.outbound_clicks) || 0
+      const shares = Number(product.shares) || 0
+      const views = Number(product.product_views) || 0
+      const automaticPriceBonus =
+        String(product.price_source || '').toLowerCase() === 'mercadolibre'
+          ? 10
+          : 0
+      const score =
+        discount * 4 +
+        clicks * 3 +
+        shares * 5 +
+        Math.min(views, 100) * 0.25 +
+        automaticPriceBonus
+
+      let reason = 'está publicado y tiene un precio confirmado'
+      if (discount >= 5) {
+        reason = `bajó ${discount.toFixed(1)}% y puede convertirse en una oferta`
+      } else if (clicks > 0) {
+        reason = `acumula ${clicks} clic(s) hacia Mercado Libre`
+      } else if (shares > 0) {
+        reason = `fue compartido ${shares} vez/veces`
+      } else if (views > 0) {
+        reason = `recibió ${views} vista(s) de detalle`
+      } else if (automaticPriceBonus) {
+        reason = 'está publicado y su precio proviene de Mercado Libre'
+      }
+
+      return { product, reason, score }
+    })
+    .sort(
+      (first, second) =>
+        second.score - first.score ||
+        String(first.product.id).localeCompare(String(second.product.id)),
+    )
+
+  return candidates[0] || null
+}
+
 export const buildAdminAlerts = (
   products = [],
   priceHistory = [],
@@ -69,7 +127,7 @@ export const buildAdminAlerts = (
     }
 
     const failures = Number(product.consecutive_sync_failures) || 0
-    if (failures >= 2) {
+    if (publication.key !== 'expired' && failures >= 2) {
       alerts.push({
         id: `sync-${product.id}`,
         productId: product.id,

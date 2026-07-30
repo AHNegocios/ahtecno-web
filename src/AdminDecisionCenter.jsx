@@ -1,6 +1,10 @@
 import { useMemo, useState } from 'react'
-import { buildAdminAlerts } from './adminDecisionSupport'
+import {
+  buildAdminAlerts,
+  getCampaignRecommendation,
+} from './adminDecisionSupport'
 import { getProductCampaignState } from './productCampaigns'
+import { getProductPublicationState } from './productVisibility'
 
 const severityLabels = {
   critical: 'Crítica',
@@ -98,11 +102,27 @@ function AlertCenter({
 
 function CampaignPlanner({
   products,
+  priceHistory,
   apiRequest,
   onReload,
   configured,
 }) {
-  const firstProductId = products[0]?.id ? String(products[0].id) : ''
+  const availableProducts = useMemo(
+    () =>
+      products.filter(
+        (product) => getProductPublicationState(product).public,
+      ),
+    [products],
+  )
+  const recommendation = useMemo(
+    () => getCampaignRecommendation(availableProducts, priceHistory),
+    [availableProducts, priceHistory],
+  )
+  const firstProductId = recommendation?.product?.id
+    ? String(recommendation.product.id)
+    : availableProducts[0]?.id
+      ? String(availableProducts[0].id)
+      : ''
   const now = new Date()
   const nextWeek = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000)
   const [productId, setProductId] = useState(firstProductId)
@@ -167,11 +187,22 @@ function CampaignPlanner({
     <section className="admin-card admin-campaigns">
       <div className="admin-card__header">
         <div>
-          <p className="eyebrow">Planificación editorial</p>
+          <p className="eyebrow">Selección asistida</p>
           <h2>Productos destacados y campañas</h2>
-          <p>Programá qué producto aparece primero y con qué mensaje.</p>
+          <p>
+            El panel recomienda una oportunidad. Ustedes confirman el mensaje y
+            las fechas antes de publicarla.
+          </p>
         </div>
       </div>
+
+      {recommendation && (
+        <div className="admin-campaign-suggestion">
+          <span>Sugerencia automática</span>
+          <strong>{recommendation.product.titulo}</strong>
+          <p>{recommendation.reason}.</p>
+        </div>
+      )}
 
       {!configured && (
         <p className="admin-message admin-message--warning">
@@ -188,7 +219,7 @@ function CampaignPlanner({
             onChange={(event) => setProductId(event.target.value)}
             required
           >
-            {products.map((product) => (
+            {availableProducts.map((product) => (
               <option value={product.id} key={product.id}>{product.titulo}</option>
             ))}
           </select>
@@ -231,7 +262,7 @@ function CampaignPlanner({
         <button
           className="button button--primary"
           type="submit"
-          disabled={!configured || saving || !products.length}
+          disabled={!configured || saving || !availableProducts.length}
         >
           {saving ? 'Guardando…' : 'Programar campaña'}
         </button>

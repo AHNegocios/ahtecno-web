@@ -31,6 +31,24 @@ const formatDate = (value) => {
   }).format(date)
 }
 
+function SyncFailureDetails({ failures = [] }) {
+  if (!failures.length) return null
+
+  return (
+    <details className="admin-sync-failures">
+      <summary>Ver por qué fallaron {failures.length} producto(s)</summary>
+      <ul>
+        {failures.map((failure, index) => (
+          <li key={`${failure.productId || failure.mlId || 'sync'}-${index}`}>
+            <strong>{failure.title || failure.mlId || 'Producto sin identificar'}</strong>
+            <span>{failure.error}</span>
+          </li>
+        ))}
+      </ul>
+    </details>
+  )
+}
+
 function ProductCatalogControls({ product, apiRequest, onSaved }) {
   const [category, setCategory] = useState(product.categoria || 'automatico')
   const [visible, setVisible] = useState(product.is_visible !== false)
@@ -641,9 +659,13 @@ function AdminDashboard({ session }) {
                       : 'admin-message--success'
                   }`}
                 >
-                  {syncResult.updated} de {syncResult.total} productos actualizados.
+                  Se revisaron {syncResult.total} productos: {syncResult.updated}{' '}
+                  actualizados.
                   {syncResult.failed
-                    ? ` ${syncResult.failed} necesitan revisión.`
+                    ? ` ${syncResult.failed} no pudieron sincronizarse.`
+                    : ''}
+                  {syncResult.skipped
+                    ? ` ${syncResult.skipped} enlaces antiguos quedaron pendientes de comprobación sin contarse como error.`
                     : ''}
                   {syncResult.needsReview
                     ? ` ${syncResult.needsReview} conservaron su precio anterior porque Mercado Libre no informó uno nuevo.`
@@ -653,6 +675,7 @@ function AdminDashboard({ session }) {
                     : ''}
                 </p>
               )}
+              <SyncFailureDetails failures={syncResult?.failures} />
             </div>
           ) : (
             <button
@@ -912,10 +935,16 @@ function AdminDashboard({ session }) {
                   : 'admin-message--success'
               }`}
             >
-              Revisión terminada: {syncResult.updated} de {syncResult.total}{' '}
-              productos procesados. Quedan {expiredProducts.length} vencido(s)
-              ocultos.
+              Revisión terminada: {syncResult.total} revisados,{' '}
+              {syncResult.updated} actualizados, {syncResult.failed} con error
+              {syncResult.skipped
+                ? ` y ${syncResult.skipped} enlaces antiguos sin confirmar`
+                : ''}
+              . Quedan {expiredProducts.length} vencido(s) ocultos.
             </p>
+          )}
+          {activeTab === 'expired' && (
+            <SyncFailureDetails failures={syncResult?.failures} />
           )}
 
           <AdminProductList

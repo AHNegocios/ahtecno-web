@@ -266,6 +266,47 @@
   margin: 0;
 }
 
+.admin-sync-failures {
+  padding: 12px 14px;
+  border: 1px solid color-mix(in srgb, var(--danger) 42%, var(--border));
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--danger) 7%, var(--surface));
+}
+
+.admin-sync-failures summary {
+  cursor: pointer;
+  color: var(--danger);
+  font-size: 0.78rem;
+  font-weight: 850;
+}
+
+.admin-sync-failures ul {
+  margin: 12px 0 0;
+  padding: 0;
+  display: grid;
+  gap: 9px;
+  list-style: none;
+}
+
+.admin-sync-failures li {
+  padding-top: 9px;
+  border-top: 1px solid var(--border);
+  display: grid;
+  gap: 3px;
+}
+
+.admin-sync-failures strong {
+  color: var(--text-primary);
+  font-size: 0.8rem;
+}
+
+.admin-sync-failures span {
+  color: var(--text-secondary);
+  font-size: 0.76rem;
+  line-height: 1.45;
+  overflow-wrap: anywhere;
+}
+
 .admin-connection-detail > span {
   color: #22c55e;
   font-size: 1.3rem;
@@ -1157,6 +1198,36 @@
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 12px;
+}
+
+.admin-campaign-suggestion {
+  margin-bottom: 18px;
+  padding: 14px 16px;
+  border: 1px solid color-mix(in srgb, var(--accent) 46%, var(--border));
+  border-radius: 12px;
+  display: grid;
+  gap: 4px;
+  background: color-mix(in srgb, var(--accent) 7%, var(--surface));
+}
+
+.admin-campaign-suggestion span {
+  color: var(--accent);
+  font-size: 0.7rem;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.admin-campaign-suggestion strong {
+  color: var(--text-primary);
+  font-size: 0.9rem;
+}
+
+.admin-campaign-suggestion p {
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: 0.8rem;
+  line-height: 1.45;
 }
 
 .admin-campaign-form label,
