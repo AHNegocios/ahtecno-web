@@ -5,6 +5,7 @@ import { getProductPublicationState } from './productVisibility'
 import { supabase } from './supabaseClient'
 import AdminAnalytics from './AdminAnalytics'
 import AdminDecisionCenter from './AdminDecisionCenter'
+import { doesPriceNeedReview } from './adminDecisionSupport'
 import './Admin.css'
 
 const formatPrice = (value, currency = 'ARS') => {
@@ -118,6 +119,7 @@ function ProductCatalogControls({ product, apiRequest, onSaved }) {
 function AdminProductRow({ product, apiRequest, onSaved }) {
   const automatic = product.price_source === 'mercadolibre'
   const publicationState = getProductPublicationState(product)
+  const priceNeedsReview = doesPriceNeedReview(product)
 
   return (
     <article
@@ -152,10 +154,14 @@ function AdminProductRow({ product, apiRequest, onSaved }) {
         >
           {publicationState.label}
         </strong>
-        {product.price_needs_review ? (
-          <strong className="admin-review-label">Revisar precio</strong>
+        {publicationState.key === 'expired' ? (
+          <span>Sin revisión de precio</span>
+        ) : priceNeedsReview ? (
+          <strong className="admin-review-label">
+            Revisar precio manual
+          </strong>
         ) : (
-          <span>Precio confirmado</span>
+          <span>Precio automático actualizado</span>
         )}
         <small>
           {product.last_synced_at
@@ -514,7 +520,9 @@ function AdminDashboard({ session }) {
       if (publicationState.public) summary.published += 1
       if (publicationState.key === 'expired') summary.expired += 1
       if (!publicationState.public) summary.hidden += 1
-      if (product.price_needs_review) summary.needsReview += 1
+      if (publicationState.public && doesPriceNeedReview(product)) {
+        summary.needsReview += 1
+      }
       return summary
     },
     {

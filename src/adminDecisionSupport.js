@@ -8,6 +8,13 @@ const severityWeight = {
   info: 1,
 }
 
+export const hasAutomaticMercadoLibrePrice = (product = {}) =>
+  String(product.price_source || '').trim().toLowerCase() === 'mercadolibre'
+
+export const doesPriceNeedReview = (product = {}) =>
+  !hasAutomaticMercadoLibrePrice(product) ||
+  Boolean(product.price_needs_review)
+
 export const getLatestPriceChanges = (history = []) => {
   const grouped = new Map()
   ;[...history]
@@ -53,7 +60,7 @@ export const getCampaignRecommendation = (
       const publication = getProductPublicationState(product)
       return (
         publication.public &&
-        !product.price_needs_review &&
+        !doesPriceNeedReview(product) &&
         Number(product.precio) > 0
       )
     })
@@ -138,14 +145,14 @@ export const buildAdminAlerts = (
       })
     }
 
-    if (product.price_needs_review) {
+    if (publication.public && doesPriceNeedReview(product)) {
       alerts.push({
         id: `price-${product.id}`,
         productId: product.id,
         severity: 'warning',
         type: 'price',
-        title: 'Precio pendiente de revisión',
-        message: `${productName} conserva un valor manual o anterior.`,
+        title: 'Revisar precio manual',
+        message: `${productName} tiene un valor cargado manualmente que Mercado Libre no confirmó mediante la API.`,
       })
     }
 

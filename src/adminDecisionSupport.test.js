@@ -2,6 +2,7 @@ import assert from 'node:assert/strict'
 import test from 'node:test'
 import {
   buildAdminAlerts,
+  doesPriceNeedReview,
   getCampaignRecommendation,
   getLatestPriceChanges,
 } from './adminDecisionSupport.js'
@@ -13,6 +14,23 @@ test('detecta aumentos y descuentos usando los dos últimos precios', () => {
   ])
 
   assert.equal(changes.get('1').changePercent, -20)
+})
+
+test('todo precio manual requiere revisión y uno automático no', () => {
+  assert.equal(
+    doesPriceNeedReview({
+      price_source: 'manual',
+      price_needs_review: false,
+    }),
+    true,
+  )
+  assert.equal(
+    doesPriceNeedReview({
+      price_source: 'mercadolibre',
+      price_needs_review: false,
+    }),
+    false,
+  )
 })
 
 test('prioriza vencidos y fallas antes que oportunidades', () => {
@@ -45,6 +63,7 @@ test('prioriza vencidos y fallas antes que oportunidades', () => {
     alerts.filter((alert) => String(alert.productId) === '1').length,
     1,
   )
+  assert.equal(alerts.some((alert) => alert.id === 'price-2'), true)
 })
 
 test('recomienda automáticamente una oferta pública con mejores señales', () => {
