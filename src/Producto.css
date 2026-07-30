@@ -272,6 +272,27 @@
   box-shadow: var(--shadow-lg);
 }
 
+.product-image-fallback {
+  position: absolute;
+  inset: 0;
+  padding: 18px;
+  display: grid;
+  place-items: center;
+  align-content: center;
+  gap: 8px;
+  color: #687077;
+  font-size: 0.78rem;
+  font-weight: 750;
+  line-height: 1.4;
+  text-align: center;
+}
+
+.product-image-fallback > span {
+  color: #9aa3aa;
+  font-size: 2rem;
+  line-height: 1;
+}
+
 .product-favorite-action {
   border-color: color-mix(in srgb, #fb7185 52%, var(--border));
   background: color-mix(in srgb, #fb7185 7%, var(--surface-raised));

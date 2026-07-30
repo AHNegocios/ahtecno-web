@@ -8,6 +8,7 @@ import {
   priceRangeOptions,
 } from './catalogFilters'
 import AffiliateDisclosure from './AffiliateDisclosure'
+import { CatalogSkeleton } from './LoadingStates'
 import Producto from './Producto'
 import RecentlyViewed from './RecentlyViewed'
 import { getActiveCampaignName } from './productCampaigns'
@@ -258,14 +259,12 @@ function Inicio() {
           )}
 
           {loading && (
-            <div className="status-panel" role="status">
-              <div className="loading-dots" aria-hidden="true"><span /><span /><span /></div>
-              <p>Cargando las ofertas seleccionadas...</p>
-            </div>
+            <CatalogSkeleton count={6} />
           )}
 
           {!loading && error && (
             <div className="status-panel status-panel--error" role="alert">
+              <span className="status-panel__icon" aria-hidden="true">!</span>
               <h2>No pudimos cargar el catálogo</h2>
               <p>{error}</p>
               <button className="button button--secondary" type="button" onClick={retry}>Reintentar</button>
@@ -274,6 +273,7 @@ function Inicio() {
 
           {!loading && !error && filteredProducts.length === 0 && (
             <div className="status-panel">
+              <span className="status-panel__icon" aria-hidden="true">⌕</span>
               <h2>No encontramos coincidencias</h2>
               <p>Probá con otra búsqueda o elegí una categoría diferente.</p>
               <button

@@ -88,9 +88,10 @@ Flujo previsto:
    historial.
 10. Las fallas temporales de red o autenticación no ocultan productos. Se
     registran como intentos fallidos para revisión.
-11. Las vistas de detalle, los compartidos y los clics salientes se cuentan
-    sin guardar IP, correo, cookies ni otros datos personales. Los totales
-    aparecen en el panel privado.
+11. Las apariciones de tarjetas, vistas de detalle, favoritos agregados,
+    compartidos y clics salientes se cuentan sin guardar IP, correo, cookies
+    ni otros datos personales. Los totales y el embudo aparecen en el panel
+    privado.
 12. Las visitas generales y el rendimiento técnico se consultan en Web
     Analytics y Speed Insights dentro del proyecto de Vercel.
 
@@ -108,10 +109,16 @@ Para habilitar el historial privado de confirmaciones manuales se debe ejecutar
 auditoría no es accesible para visitantes ni usuarios autenticados comunes; las
 confirmaciones se realizan desde la función privada de Admin.
 
+Para habilitar el embudo de actividad y la procedencia general de las visitas se
+debe ejecutar `supabase/migrations/202607300002_visitor_funnel.sql`. Sólo se
+guarda el producto, la acción, la superficie, un canal general como TikTok o
+Instagram y el momento; no se agregan identificadores personales.
+
 Los favoritos públicos se guardan en `localStorage` con la clave
 `ahtecno-favorites-v1`. Conservan sólo una referencia mínima del producto, no
 se envían a Supabase ni Mercado Libre y desaparecen al borrar los datos del
-navegador.
+navegador. Se puede registrar anónimamente el uso del botón de favoritos, pero
+no el contenido privado de la lista.
 
 Los productos vistos recientemente siguen el mismo criterio y se guardan con
 la clave `ahtecno-recent-products-v1`, con un máximo de seis referencias. El
@@ -123,3 +130,14 @@ Hobby, Vercel puede iniciarla en cualquier momento dentro de esa hora.
 `category_id` conserva la clasificación técnica original de Mercado Libre y
 `categoria` guarda la clasificación editorial de AH Tecno. Si esta última se
 deja en automático, la web usa las reglas de `src/catalogConfig.js`.
+
+## Descubrimiento y enlaces compartidos
+
+- `robots.txt` permite rastrear la parte pública y excluye Admin y las rutas de
+  API.
+- `/sitemap.xml` se genera con las páginas principales y todos los productos
+  públicos activos.
+- Cada ruta actualiza título, descripción y dirección canónica.
+- Las fichas de producto agregan datos estructurados `Product` sin presentar a
+  AH Tecno como vendedor.
+- `public/og.png` es la tarjeta general que aparece al compartir la web.

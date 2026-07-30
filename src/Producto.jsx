@@ -2,7 +2,10 @@ import { useEffect, useId, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { categories, getProductCategory } from './catalogConfig'
 import { useFavorites } from './useFavorites'
-import { trackProductEvent } from './outboundTracking'
+import {
+  trackProductEvent,
+  trackProductImpression,
+} from './outboundTracking'
 import {
   formatProductCondition,
   normalizeGalleryImages,
@@ -37,6 +40,37 @@ const copyWithoutClipboardApi = (text) => {
   return copied
 }
 
+function SafeProductImage({
+  src,
+  alt,
+  loading,
+  className = '',
+  fallback = 'Imagen no disponible',
+}) {
+  const [failedSrc, setFailedSrc] = useState('')
+  const failed = Boolean(src && failedSrc === src)
+
+  if (!src || failed) {
+    return (
+      <span className={`product-image-fallback ${className}`} role="img" aria-label={fallback}>
+        <span aria-hidden="true">▧</span>
+        {fallback}
+      </span>
+    )
+  }
+
+  return (
+    <img
+      src={src}
+      alt={alt}
+      className={className}
+      loading={loading}
+      decoding="async"
+      onError={() => setFailedSrc(src)}
+    />
+  )
+}
+
 export function ProductDetailsContent({ product, context = 'modal', titleId }) {
   const [activeImageIndex, setActiveImageIndex] = useState(0)
   const [shareFeedback, setShareFeedback] = useState('')
@@ -69,6 +103,13 @@ export function ProductDetailsContent({ product, context = 'modal', titleId }) {
   const outboundSource = context === 'detail' ? 'detail' : 'modal'
   const ProductTitle = context === 'detail' ? 'h1' : 'h2'
   const favorite = isFavorite(id)
+
+  const toggleProductFavorite = () => {
+    if (!favorite) {
+      trackProductEvent(id, 'favorite_add', outboundSource)
+    }
+    toggleFavorite(product)
+  }
 
   useEffect(() => {
     trackProductEvent(id, 'product_view', outboundSource)
@@ -126,7 +167,11 @@ export function ProductDetailsContent({ product, context = 'modal', titleId }) {
       <div className="product-modal__hero">
         <div className="product-modal__gallery">
           <div className="product-modal__image">
-            {activeImage ? <img src={activeImage} alt={titulo} /> : <span>Sin imagen</span>}
+            <SafeProductImage
+              src={activeImage}
+              alt={titulo}
+              fallback={`No hay una imagen disponible para ${titulo}`}
+            />
           </div>
 
           {galleryImages.length > 1 && (
@@ -187,7 +232,7 @@ export function ProductDetailsContent({ product, context = 'modal', titleId }) {
               }`}
               type="button"
               aria-pressed={favorite}
-              onClick={() => toggleFavorite(product)}
+              onClick={toggleProductFavorite}
             >
               <span aria-hidden="true">{favorite ? '♥' : '♡'}</span>
               {favorite ? 'Guardado en favoritos' : 'Guardar en favoritos'}
@@ -285,6 +330,17 @@ function Producto({
   const favorite = isFavorite(id)
 
   useEffect(() => {
+    trackProductImpression(id, 'card')
+  }, [id])
+
+  const toggleCardFavorite = () => {
+    if (!favorite) {
+      trackProductEvent(id, 'favorite_add', 'card')
+    }
+    toggleFavorite(product)
+  }
+
+  useEffect(() => {
     if (!modalOpen) return undefined
 
     const previouslyFocused = document.activeElement
@@ -329,17 +385,17 @@ function Producto({
           }
           aria-pressed={favorite}
           title={favorite ? 'Quitar de favoritos' : 'Guardar en favoritos'}
-          onClick={() => toggleFavorite(product)}
+          onClick={toggleCardFavorite}
         >
           <span aria-hidden="true">{favorite ? '♥' : '♡'}</span>
         </button>
 
         <div className="product-card__image-wrap">
-          {imagen ? (
-            <img src={imagen} alt={titulo} loading="lazy" />
-          ) : (
-            <span className="product-card__image-placeholder">Imagen no disponible</span>
-          )}
+          <SafeProductImage
+            src={imagen}
+            alt={titulo}
+            loading="lazy"
+          />
         </div>
 
         <div className="product-card__body">
