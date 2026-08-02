@@ -19,6 +19,7 @@ export function useProducts({ order = 'mas_nuevos', limit = null } = {}) {
 
   useEffect(() => {
     let active = true
+    let publicationTimer
 
     async function fetchProducts() {
       setLoading(true)
@@ -64,6 +65,24 @@ export function useProducts({ order = 'mas_nuevos', limit = null } = {}) {
             ? sortProductsByActiveCampaign(visibleProducts)
             : visibleProducts,
         )
+
+        const nextPublicationTime = (data || [])
+          .filter(
+            (product) =>
+              product.is_visible !== false &&
+              product.publication_status === 'scheduled' &&
+              product.planned_publish_at &&
+              new Date(product.planned_publish_at).getTime() > Date.now(),
+          )
+          .map((product) => new Date(product.planned_publish_at).getTime())
+          .sort((left, right) => left - right)[0]
+
+        if (nextPublicationTime) {
+          publicationTimer = window.setTimeout(
+            () => setRevision((current) => current + 1),
+            Math.min(nextPublicationTime - Date.now() + 250, 2_147_483_647),
+          )
+        }
       }
 
       setLoading(false)
@@ -73,6 +92,7 @@ export function useProducts({ order = 'mas_nuevos', limit = null } = {}) {
 
     return () => {
       active = false
+      if (publicationTimer) window.clearTimeout(publicationTimer)
     }
   }, [limit, order, revision])
 

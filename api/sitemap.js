@@ -1,4 +1,5 @@
 import { createSupabaseAdmin } from './_lib/supabase-admin.js'
+import { isProductPubliclyVisible } from '../src/productVisibility.js'
 
 const SITE_URL = 'https://ahtecno-web.vercel.app'
 const coreRoutes = [
@@ -49,15 +50,28 @@ export async function GET() {
 
   try {
     const supabase = createSupabaseAdmin()
-    const result = await supabase
-      .from('Productos')
-      .select('id, ml_id, titulo, last_synced_at')
-      .eq('is_visible', true)
-      .or('ml_status.is.null,ml_status.eq.active')
-      .order('created_at', { ascending: false })
-      .limit(1000)
+    const buildQuery = (withEditorialFields) =>
+      supabase
+        .from('Productos')
+        .select(
+          withEditorialFields
+            ? 'id, ml_id, titulo, link, is_visible, ml_status, last_synced_at, publication_status, planned_publish_at'
+            : 'id, ml_id, titulo, link, is_visible, ml_status, last_synced_at',
+        )
+        .eq('is_visible', true)
+        .or('ml_status.is.null,ml_status.eq.active')
+        .order('created_at', { ascending: false })
+        .limit(1000)
 
-    if (!result.error) products = result.data || []
+    let result = await buildQuery(true)
+    if (
+      result.error &&
+      /publication_status|planned_publish_at/i.test(String(result.error.message || ''))
+    ) {
+      result = await buildQuery(false)
+    }
+
+    if (!result.error) products = (result.data || []).filter(isProductPubliclyVisible)
   } catch (error) {
     console.error('No se pudieron agregar productos al sitemap.', error)
   }

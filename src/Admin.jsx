@@ -4,6 +4,7 @@ import { categories, getCategoryLabel, getProductCategory } from './catalogConfi
 import { getProductPublicationState } from './productVisibility'
 import { supabase } from './supabaseClient'
 import AdminAnalytics from './AdminAnalytics'
+import AdminDatabase from './AdminDatabase'
 import AdminDecisionCenter from './AdminDecisionCenter'
 import {
   doesPriceNeedReview,
@@ -61,7 +62,9 @@ function ProductCatalogControls({ product, apiRequest, onSaved }) {
   const publicationState = getProductPublicationState(product)
   const automaticallyHidden =
     publicationState.key === 'expired' ||
-    publicationState.key === 'mercadolibre-inactive'
+    publicationState.key === 'mercadolibre-inactive' ||
+    publicationState.key === 'draft' ||
+    publicationState.key === 'scheduled'
 
   const saveSettings = async () => {
     setSaving(true)
@@ -99,7 +102,9 @@ function ProductCatalogControls({ product, apiRequest, onSaved }) {
       </label>
       {automaticallyHidden ? (
         <p className="admin-visibility-control admin-visibility-control--locked">
-          Oculto automáticamente
+          {publicationState.key === 'draft' || publicationState.key === 'scheduled'
+            ? 'Gestionado desde Base de datos'
+            : 'Oculto automáticamente'}
         </p>
       ) : (
         <label className="admin-visibility-control">
@@ -387,6 +392,10 @@ function AdminDashboard({ session }) {
   const [affiliateUrl, setAffiliateUrl] = useState('')
   const [manualPrice, setManualPrice] = useState('')
   const [selectedCategory, setSelectedCategory] = useState('automatico')
+  const [publicationMode, setPublicationMode] = useState('draft')
+  const [plannedPublishAt, setPlannedPublishAt] = useState('')
+  const [contentUrl, setContentUrl] = useState('')
+  const [editorialNotes, setEditorialNotes] = useState('')
   const [manualPriceNeeded, setManualPriceNeeded] = useState(false)
   const [saving, setSaving] = useState(false)
   const [formError, setFormError] = useState('')
@@ -397,6 +406,7 @@ function AdminDashboard({ session }) {
     campaigns_configured: false,
     price_history_configured: false,
     price_reviews_configured: false,
+    editorial_configured: false,
   })
   const [analytics, setAnalytics] = useState({
     daily: [],
@@ -455,6 +465,7 @@ function AdminDashboard({ session }) {
         campaigns_configured: false,
         price_history_configured: false,
         price_reviews_configured: false,
+        editorial_configured: false,
       })
     } catch (error) {
       setPriceOverviewError(error.message)
@@ -500,6 +511,7 @@ function AdminDashboard({ session }) {
             campaigns_configured: false,
             price_history_configured: false,
             price_reviews_configured: false,
+            editorial_configured: false,
           })
         }
       })
@@ -570,6 +582,12 @@ function AdminDashboard({ session }) {
           affiliate_url: affiliateUrl,
           manual_price: manualPrice,
           category: selectedCategory,
+          publication_mode: publicationMode,
+          planned_publish_at: plannedPublishAt
+            ? new Date(plannedPublishAt).toISOString()
+            : null,
+          content_url: contentUrl,
+          editorial_notes: editorialNotes,
         }),
       })
       setSavedProduct(payload.product)
@@ -578,12 +596,27 @@ function AdminDashboard({ session }) {
       setAffiliateUrl('')
       setManualPrice('')
       setSelectedCategory('automatico')
+      setPublicationMode('draft')
+      setPlannedPublishAt('')
+      setContentUrl('')
+      setEditorialNotes('')
     } catch (error) {
       setFormError(error.message)
       setManualPriceNeeded(error.message.toLowerCase().includes('precio manual'))
     } finally {
       setSaving(false)
     }
+  }
+
+  const openProductImporter = () => {
+    setPublicationMode('draft')
+    setActiveTab('overview')
+    window.setTimeout(() => {
+      document.getElementById('import-product-title')?.scrollIntoView({
+        behavior: 'smooth',
+        block: 'start',
+      })
+    }, 0)
   }
 
   const catalogSummary = priceOverview.reduce(
@@ -615,6 +648,9 @@ function AdminDashboard({ session }) {
   const expiredProducts = priceOverview.filter(
     (product) => getProductPublicationState(product).key === 'expired',
   )
+  const editorialQueueCount = priceOverview.filter((product) =>
+    ['draft', 'scheduled'].includes(product.publication_status),
+  ).length
   const currentProducts = priceOverview.filter(
     (product) => getProductPublicationState(product).key !== 'expired',
   )
@@ -659,6 +695,11 @@ function AdminDashboard({ session }) {
       id: 'overview',
       label: 'Vista general',
       count: currentProducts.length,
+    },
+    {
+      id: 'database',
+      label: 'Base de datos',
+      count: editorialQueueCount,
     },
     {
       id: 'expired',
@@ -885,6 +926,57 @@ function AdminDashboard({ session }) {
               </small>
             </label>
 
+            <label htmlFor="product-publication-mode">
+              Estado inicial en la web
+              <select
+                id="product-publication-mode"
+                value={publicationMode}
+                onChange={(event) => setPublicationMode(event.target.value)}
+              >
+                <option value="draft">Guardar como borrador</option>
+                <option value="scheduled">Programar publicación</option>
+                <option value="published">Publicar ahora</option>
+              </select>
+              <small>
+                El borrador queda preparado en Base de datos, pero no aparece para visitantes.
+              </small>
+            </label>
+
+            <label htmlFor="product-planned-publish-at">
+              Fecha prevista <span className="admin-optional">(opcional en borradores)</span>
+              <input
+                id="product-planned-publish-at"
+                type="datetime-local"
+                value={plannedPublishAt}
+                onChange={(event) => setPlannedPublishAt(event.target.value)}
+                required={publicationMode === 'scheduled'}
+              />
+              <small>Usala para organizar cuándo pensás subir el video o publicar el producto.</small>
+            </label>
+
+            <label htmlFor="product-content-url">
+              Enlace del video o contenido <span className="admin-optional">(opcional)</span>
+              <input
+                id="product-content-url"
+                type="url"
+                placeholder="TikTok, Instagram o YouTube"
+                value={contentUrl}
+                onChange={(event) => setContentUrl(event.target.value)}
+              />
+            </label>
+
+            <label htmlFor="product-editorial-notes">
+              Notas internas <span className="admin-optional">(opcional)</span>
+              <textarea
+                id="product-editorial-notes"
+                rows="3"
+                maxLength="1000"
+                placeholder="Idea del video, plataforma, tarea pendiente…"
+                value={editorialNotes}
+                onChange={(event) => setEditorialNotes(event.target.value)}
+              />
+            </label>
+
             {manualPriceNeeded && (
               <p className="admin-message admin-message--warning">
                 Mercado Libre entregó la ficha, pero no el precio. Completá el
@@ -995,7 +1087,19 @@ function AdminDashboard({ session }) {
         </section>
       )}
 
-      {activeTab !== 'analytics' && (
+      {activeTab === 'database' && (
+        <AdminDatabase
+          products={priceOverview}
+          loading={priceOverviewLoading}
+          error={priceOverviewError}
+          apiRequest={apiRequest}
+          onReload={loadPriceOverview}
+          onCreateDraft={openProductImporter}
+          configured={decisionCenter.editorial_configured}
+        />
+      )}
+
+      {(activeTab === 'overview' || activeTab === 'expired') && (
         <section
           className={`admin-card admin-price-overview ${
             activeTab === 'expired' ? 'admin-expired-panel' : ''
