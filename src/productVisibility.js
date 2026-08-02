@@ -1,4 +1,8 @@
 import { isUsableAffiliateLink } from './affiliateLinks.js'
+import {
+  getEditorialPublicationState,
+  isEditoriallyPublished,
+} from './editorialWorkflow.js'
 
 const INACTIVE_MERCADO_LIBRE_STATUSES = new Set([
   'closed',
@@ -31,6 +35,7 @@ export const hasExpiredMercadoLibreStatus = (status = '') =>
 
 export const isProductPubliclyVisible = (product = {}) =>
   product.is_visible !== false &&
+  isEditoriallyPublished(product) &&
   isUsableAffiliateLink(product.link) &&
   !hasInactiveMercadoLibreStatus(product.ml_status)
 
@@ -55,6 +60,9 @@ export const getProductPublicationState = (product = {}) => {
       public: false,
     }
   }
+
+  const editorialState = getEditorialPublicationState(product)
+  if (!editorialState.public) return editorialState
 
   if (product.is_visible === false) {
     return { key: 'manual-hidden', label: 'Oculto manualmente', public: false }

@@ -13,6 +13,8 @@ const AVAILABILITY_FIELDS = ', unavailable_since, consecutive_sync_failures'
 const CAMPAIGN_FIELDS =
   ', campaign_name, featured_from, featured_until, featured_priority'
 const PRICE_REVIEW_FIELDS = ', manual_price_reviewed_at'
+const EDITORIAL_FIELDS =
+  ', publication_status, planned_publish_at, published_at, content_url, editorial_notes'
 
 const loadAdminProducts = async (supabase) => {
   const runQuery = (fields) =>
@@ -20,24 +22,35 @@ const loadAdminProducts = async (supabase) => {
       .from('Productos')
       .select(fields)
       .order('created_at', { ascending: false })
-      .limit(100)
+      .limit(1000)
 
   let availabilityConfigured = true
   let campaignsConfigured = true
   let priceReviewsConfigured = true
+  let editorialConfigured = true
   let result
 
-  for (let attempt = 0; attempt < 4; attempt += 1) {
+  for (let attempt = 0; attempt < 5; attempt += 1) {
     const fields = [
       BASE_PRODUCT_FIELDS,
       availabilityConfigured ? AVAILABILITY_FIELDS : '',
       campaignsConfigured ? CAMPAIGN_FIELDS : '',
       priceReviewsConfigured ? PRICE_REVIEW_FIELDS : '',
+      editorialConfigured ? EDITORIAL_FIELDS : '',
     ].join('')
     result = await runQuery(fields)
     if (!result.error) break
 
     const message = String(result.error.message || '')
+    if (
+      editorialConfigured &&
+      /publication_status|planned_publish_at|published_at|content_url|editorial_notes/i.test(
+        message,
+      )
+    ) {
+      editorialConfigured = false
+      continue
+    }
     if (
       priceReviewsConfigured &&
       /manual_price_reviewed_at/i.test(message)
@@ -89,6 +102,7 @@ const loadAdminProducts = async (supabase) => {
   return {
     campaignsConfigured,
     priceReviewsConfigured,
+    editorialConfigured,
     products: (result.data || []).map((product) => ({
       ...product,
       campaign_name: product.campaign_name || null,
@@ -99,6 +113,12 @@ const loadAdminProducts = async (supabase) => {
         product.manual_price_reviewed_at || null,
       manual_price_reviewed_by:
         latestReviews.get(String(product.id))?.reviewer_email || null,
+      publication_status:
+        product.publication_status || (product.is_visible === false ? 'draft' : 'published'),
+      planned_publish_at: product.planned_publish_at || null,
+      published_at: product.published_at || null,
+      content_url: product.content_url || null,
+      editorial_notes: product.editorial_notes || null,
     })),
   }
 }
@@ -199,6 +219,7 @@ export async function GET(request) {
       products: productRows,
       campaignsConfigured,
       priceReviewsConfigured,
+      editorialConfigured,
     } = await loadAdminProducts(supabase)
 
     let eventsResult = await supabase
@@ -284,6 +305,7 @@ export async function GET(request) {
         campaigns_configured: campaignsConfigured,
         price_history_configured: priceHistory.configured,
         price_reviews_configured: priceReviewsConfigured,
+        editorial_configured: editorialConfigured,
       },
     })
   } catch (error) {
