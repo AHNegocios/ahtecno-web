@@ -46,7 +46,7 @@ function EditorialRow({ product, apiRequest, onReload, configured }) {
     setSaving(true)
     setFeedback('')
     try {
-      await apiRequest('/api/admin/editorial', {
+      await apiRequest('/api/mercadolibre/product', {
         method: 'PATCH',
         body: JSON.stringify({
           product_id: product.id,
