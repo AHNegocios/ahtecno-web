@@ -1,6 +1,34 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { categories, getCategoryLabel, getProductCategory, normalizeText } from './catalogConfig'
 import { getProductPublicationState } from './productVisibility'
+
+const COLUMN_STORAGE_KEY = 'ahtecno-admin-database-columns'
+const DEFAULT_COLUMNS = {
+  category: true,
+  planned: true,
+  published: true,
+  content: false,
+  notes: false,
+}
+
+const columnOptions = [
+  { key: 'category', label: 'Categoría' },
+  { key: 'planned', label: 'Fecha prevista' },
+  { key: 'published', label: 'Fecha de publicación' },
+  { key: 'content', label: 'Video o contenido' },
+  { key: 'notes', label: 'Notas internas' },
+]
+
+const loadColumnPreferences = () => {
+  if (typeof window === 'undefined') return DEFAULT_COLUMNS
+
+  try {
+    const stored = JSON.parse(window.localStorage.getItem(COLUMN_STORAGE_KEY) || '{}')
+    return { ...DEFAULT_COLUMNS, ...stored }
+  } catch {
+    return DEFAULT_COLUMNS
+  }
+}
 
 const toDateTimeLocal = (value) => {
   if (!value) return ''
@@ -34,13 +62,17 @@ const getDatabaseState = (product) => {
   return { key: 'published', label: 'Publicado', tone: 'published' }
 }
 
-function EditorialRow({ product, apiRequest, onReload, configured }) {
+function EditorialRow({ product, apiRequest, onReload, configured, visibleColumns }) {
   const [plannedAt, setPlannedAt] = useState(toDateTimeLocal(product.planned_publish_at))
   const [contentUrl, setContentUrl] = useState(product.content_url || '')
   const [notes, setNotes] = useState(product.editorial_notes || '')
   const [saving, setSaving] = useState(false)
   const [feedback, setFeedback] = useState('')
   const state = getDatabaseState(product)
+  const hasChanges =
+    plannedAt !== toDateTimeLocal(product.planned_publish_at) ||
+    contentUrl !== (product.content_url || '') ||
+    notes !== (product.editorial_notes || '')
 
   const submit = async (action) => {
     setSaving(true)
@@ -76,6 +108,11 @@ function EditorialRow({ product, apiRequest, onReload, configured }) {
   return (
     <tr>
       <td>
+        <span className={`admin-editorial-state admin-editorial-state--${state.tone}`}>
+          {state.label}
+        </span>
+      </td>
+      <td>
         <div className="admin-database-product">
           {product.imagen ? <img src={product.imagen} alt="" /> : <span aria-hidden="true">📦</span>}
           <div>
@@ -84,17 +121,12 @@ function EditorialRow({ product, apiRequest, onReload, configured }) {
           </div>
         </div>
       </td>
-      <td>
+      {visibleColumns.category && <td>
         <span className="admin-database-category">
           {getCategoryLabel(getProductCategory(product))}
         </span>
-      </td>
-      <td>
-        <span className={`admin-editorial-state admin-editorial-state--${state.tone}`}>
-          {state.label}
-        </span>
-      </td>
-      <td>
+      </td>}
+      {visibleColumns.planned && <td>
         <input
           aria-label={`Fecha prevista de ${product.titulo}`}
           type="datetime-local"
@@ -102,13 +134,13 @@ function EditorialRow({ product, apiRequest, onReload, configured }) {
           onChange={(event) => setPlannedAt(event.target.value)}
           disabled={!configured || saving}
         />
-      </td>
-      <td>
+      </td>}
+      {visibleColumns.published && <td>
         <span className="admin-database-date">
           {formatDateTime(product.published_at, 'Todavía no publicado')}
         </span>
-      </td>
-      <td>
+      </td>}
+      {visibleColumns.content && <td>
         <input
           aria-label={`Enlace del contenido de ${product.titulo}`}
           type="url"
@@ -122,8 +154,8 @@ function EditorialRow({ product, apiRequest, onReload, configured }) {
             Abrir contenido ↗
           </a>
         )}
-      </td>
-      <td>
+      </td>}
+      {visibleColumns.notes && <td>
         <textarea
           aria-label={`Notas de ${product.titulo}`}
           rows="2"
@@ -133,17 +165,9 @@ function EditorialRow({ product, apiRequest, onReload, configured }) {
           onChange={(event) => setNotes(event.target.value)}
           disabled={!configured || saving}
         />
-      </td>
+      </td>}
       <td>
         <div className="admin-database-actions">
-          <button
-            className="button button--secondary"
-            type="button"
-            disabled={!configured || saving}
-            onClick={() => submit('save')}
-          >
-            Guardar
-          </button>
           {state.key !== 'expired' && state.key !== 'published' && (
             <button
               className="button button--primary"
@@ -154,7 +178,7 @@ function EditorialRow({ product, apiRequest, onReload, configured }) {
               Publicar ahora
             </button>
           )}
-          {state.key !== 'expired' && state.key !== 'published' && (
+          {state.key !== 'expired' && state.key !== 'published' && plannedAt && (
             <button
               className="button button--secondary"
               type="button"
@@ -164,14 +188,24 @@ function EditorialRow({ product, apiRequest, onReload, configured }) {
               Programar
             </button>
           )}
+          {hasChanges && (
+            <button
+              className="button button--secondary"
+              type="button"
+              disabled={!configured || saving}
+              onClick={() => submit('save')}
+            >
+              Guardar cambios
+            </button>
+          )}
           {state.key !== 'expired' && state.key !== 'draft' && (
             <button
-              className="admin-database-text-action"
+              className="button button--secondary"
               type="button"
               disabled={!configured || saving}
               onClick={() => submit('draft')}
             >
-              Volver a borrador
+              {state.key === 'published' ? 'Pasar a borrador' : 'Cancelar programación'}
             </button>
           )}
           {feedback && <small role="status">{feedback}</small>}
@@ -194,6 +228,15 @@ export default function AdminDatabase({
   const [statusFilter, setStatusFilter] = useState('all')
   const [categoryFilter, setCategoryFilter] = useState('all')
   const [sort, setSort] = useState('planned')
+  const [visibleColumns, setVisibleColumns] = useState(loadColumnPreferences)
+
+  useEffect(() => {
+    window.localStorage.setItem(COLUMN_STORAGE_KEY, JSON.stringify(visibleColumns))
+  }, [visibleColumns])
+
+  const toggleColumn = (key) => {
+    setVisibleColumns((current) => ({ ...current, [key]: !current[key] }))
+  }
 
   const rows = useMemo(() => {
     const normalizedSearch = normalizeText(search)
@@ -281,7 +324,7 @@ export default function AdminDatabase({
           />
         </label>
         <label>
-          Estado
+          Publicado o borrador
           <select value={statusFilter} onChange={(event) => setStatusFilter(event.target.value)}>
             <option value="all">Todos los estados</option>
             <option value="draft">Borradores</option>
@@ -309,6 +352,23 @@ export default function AdminDatabase({
         </label>
       </div>
 
+      <details className="admin-database-settings">
+        <summary>Configurar columnas</summary>
+        <div>
+          {columnOptions.map((option) => (
+            <label key={option.key}>
+              <input
+                type="checkbox"
+                checked={visibleColumns[option.key]}
+                onChange={() => toggleColumn(option.key)}
+              />
+              {option.label}
+            </label>
+          ))}
+        </div>
+        <small>El estado, el producto y las acciones siempre permanecen visibles.</small>
+      </details>
+
       <p className="admin-database-results">
         Mostrando {rows.length} de {products.length} productos.
       </p>
@@ -324,13 +384,13 @@ export default function AdminDatabase({
           <table className="admin-database-table">
             <thead>
               <tr>
-                <th>Producto</th>
-                <th>Categoría</th>
                 <th>Estado</th>
-                <th>Fecha prevista</th>
-                <th>Fecha de publicación</th>
-                <th>Video o contenido</th>
-                <th>Notas</th>
+                <th>Producto</th>
+                {visibleColumns.category && <th>Categoría</th>}
+                {visibleColumns.planned && <th>Fecha prevista</th>}
+                {visibleColumns.published && <th>Fecha de publicación</th>}
+                {visibleColumns.content && <th>Video o contenido</th>}
+                {visibleColumns.notes && <th>Notas</th>}
                 <th>Acciones</th>
               </tr>
             </thead>
@@ -341,6 +401,7 @@ export default function AdminDatabase({
                   apiRequest={apiRequest}
                   onReload={onReload}
                   configured={configured}
+                  visibleColumns={visibleColumns}
                   key={`${product.id}-${product.publication_status}-${product.planned_publish_at || ''}-${product.published_at || ''}`}
                 />
               ))}
@@ -350,9 +411,8 @@ export default function AdminDatabase({
       )}
 
       <p className="admin-database-help">
-        <strong>Publicar ahora</strong> muestra el producto inmediatamente y registra la hora real.
-        <strong> Programar</strong> lo mantiene oculto hasta la fecha prevista. Podés devolverlo a
-        borrador en cualquier momento.
+        <strong>Publicar ahora</strong> muestra un borrador inmediatamente y registra la hora real.
+        Los campos opcionales permanecen ocultos hasta que los actives en Configurar columnas.
       </p>
     </section>
   )

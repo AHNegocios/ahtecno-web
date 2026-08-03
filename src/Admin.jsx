@@ -859,6 +859,30 @@ function AdminDashboard({ session }) {
           </div>
 
           <form className="admin-form" onSubmit={importProduct}>
+            <fieldset className="admin-import-mode">
+              <legend>¿Cuándo querés mostrarlo en la web?</legend>
+              <div className="admin-import-mode__options">
+                <button
+                  className={publicationMode !== 'published' ? 'is-active' : ''}
+                  type="button"
+                  aria-pressed={publicationMode !== 'published'}
+                  onClick={() => setPublicationMode('draft')}
+                >
+                  <strong>Publicar después</strong>
+                  <span>Se guarda como borrador oculto y queda listo en Base de datos.</span>
+                </button>
+                <button
+                  className={publicationMode === 'published' ? 'is-active' : ''}
+                  type="button"
+                  aria-pressed={publicationMode === 'published'}
+                  onClick={() => setPublicationMode('published')}
+                >
+                  <strong>Publicar ahora</strong>
+                  <span>Se muestra en la web al terminar la importación.</span>
+                </button>
+              </div>
+            </fieldset>
+
             <label htmlFor="product-ml-id">
               Enlace común o ID de Mercado Libre
               <input
@@ -926,56 +950,55 @@ function AdminDashboard({ session }) {
               </small>
             </label>
 
-            <label htmlFor="product-publication-mode">
-              Estado inicial en la web
-              <select
-                id="product-publication-mode"
-                value={publicationMode}
-                onChange={(event) => setPublicationMode(event.target.value)}
-              >
-                <option value="draft">Guardar como borrador</option>
-                <option value="scheduled">Programar publicación</option>
-                <option value="published">Publicar ahora</option>
-              </select>
-              <small>
-                El borrador queda preparado en Base de datos, pero no aparece para visitantes.
-              </small>
-            </label>
+            <details className="admin-form-options">
+              <summary>Opciones de organización</summary>
+              <div>
+                <label className="admin-form-options__toggle">
+                  <input
+                    type="checkbox"
+                    checked={publicationMode === 'scheduled'}
+                    onChange={(event) =>
+                      setPublicationMode(event.target.checked ? 'scheduled' : 'draft')
+                    }
+                  />
+                  Publicar automáticamente en una fecha
+                </label>
 
-            <label htmlFor="product-planned-publish-at">
-              Fecha prevista <span className="admin-optional">(opcional en borradores)</span>
-              <input
-                id="product-planned-publish-at"
-                type="datetime-local"
-                value={plannedPublishAt}
-                onChange={(event) => setPlannedPublishAt(event.target.value)}
-                required={publicationMode === 'scheduled'}
-              />
-              <small>Usala para organizar cuándo pensás subir el video o publicar el producto.</small>
-            </label>
+                <label htmlFor="product-planned-publish-at">
+                  Fecha prevista <span className="admin-optional">(opcional)</span>
+                  <input
+                    id="product-planned-publish-at"
+                    type="datetime-local"
+                    value={plannedPublishAt}
+                    onChange={(event) => setPlannedPublishAt(event.target.value)}
+                    required={publicationMode === 'scheduled'}
+                  />
+                </label>
 
-            <label htmlFor="product-content-url">
-              Enlace del video o contenido <span className="admin-optional">(opcional)</span>
-              <input
-                id="product-content-url"
-                type="url"
-                placeholder="TikTok, Instagram o YouTube"
-                value={contentUrl}
-                onChange={(event) => setContentUrl(event.target.value)}
-              />
-            </label>
+                <label htmlFor="product-content-url">
+                  Enlace del video o contenido <span className="admin-optional">(opcional)</span>
+                  <input
+                    id="product-content-url"
+                    type="url"
+                    placeholder="TikTok, Instagram o YouTube"
+                    value={contentUrl}
+                    onChange={(event) => setContentUrl(event.target.value)}
+                  />
+                </label>
 
-            <label htmlFor="product-editorial-notes">
-              Notas internas <span className="admin-optional">(opcional)</span>
-              <textarea
-                id="product-editorial-notes"
-                rows="3"
-                maxLength="1000"
-                placeholder="Idea del video, plataforma, tarea pendiente…"
-                value={editorialNotes}
-                onChange={(event) => setEditorialNotes(event.target.value)}
-              />
-            </label>
+                <label htmlFor="product-editorial-notes">
+                  Notas internas <span className="admin-optional">(opcional)</span>
+                  <textarea
+                    id="product-editorial-notes"
+                    rows="3"
+                    maxLength="1000"
+                    placeholder="Idea del video, plataforma, tarea pendiente…"
+                    value={editorialNotes}
+                    onChange={(event) => setEditorialNotes(event.target.value)}
+                  />
+                </label>
+              </div>
+            </details>
 
             {manualPriceNeeded && (
               <p className="admin-message admin-message--warning">
@@ -993,7 +1016,13 @@ function AdminDashboard({ session }) {
               type="submit"
               disabled={!status?.connected || saving}
             >
-              {saving ? 'Consultando y guardando…' : 'Importar producto'}
+              {saving
+                ? 'Consultando y guardando…'
+                : publicationMode === 'published'
+                  ? 'Importar y publicar ahora'
+                  : publicationMode === 'scheduled'
+                    ? 'Importar y programar'
+                    : 'Importar y guardar para después'}
             </button>
           </form>
 
@@ -1001,7 +1030,13 @@ function AdminDashboard({ session }) {
             <article className="admin-product-result">
               {savedProduct.imagen && <img src={savedProduct.imagen} alt="" />}
               <div>
-                <span>Producto guardado</span>
+                <span>
+                  {savedProduct.publication_status === 'published'
+                    ? 'Producto publicado'
+                    : savedProduct.publication_status === 'scheduled'
+                      ? 'Producto programado'
+                      : 'Producto preparado como borrador'}
+                </span>
                 <h3>{savedProduct.titulo}</h3>
                 <p>{formatPrice(savedProduct.precio, savedProduct.currency_id)}</p>
                 <p className="admin-saved-category">
