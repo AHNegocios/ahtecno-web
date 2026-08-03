@@ -94,6 +94,14 @@ Flujo previsto:
     privado.
 12. Las visitas generales y el rendimiento técnico se consultan en Web
     Analytics y Speed Insights dentro del proyecto de Vercel.
+13. La pestaña privada **Base de datos** organiza el calendario editorial. Un
+    producto puede guardarse como borrador, programarse para una fecha futura
+    o publicarse inmediatamente. Los borradores no aparecen en el catálogo;
+    una programación se habilita al llegar su fecha y “Publicar ahora” registra
+    la fecha efectiva con un solo clic.
+14. Cada fila editorial conserva fecha prevista, fecha de publicación, enlace
+    del video o contenido y notas internas. El panel permite buscar y filtrar
+    por estado y categoría sin depender de una planilla externa.
 
 Antes de conectar una cuenta se debe ejecutar la migración incluida en
 `supabase/migrations` y configurar en Vercel las variables privadas enumeradas
@@ -113,6 +121,11 @@ Para habilitar el embudo de actividad y la procedencia general de las visitas se
 debe ejecutar `supabase/migrations/202607300002_visitor_funnel.sql`. Sólo se
 guarda el producto, la acción, la superficie, un canal general como TikTok o
 Instagram y el momento; no se agregan identificadores personales.
+
+Para habilitar la base editorial se debe ejecutar
+`supabase/migrations/202608020001_editorial_database.sql`. La migración conserva
+los productos visibles actuales como publicados y convierte los productos que
+ya estaban ocultos manualmente en borradores.
 
 Los favoritos públicos se guardan en `localStorage` con la clave
 `ahtecno-favorites-v1`. Conservan sólo una referencia mínima del producto, no
