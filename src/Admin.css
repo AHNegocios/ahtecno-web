@@ -218,6 +218,97 @@
   transform: none;
 }
 
+.admin-import-mode {
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.admin-import-mode legend {
+  margin-bottom: 9px;
+  color: var(--text-primary);
+  font-size: 0.88rem;
+  font-weight: 850;
+}
+
+.admin-import-mode__options {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.admin-import-mode__options button {
+  min-height: 86px;
+  padding: 14px;
+  border: 1px solid var(--border);
+  border-radius: 11px;
+  background: var(--surface-raised);
+  color: var(--text-primary);
+  cursor: pointer;
+  text-align: left;
+  transition: border-color 160ms ease, background 160ms ease, transform 160ms ease;
+}
+
+.admin-import-mode__options button:hover {
+  border-color: color-mix(in srgb, var(--accent) 52%, var(--border));
+  transform: translateY(-1px);
+}
+
+.admin-import-mode__options button.is-active {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+  box-shadow: inset 0 0 0 1px var(--accent);
+}
+
+.admin-import-mode__options strong,
+.admin-import-mode__options span {
+  display: block;
+}
+
+.admin-import-mode__options strong {
+  margin-bottom: 6px;
+  font-size: 0.9rem;
+}
+
+.admin-import-mode__options span {
+  color: var(--text-secondary);
+  font-size: 0.73rem;
+  font-weight: 600;
+  line-height: 1.45;
+}
+
+.admin-form-options {
+  padding: 13px 14px;
+  border: 1px solid var(--border);
+  border-radius: 11px;
+  background: var(--surface-raised);
+}
+
+.admin-form-options summary {
+  color: var(--text-primary);
+  cursor: pointer;
+  font-size: 0.84rem;
+  font-weight: 850;
+}
+
+.admin-form-options > div {
+  padding-top: 15px;
+  display: grid;
+  gap: 15px;
+}
+
+.admin-form-options .admin-form-options__toggle {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+}
+
+.admin-form-options__toggle input {
+  width: 18px;
+  min-height: 18px;
+  margin: 0;
+}
+
 .admin-message {
   margin: 0 0 20px;
   padding: 13px 15px;
@@ -1762,6 +1853,47 @@
   font-size: 0.8rem;
 }
 
+.admin-database-settings {
+  margin: 0 0 14px;
+  padding: 11px 13px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--surface-raised);
+}
+
+.admin-database-settings summary {
+  width: fit-content;
+  color: var(--text-primary);
+  cursor: pointer;
+  font-size: 0.8rem;
+  font-weight: 850;
+}
+
+.admin-database-settings > div {
+  margin: 12px 0 8px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 18px;
+}
+
+.admin-database-settings label {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  color: var(--text-secondary);
+  font-size: 0.76rem;
+  font-weight: 750;
+}
+
+.admin-database-settings input {
+  accent-color: var(--accent);
+}
+
+.admin-database-settings small {
+  color: var(--text-secondary);
+  font-size: 0.72rem;
+}
+
 .admin-database-table-wrap {
   width: 100%;
   overflow-x: auto;
@@ -1771,7 +1903,7 @@
 
 .admin-database-table {
   width: 100%;
-  min-width: 1480px;
+  min-width: 920px;
   border-collapse: collapse;
   background: var(--surface-raised);
 }
@@ -1893,7 +2025,7 @@
 }
 
 .admin-database-actions {
-  min-width: 155px;
+  min-width: 175px;
   display: grid;
   gap: 7px;
 }
@@ -2029,6 +2161,10 @@
 
   .admin-heading .button {
     width: 100%;
+  }
+
+  .admin-import-mode__options {
+    grid-template-columns: 1fr;
   }
 
   .admin-tabs {
